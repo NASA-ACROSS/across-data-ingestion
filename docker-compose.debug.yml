@@ -1,0 +1,20 @@
+name: across-server
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: local
+    volumes:
+      - ./across_data_ingestion/main.py:/app/across_data_ingestion/main.py
+      - ./across_data_ingestion:/app/across_data_ingestion
+    environment:
+      APP_ENV: local
+    command: fastapi dev across_data_ingestion/main.py --host 0.0.0.0 --port 8001
+    ports:
+      - 8001:8001
+    depends_on:
+      db:
+        condition: service_healthy
+
