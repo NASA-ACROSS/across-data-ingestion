@@ -1,6 +1,9 @@
 from fastapi import FastAPI, status
 from .core.config import config
-from .tasks.example import example_task
+from .tasks.task_loader import init_tasks
+import logging
+
+logger = logging.getLogger("uvicorn.error")
 
 app = FastAPI(
     title="ACROSS Data Ingestion",
@@ -19,6 +22,8 @@ app = FastAPI(
 async def get():
     return "ok"
 
+
 @app.on_event("startup")
-async def init_tasks():
-    await example_task()
+async def startup():
+    logger.info("Initializing tasks")
+    await init_tasks()

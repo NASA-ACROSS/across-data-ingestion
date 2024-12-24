@@ -1,7 +1,11 @@
 import time
 from fastapi_utils.tasks import repeat_every
+import logging
+
+logger = logging.getLogger("uvicorn.error")
+
 
 @repeat_every(seconds=1, max_repetitions=3)
-def example_task():
+async def example_task():
     current_time = time.time()
-    print(f'task ran successfully at {current_time}')
+    logger.info(f"{__name__} ran successfully at {current_time}")
