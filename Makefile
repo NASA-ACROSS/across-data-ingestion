@@ -140,7 +140,7 @@ install_deps: ### Install dependencies
 start: check_prod run ## Start the application containers
 
 dev: check_prod ## Start the server in the terminal
-	@$(VENV_BIN)/fastapi dev across_data_ingestion/main.py
+	@$(VENV_BIN)/fastapi dev across_data_ingestion/main.py --host 0.0.0.0 --port 8001
 
 stop: check_prod ## Stop the server container
 	@$(DOCKER_COMPOSE) down app
@@ -177,7 +177,7 @@ temp_run: check_prod ## Start a temporary container from an image with a bash sh
 
 # Group: Testing
 test: ## Run automated tests
-	@$(VENV_BIN)/pytest --cov=across_data_ingestion **/*/*.py;
+	@$(VENV_BIN)/pytest --cov=across_data_ingestion tests/
 
 lint: ## Run linting
 	@$(VENV_BIN)/pre-commit run;
