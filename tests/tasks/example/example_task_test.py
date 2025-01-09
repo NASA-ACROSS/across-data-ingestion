@@ -18,9 +18,9 @@ from across_data_ingestion.tasks.example import example_task  # noqa: E402
 class TestExampleTask:
     @pytest.mark.asyncio
     async def test_should_log_string(self):
-        """Should log a string"""
+        """Should log ran successfully"""
         with patch(
             "across_data_ingestion.tasks.example.example_task.logger"
         ) as log_mock:
             await example_task()
-            log_mock.info.assert_called()
+            assert "ran successfully" in log_mock.info.call_args.args[0]
