@@ -6,7 +6,7 @@ def create_env_file():
 
     env_vars = {
         "ACROSS_INGESTION_SERVICE_ACCOUNT_KEY": "local-ingestion-service-account-key",
-        "ACROSS_API_URL": "http://localhost:8001/api/v1/",
+        "ACROSS_API_URL": "http://localhost:8000/api/v1/",
         "ACROSS_DEBUG": True,
     }
 
