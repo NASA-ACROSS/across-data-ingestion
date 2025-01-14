@@ -31,7 +31,7 @@ That's it! This is a [`Makefile target`](https://makefiletutorial.com/#targets) 
 - Create a `.env` config file
 - Build the containers
 
-If everything completed successfully, you should be able to access the generated OpenAPI docs locally at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+If everything completed successfully, you should be able to access the generated OpenAPI docs locally at [http://127.0.0.1:8001/docs](http://127.0.0.1:8001/docs).
 
 General documentation for other project commands can be found with `make help`.
 
@@ -56,12 +56,6 @@ While it is possible to develop using the server running on the docker container
 ```zsh
 make tail_log
 ```
-
-### Testing Routes Locally
-
-For the `local` env there is an auth route `/auth/local-token` that will provide a long lived access token for a given user email. This can be used to easily authorize users with different scopes for testing purposes.
-
-The next section will guide you through running a debug session in vscode.
 
 ### Debugging
 
