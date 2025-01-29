@@ -1,5 +1,4 @@
 import logging
-from uuid import uuid4
 
 import astropy.units as u  # type:ignore
 import pandas as pd  # type:ignore
@@ -11,7 +10,7 @@ logger = logging.getLogger("uvicorn.error")
 SECONDS_IN_A_WEEK = 60 * 60 * 24 * 7
 
 
-async def ingest():
+def ingest():
     # When running locally and debugging, it is recommended to save the results of these files and load them from a local path to reduce external thrashing
     # Pointings file is used to determine the sector schedules and contains the schedule start/end and RA/DEC values
     tess_pointings_file = "https://raw.githubusercontent.com/tessgi/tesswcs/main/src/tesswcs/data/pointings.csv"
@@ -38,7 +37,6 @@ async def ingest():
 
     for sector, ra, dec, roll, sector_start_date, sector_end_date in sector_schedules:
         schedule = {
-            "id": str(uuid4()),
             "name": f"TESS_sector_{sector}",
             "telescope_id": tess_telescope_info["id"],
             "status": "planned",
@@ -73,7 +71,6 @@ async def ingest():
             # The pointings file contains a location and can be treated as one observation within the schedule when no orbits are yet planned
             exposure_time = sched_end_at - sched_start_at
             placeholder_observation = {
-                "id": str(uuid4()),
                 "telescope_id": tess_telescope_info["id"],
                 "schedule_id": schedule["id"],
                 "object_name": f"TESS_sector_{sector}_placeholder",
@@ -100,7 +97,6 @@ async def ingest():
                 exposure_time = obs_end_at - obs_start_at
 
                 observation = {
-                    "id": str(uuid4()),
                     "telescope_id": tess_telescope_info["id"],
                     "schedule_id": schedule["id"],
                     "object_name": f"TESS_sector_{sector}_obs_{i}_orbit_{int(orbit)}",
@@ -132,7 +128,7 @@ async def TESS_low_fidelity_schedule_ingestion_task():
     current_time = Time.now()
 
     try:
-        await ingest()
+        ingest()
     except Exception as E:
         # Surface the error through logging, if we do not catch everything and log, the errors get voided
         logger.error(f"{__name__} encountered an error {E}")
