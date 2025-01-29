@@ -72,7 +72,6 @@ def ingest():
             exposure_time = sched_end_at - sched_start_at
             placeholder_observation = {
                 "telescope_id": tess_telescope_info["id"],
-                "schedule_id": schedule["id"],
                 "object_name": f"TESS_sector_{sector}_placeholder",
                 "pointing_position": {"ra": ra, "dec": dec},
                 "pointing_angle": roll,
@@ -98,7 +97,6 @@ def ingest():
 
                 observation = {
                     "telescope_id": tess_telescope_info["id"],
-                    "schedule_id": schedule["id"],
                     "object_name": f"TESS_sector_{sector}_obs_{i}_orbit_{int(orbit)}",
                     "pointing_position": {"ra": ra, "dec": dec},
                     "pointing_angle": roll,
