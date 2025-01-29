@@ -164,3 +164,6 @@ cython_debug/
 *.egg-info
 
 **/.DS_Store
+
+# Ignore cached local csv files used for debugging
+**/*.csv
