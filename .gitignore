@@ -166,4 +166,4 @@ cython_debug/
 **/.DS_Store
 
 # Ignore cached local csv files used for debugging
-**/*.csv
+across_data_ingestion/**/*.csv

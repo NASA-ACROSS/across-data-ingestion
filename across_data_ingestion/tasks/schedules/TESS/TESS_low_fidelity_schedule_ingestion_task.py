@@ -11,6 +11,9 @@ SECONDS_IN_A_WEEK = 60 * 60 * 24 * 7
 TESS_CENTRAL_WAVELENGTH = 7865
 TESS_BANDWIDTH = 4000
 TESS_TELESCOPE_ID = "some-tess-telescope-uuid"
+# When running locally and debugging, it is recommended to save the results of these files and load them from a local path to reduce external thrashing
+TESS_POINTINGS_FILE = "https://raw.githubusercontent.com/tessgi/tesswcs/main/src/tesswcs/data/pointings.csv"
+TESS_ORBIT_TIMES_FILE = "https://tess.mit.edu/public/files/TESS_orbit_times.csv"
 
 
 def create_orbit_observation(sector, ra, dec, roll, i, orbit, obs_start, obs_end):
@@ -60,14 +63,11 @@ def create_placeholder_observation(
 
 
 def ingest():
-    # When running locally and debugging, it is recommended to save the results of these files and load them from a local path to reduce external thrashing
     # Pointings file is used to determine the sector schedules and contains the schedule start/end and RA/DEC values
-    tess_pointings_file = "https://raw.githubusercontent.com/tessgi/tesswcs/main/src/tesswcs/data/pointings.csv"
-    sector_pointings_df = pd.read_csv(tess_pointings_file)
+    sector_pointings_df = pd.read_csv(TESS_POINTINGS_FILE)
 
     # TESS_orbit_times.csv is used to discretize each orbit as an observation for a given sector from the schedule above
-    tess_orbit_times_file = "https://tess.mit.edu/public/files/TESS_orbit_times.csv"
-    orbit_observations_df = pd.read_csv(tess_orbit_times_file)
+    orbit_observations_df = pd.read_csv(TESS_ORBIT_TIMES_FILE)
 
     sector_schedules = list(
         zip(
@@ -137,7 +137,7 @@ def ingest():
 
     # POST Schedule not yet implemented in across-server
     logger.info(schedules)
-    return
+    return schedules
 
 
 @repeat_every(seconds=SECONDS_IN_A_WEEK)  # Weekly
@@ -145,9 +145,10 @@ def TESS_low_fidelity_schedule_ingestion_task():
     current_time = Time.now()
 
     try:
-        ingest()
+        schedules = ingest()
+        logger.info(f"{__name__} ran at {current_time}")
+        return schedules
     except Exception as E:
         # Surface the error through logging, if we do not catch everything and log, the errors get voided
-        logger.error(f"{__name__} encountered an error {E}")
-
-    logger.info(f"{__name__} ran at {current_time}")
+        logger.error(f"{__name__} encountered an error {E} at {current_time}")
+        return
