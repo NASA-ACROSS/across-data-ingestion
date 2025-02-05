@@ -3,8 +3,6 @@ import os
 from unittest import TestCase
 from unittest.mock import patch
 
-import pytest
-
 from across_data_ingestion.tasks.schedules.TESS import (
     TESS_low_fidelity_schedule_ingestion_task,
 )
@@ -52,7 +50,6 @@ class TestTESSLowFidelityScheduleIngestionTask(TestCase):
             across_schedule_orbits_obs_output,
         )
 
-    @pytest.mark.asyncio
     def test_should_generate_across_schedules_with_placeholder_observations(self):
         """Should generate ACROSS schedules with placeholder observations"""
         (
@@ -73,7 +70,6 @@ class TestTESSLowFidelityScheduleIngestionTask(TestCase):
                 expected = json.load(expected_output_file)
                 self.assertEqual(json.dumps(schedules), json.dumps(expected))
 
-    @pytest.mark.asyncio
     def test_should_generate_across_schedules_with_orbit_observations(self):
         """Should generate ACROSS schedules with orbit observations"""
         (
@@ -94,7 +90,6 @@ class TestTESSLowFidelityScheduleIngestionTask(TestCase):
                 expected = json.load(expected_output_file)
                 self.assertEqual(json.dumps(schedules), json.dumps(expected))
 
-    @pytest.mark.asyncio
     def test_should_log_error_when_file_not_found(self):
         """Should log an error when file is not found"""
         mock_orbit_times_file, mock_pointings_file = ("", "")
@@ -111,7 +106,6 @@ class TestTESSLowFidelityScheduleIngestionTask(TestCase):
             TESS_low_fidelity_schedule_ingestion_task()
             assert "encountered an error" in log_mock.error.call_args.args[0]
 
-    @pytest.mark.asyncio
     def test_should_log_info_when_success(self):
         """Should log info with ran at when success"""
         (

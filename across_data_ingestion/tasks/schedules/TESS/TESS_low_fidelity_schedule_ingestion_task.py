@@ -1,8 +1,8 @@
 import logging
 
-import astropy.units as u  # type:ignore
-import pandas as pd  # type:ignore
-from astropy.time import Time  # type:ignore
+import astropy.units as u  # type: ignore[import-untyped]
+import pandas as pd
+from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
 logger = logging.getLogger("uvicorn.error")

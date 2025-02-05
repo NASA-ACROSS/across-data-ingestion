@@ -127,6 +127,7 @@ numpy==2.1.3
     #   healpy
     #   jplephem
     #   pandas
+    #   pandas-stubs
     #   pyerfa
     #   shapely
     #   skyfield
@@ -137,6 +138,8 @@ packaging==24.2
     #   geoalchemy2
     #   pytest
 pandas==2.2.3
+    # via -r requirements/base.in
+pandas-stubs==2.2.3.241126
     # via -r requirements/base.in
 platformdirs==4.3.6
     # via virtualenv
@@ -236,6 +239,8 @@ types-pyasn1==0.6.0.20240913
     # via types-python-jose
 types-python-jose==3.3.4.20240106
     # via -r requirements/types.in
+types-pytz==2025.1.0.20250204
+    # via pandas-stubs
 types-requests==2.32.0.20241016
     # via -r requirements/types.in
 types-shapely==2.0.0.20241112
