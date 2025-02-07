@@ -1,6 +1,5 @@
 import json
 import os
-from unittest import TestCase
 from unittest.mock import patch
 
 from across_data_ingestion.tasks.schedules.TESS import (
@@ -8,7 +7,7 @@ from across_data_ingestion.tasks.schedules.TESS import (
 )
 
 
-class TestTESSLowFidelityScheduleIngestionTask(TestCase):
+class TestTESSLowFidelityScheduleIngestionTask:
     def create_mock_placeholder_obs_relative_filepaths(self):
         current_dir = os.path.dirname(__file__)
         # files for testing placeholder observations without orbits observations data
@@ -68,7 +67,7 @@ class TestTESSLowFidelityScheduleIngestionTask(TestCase):
             schedules = TESS_low_fidelity_schedule_ingestion_task()
             with open(across_schedule_placeholder_obs_output) as expected_output_file:
                 expected = json.load(expected_output_file)
-                self.assertEqual(json.dumps(schedules), json.dumps(expected))
+                assert json.dumps(schedules) == json.dumps(expected)
 
     def test_should_generate_across_schedules_with_orbit_observations(self):
         """Should generate ACROSS schedules with orbit observations"""
@@ -88,7 +87,7 @@ class TestTESSLowFidelityScheduleIngestionTask(TestCase):
             schedules = TESS_low_fidelity_schedule_ingestion_task()
             with open(across_schedule_orbits_obs_output) as expected_output_file:
                 expected = json.load(expected_output_file)
-                self.assertEqual(json.dumps(schedules), json.dumps(expected))
+                assert json.dumps(schedules) == json.dumps(expected)
 
     def test_should_log_error_when_file_not_found(self):
         """Should log an error when file is not found"""
