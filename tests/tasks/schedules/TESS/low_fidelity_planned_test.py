@@ -58,10 +58,10 @@ class TestTESSLowFidelityScheduleIngestionTask:
         ) = self.create_mock_placeholder_obs_relative_filepaths()
 
         with patch(
-            "across_data_ingestion.tasks.schedules.TESS.TESS_low_fidelity_schedule_ingestion_task.TESS_POINTINGS_FILE",
+            "across_data_ingestion.tasks.schedules.TESS.low_fidelity_planned.TESS_POINTINGS_FILE",
             new=mock_pointings_placeholder_obs_file,
         ), patch(
-            "across_data_ingestion.tasks.schedules.TESS.TESS_low_fidelity_schedule_ingestion_task.TESS_ORBIT_TIMES_FILE",
+            "across_data_ingestion.tasks.schedules.TESS.low_fidelity_planned.TESS_ORBIT_TIMES_FILE",
             new=mock_orbit_times_placeholder_obs_file,
         ):
             schedules = TESS_low_fidelity_schedule_ingestion_task()
@@ -78,10 +78,10 @@ class TestTESSLowFidelityScheduleIngestionTask:
         ) = self.create_mock_orbit_obs_relative_filepaths()
 
         with patch(
-            "across_data_ingestion.tasks.schedules.TESS.TESS_low_fidelity_schedule_ingestion_task.TESS_POINTINGS_FILE",
+            "across_data_ingestion.tasks.schedules.TESS.low_fidelity_planned.TESS_POINTINGS_FILE",
             new=mock_pointings_orbits_obs_file,
         ), patch(
-            "across_data_ingestion.tasks.schedules.TESS.TESS_low_fidelity_schedule_ingestion_task.TESS_ORBIT_TIMES_FILE",
+            "across_data_ingestion.tasks.schedules.TESS.low_fidelity_planned.TESS_ORBIT_TIMES_FILE",
             new=mock_orbit_times_orbits_obs_file,
         ):
             schedules = TESS_low_fidelity_schedule_ingestion_task()
@@ -94,12 +94,12 @@ class TestTESSLowFidelityScheduleIngestionTask:
         mock_orbit_times_file, mock_pointings_file = ("", "")
 
         with patch(
-            "across_data_ingestion.tasks.schedules.TESS.TESS_low_fidelity_schedule_ingestion_task.logger"
+            "across_data_ingestion.tasks.schedules.TESS.low_fidelity_planned.logger"
         ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.TESS.TESS_low_fidelity_schedule_ingestion_task.TESS_POINTINGS_FILE",
+            "across_data_ingestion.tasks.schedules.TESS.low_fidelity_planned.TESS_POINTINGS_FILE",
             new=mock_pointings_file,
         ), patch(
-            "across_data_ingestion.tasks.schedules.TESS.TESS_low_fidelity_schedule_ingestion_task.TESS_ORBIT_TIMES_FILE",
+            "across_data_ingestion.tasks.schedules.TESS.low_fidelity_planned.TESS_ORBIT_TIMES_FILE",
             new=mock_orbit_times_file,
         ):
             TESS_low_fidelity_schedule_ingestion_task()
@@ -114,12 +114,12 @@ class TestTESSLowFidelityScheduleIngestionTask:
         ) = self.create_mock_placeholder_obs_relative_filepaths()
 
         with patch(
-            "across_data_ingestion.tasks.schedules.TESS.TESS_low_fidelity_schedule_ingestion_task.logger"
+            "across_data_ingestion.tasks.schedules.TESS.low_fidelity_planned.logger"
         ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.TESS.TESS_low_fidelity_schedule_ingestion_task.TESS_POINTINGS_FILE",
+            "across_data_ingestion.tasks.schedules.TESS.low_fidelity_planned.TESS_POINTINGS_FILE",
             new=mock_pointings_placeholder_obs_file,
         ), patch(
-            "across_data_ingestion.tasks.schedules.TESS.TESS_low_fidelity_schedule_ingestion_task.TESS_ORBIT_TIMES_FILE",
+            "across_data_ingestion.tasks.schedules.TESS.low_fidelity_planned.TESS_ORBIT_TIMES_FILE",
             new=mock_orbit_times_placeholder_obs_file,
         ):
             TESS_low_fidelity_schedule_ingestion_task()
