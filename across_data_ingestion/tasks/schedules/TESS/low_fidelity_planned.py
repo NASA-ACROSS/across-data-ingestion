@@ -26,7 +26,7 @@ def create_orbit_observation(sector, ra, dec, roll, i, orbit, obs_start, obs_end
 
     return {
         "telescope_id": TESS_TELESCOPE_ID,
-        "object_name": f"TESS_sector_{sector}_obs_{i}_orbit_{int(orbit)}",
+        "object_name": f"TESS_sector_{int(sector)}_obs_{i}_orbit_{int(orbit)}",
         "pointing_position": {"ra": ra, "dec": dec},
         "pointing_angle": roll,
         "date_range": {"begin": obs_start_str, "end": obs_end_str},
@@ -47,7 +47,7 @@ def create_placeholder_observation(
     exposure_time = sched_end_at - sched_start_at
     return {
         "telescope_id": TESS_TELESCOPE_ID,
-        "object_name": f"TESS_sector_{sector}_placeholder",
+        "object_name": f"TESS_sector_{int(sector)}_placeholder",
         "pointing_position": {"ra": ra, "dec": dec},
         "pointing_angle": roll,
         "date_range": schedule["date_range"],
@@ -69,16 +69,8 @@ def ingest():
     # TESS_orbit_times.csv is used to discretize each orbit as an observation for a given sector from the schedule above
     orbit_observations_df = pd.read_csv(TESS_ORBIT_TIMES_FILE)
 
-    sector_schedules = list(
-        zip(
-            sector_pointings_df["Sector"],
-            sector_pointings_df["RA"],
-            sector_pointings_df["Dec"],
-            sector_pointings_df["Roll"],
-            sector_pointings_df["Start"],
-            sector_pointings_df["End"],
-        )
-    )
+    columns = ["Sector", "RA", "Dec", "Roll", "Start", "End"]
+    sector_schedules = sector_pointings_df[columns].values.tolist()
 
     # GET Telecope by name not yet implemented in across-server
     tess_telescope_info = {"id": "some-tess-telescope-uuid"}
@@ -90,7 +82,7 @@ def ingest():
     for sector, ra, dec, roll, sector_start_date, sector_end_date in sector_schedules:
         # Create base schedule from  each pointings file row and set date range
         schedule = {
-            "name": f"TESS_sector_{sector}",
+            "name": f"TESS_sector_{int(sector)}",
             "telescope_id": tess_telescope_info["id"],
             "status": "planned",
             "fidelity": "low",
@@ -104,7 +96,7 @@ def ingest():
 
         # Find planned orbits from TESS_orbit_times.csv for current sector from pointings row
         orbit_observations = orbit_observations_df.loc[
-            orbit_observations_df["Sector"] == str(sector)
+            orbit_observations_df["Sector"] == str(int(sector))
         ]
         sector_orbit_observations = list(
             zip(
@@ -141,14 +133,14 @@ def ingest():
 
 
 @repeat_every(seconds=SECONDS_IN_A_WEEK)  # Weekly
-def TESS_low_fidelity_schedule_ingestion_task():
+def entrypoint():
     current_time = Time.now()
 
     try:
         schedules = ingest()
         logger.info(f"{__name__} ran at {current_time}")
         return schedules
-    except Exception as E:
+    except Exception as e:
         # Surface the error through logging, if we do not catch everything and log, the errors get voided
-        logger.error(f"{__name__} encountered an error {E} at {current_time}")
+        logger.error(f"{__name__} encountered an error {e} at {current_time}")
         return

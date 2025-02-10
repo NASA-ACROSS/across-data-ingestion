@@ -2,8 +2,8 @@ import json
 import os
 from unittest.mock import patch
 
-from across_data_ingestion.tasks.schedules.TESS import (
-    TESS_low_fidelity_schedule_ingestion_task,
+from across_data_ingestion.tasks.schedules.TESS.low_fidelity_planned import (
+    entrypoint,
 )
 
 
@@ -64,7 +64,7 @@ class TestTESSLowFidelityScheduleIngestionTask:
             "across_data_ingestion.tasks.schedules.TESS.low_fidelity_planned.TESS_ORBIT_TIMES_FILE",
             new=mock_orbit_times_placeholder_obs_file,
         ):
-            schedules = TESS_low_fidelity_schedule_ingestion_task()
+            schedules = entrypoint()
             with open(across_schedule_placeholder_obs_output) as expected_output_file:
                 expected = json.load(expected_output_file)
                 assert json.dumps(schedules) == json.dumps(expected)
@@ -84,7 +84,7 @@ class TestTESSLowFidelityScheduleIngestionTask:
             "across_data_ingestion.tasks.schedules.TESS.low_fidelity_planned.TESS_ORBIT_TIMES_FILE",
             new=mock_orbit_times_orbits_obs_file,
         ):
-            schedules = TESS_low_fidelity_schedule_ingestion_task()
+            schedules = entrypoint()
             with open(across_schedule_orbits_obs_output) as expected_output_file:
                 expected = json.load(expected_output_file)
                 assert json.dumps(schedules) == json.dumps(expected)
@@ -102,7 +102,7 @@ class TestTESSLowFidelityScheduleIngestionTask:
             "across_data_ingestion.tasks.schedules.TESS.low_fidelity_planned.TESS_ORBIT_TIMES_FILE",
             new=mock_orbit_times_file,
         ):
-            TESS_low_fidelity_schedule_ingestion_task()
+            entrypoint()
             assert "encountered an error" in log_mock.error.call_args.args[0]
 
     def test_should_log_info_when_success(self):
@@ -122,5 +122,5 @@ class TestTESSLowFidelityScheduleIngestionTask:
             "across_data_ingestion.tasks.schedules.TESS.low_fidelity_planned.TESS_ORBIT_TIMES_FILE",
             new=mock_orbit_times_placeholder_obs_file,
         ):
-            TESS_low_fidelity_schedule_ingestion_task()
+            entrypoint()
             assert "ran at" in log_mock.info.call_args.args[0]
