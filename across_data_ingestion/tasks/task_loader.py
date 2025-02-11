@@ -1,5 +1,5 @@
 from across_data_ingestion.tasks.example import example_task
-from across_data_ingestion.tasks.schedules.TESS.low_fidelity_planned import (
+from across_data_ingestion.tasks.schedules.tess.low_fidelity_planned import (
     entrypoint as TESS_low_fidelity_schedule_ingestion_task,
 )
 
