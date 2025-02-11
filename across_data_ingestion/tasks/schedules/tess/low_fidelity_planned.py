@@ -70,7 +70,7 @@ def ingest():
     orbit_observations_df = pd.read_csv(TESS_ORBIT_TIMES_FILE)
 
     columns = ["Sector", "RA", "Dec", "Roll", "Start", "End"]
-    sector_schedules = sector_pointings_df[columns].values.tolist()
+    sector_schedules = list(zip(*(sector_pointings_df[col] for col in columns)))
 
     # GET Telecope by name not yet implemented in across-server
     tess_telescope_info = {"id": "some-tess-telescope-uuid"}
@@ -98,12 +98,9 @@ def ingest():
         orbit_observations = orbit_observations_df.loc[
             orbit_observations_df["Sector"] == str(int(sector))
         ]
+        observation_columns = ["Orbit", "Start of Orbit", "End of Orbit"]
         sector_orbit_observations = list(
-            zip(
-                orbit_observations["Orbit"],
-                orbit_observations["Start of Orbit"],
-                orbit_observations["End of Orbit"],
-            )
+            zip(*(orbit_observations[col] for col in observation_columns))
         )
 
         # Initialize list of observations to append
