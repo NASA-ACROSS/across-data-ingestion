@@ -1,4 +1,7 @@
 from across_data_ingestion.tasks.example import example_task
+from across_data_ingestion.tasks.schedules.tess.low_fidelity_planned import (
+    entrypoint as TESS_low_fidelity_schedule_ingestion_task,
+)
 
 
 async def init_tasks():
@@ -8,3 +11,4 @@ async def init_tasks():
     For more information see https://fastapiutils.github.io/fastapi-utils//user-guide/repeated-tasks/
     """
     await example_task()
+    await TESS_low_fidelity_schedule_ingestion_task()

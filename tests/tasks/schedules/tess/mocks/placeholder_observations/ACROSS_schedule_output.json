@@ -1,0 +1,62 @@
+[
+  {
+    "name": "TESS_sector_87",
+    "telescope_id": "some-tess-telescope-uuid",
+    "status": "planned",
+    "fidelity": "low",
+    "date_range": {
+      "begin": "2024-12-18 00:00:00",
+      "end": "2025-01-14 00:00:00"
+    },
+    "observations": [
+      {
+        "telescope_id": "some-tess-telescope-uuid",
+        "object_name": "TESS_sector_87_placeholder",
+        "pointing_position": { "ra": 97.9629, "dec": -32.3927 },
+        "pointing_angle": 175.9167,
+        "date_range": {
+          "begin": "2024-12-18 00:00:00",
+          "end": "2025-01-14 00:00:00"
+        },
+        "exposure_time": 2332800,
+        "status": "planned",
+        "type": "imaging",
+        "bandpass": {
+          "central_wavelength": 7865,
+          "bandwidth": 4000,
+          "filter_name": "TESS"
+        }
+      }
+    ]
+  },
+  {
+    "name": "TESS_sector_88",
+    "telescope_id": "some-tess-telescope-uuid",
+    "status": "planned",
+    "fidelity": "low",
+    "date_range": {
+      "begin": "2025-01-14 00:00:00",
+      "end": "2025-02-11 00:00:00"
+    },
+    "observations": [
+      {
+        "telescope_id": "some-tess-telescope-uuid",
+        "object_name": "TESS_sector_88_placeholder",
+        "pointing_position": { "ra": 116.8315, "dec": -35.7542 },
+        "pointing_angle": 163.0201,
+        "date_range": {
+          "begin": "2025-01-14 00:00:00",
+          "end": "2025-02-11 00:00:00"
+        },
+        "exposure_time": 2419200,
+        "status": "planned",
+        "type": "imaging",
+        "bandpass": {
+          "central_wavelength": 7865,
+          "bandwidth": 4000,
+          "filter_name": "TESS"
+        }
+      }
+    ]
+  }
+]
