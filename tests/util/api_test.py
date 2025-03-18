@@ -36,7 +36,7 @@ class TestScheduleApi:
 
             with patch(
                 "across_data_ingestion.util.across_api.schedule.api.logger"
-            ) as log_mock, patch("requests.request", return_value=response):
+            ) as log_mock, patch("httpx.request", return_value=response):
                 schedule.post(data={})
                 assert (
                     f"Schedule Created with id: {response.text}"
@@ -52,7 +52,7 @@ class TestScheduleApi:
 
             with patch(
                 "across_data_ingestion.util.across_api.schedule.api.logger"
-            ) as log_mock, patch("requests.request", return_value=response):
+            ) as log_mock, patch("httpx.request", return_value=response):
                 schedule.post(data={})
                 assert response.text in log_mock.info.call_args.args[0]
 
@@ -63,7 +63,7 @@ class TestScheduleApi:
                 text="Duplicate Schedule detected with id test_id already exists.",
             )
 
-            with patch("requests.request", return_value=response), patch(
+            with patch("httpx.request", return_value=response), patch(
                 "logging.error", return_value=None
             ):
                 with pytest.raises(AcrossHTTPException):
@@ -76,7 +76,7 @@ class TestTelescopeApi:
             """Should return a successful GET"""
             response = mock_response(status_code=200, text="response_text")
 
-            with patch("requests.request", return_value=response):
+            with patch("httpx.request", return_value=response):
                 value = telescope.get(params={})
                 assert isinstance(value, list)
 
@@ -84,7 +84,7 @@ class TestTelescopeApi:
             """Should raise an exception on telescope get with non-200 status code"""
             response = mock_response(status_code=400, text="response_text")
 
-            with patch("requests.request", return_value=response), patch(
+            with patch("httpx.request", return_value=response), patch(
                 "logging.error", return_value=None
             ):
                 with pytest.raises(AcrossHTTPException):

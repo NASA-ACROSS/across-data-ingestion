@@ -1,6 +1,6 @@
 from urllib.parse import urlencode
 
-import requests
+import httpx
 
 from ....core.config import config  # type: ignore[import-untyped]
 from ....core.exceptions import AcrossHTTPException  # type: ignore[import-untyped]
@@ -27,7 +27,7 @@ def get(params: dict = {}) -> list[dict]:
 
     query_url = f"{TELESCOPE_URL}?{query_string}"
 
-    response = requests.request("GET", url=query_url)
+    response = httpx.request("GET", url=query_url)
 
     if response.status_code == 200:
         return response.json()

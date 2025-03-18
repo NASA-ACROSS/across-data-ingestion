@@ -37,12 +37,9 @@ certifi==2024.8.30
     # via
     #   httpcore
     #   httpx
-    #   requests
     #   skyfield
 cfgv==3.4.0
     # via pre-commit
-charset-normalizer==3.4.1
-    # via requests
 click==8.1.7
     # via
     #   typer
@@ -93,7 +90,6 @@ idna==3.10
     #   anyio
     #   email-validator
     #   httpx
-    #   requests
 iniconfig==2.0.0
     # via pytest
 jinja2==3.1.4
@@ -201,8 +197,6 @@ pyyaml==6.0.2
     #   uvicorn
 represent==2.1
     # via spacetrack
-requests==2.32.3
-    # via -r requirements/base.in
 rich==13.9.4
     # via typer
 ruff==0.8.1
@@ -268,7 +262,6 @@ tzdata==2024.2
 urllib3==2.2.3
     # via
     #   botocore
-    #   requests
     #   types-requests
 uvicorn==0.30.6
     # via
