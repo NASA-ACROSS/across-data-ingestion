@@ -12,8 +12,8 @@ class Config(BaseConfig):
     HOST: str = "localhost"
     PORT: int = 8001
     ROOT_PATH: str = "/api"
-    ACROSS_SERVER_URL: str = "http://localhost:8000/api/v1/"
-    ACROSS_SERVER_SERVICE_ACCOUNT: str = "local-data-ingestion-service-account"
+    ACROSS_SERVER_URL: str = "http://localhost:8000/api/"
+    ACROSS_INGESTION_SERVICE_ACCOUNT_KEY: str = "local-data-ingestion-service-account"
 
     def is_local(self):
         return self.APP_ENV == Environments.LOCAL

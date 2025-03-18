@@ -63,8 +63,19 @@ class TestTESSLowFidelityScheduleIngestionTask:
         ), patch(
             "across_data_ingestion.tasks.schedules.tess.low_fidelity_planned.TESS_ORBIT_TIMES_FILE",
             new=mock_orbit_times_placeholder_obs_file,
+        ), patch(
+            "across_data_ingestion.util.across_api.telescope.get",
+            return_value=[
+                {
+                    "id": "some-tess-telescope-uuid",
+                    "instruments": [{"id": "some-tess-instrument-uuid"}],
+                }
+            ],
+        ), patch(
+            "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ):
             schedules = entrypoint()
+            print(json.dumps(schedules, indent=4))
             with open(across_schedule_placeholder_obs_output) as expected_output_file:
                 expected = json.load(expected_output_file)
                 assert json.dumps(schedules) == json.dumps(expected)
@@ -83,8 +94,19 @@ class TestTESSLowFidelityScheduleIngestionTask:
         ), patch(
             "across_data_ingestion.tasks.schedules.tess.low_fidelity_planned.TESS_ORBIT_TIMES_FILE",
             new=mock_orbit_times_orbits_obs_file,
+        ), patch(
+            "across_data_ingestion.util.across_api.telescope.get",
+            return_value=[
+                {
+                    "id": "some-tess-telescope-uuid",
+                    "instruments": [{"id": "some-tess-instrument-uuid"}],
+                }
+            ],
+        ), patch(
+            "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ):
             schedules = entrypoint()
+            print(json.dumps(schedules, indent=4))
             with open(across_schedule_orbits_obs_output) as expected_output_file:
                 expected = json.load(expected_output_file)
                 assert json.dumps(schedules) == json.dumps(expected)
@@ -101,6 +123,16 @@ class TestTESSLowFidelityScheduleIngestionTask:
         ), patch(
             "across_data_ingestion.tasks.schedules.tess.low_fidelity_planned.TESS_ORBIT_TIMES_FILE",
             new=mock_orbit_times_file,
+        ), patch(
+            "across_data_ingestion.util.across_api.telescope.get",
+            return_value=[
+                {
+                    "id": "some-tess-telescope-uuid",
+                    "instruments": [{"id": "some-tess-instrument-uuid"}],
+                }
+            ],
+        ), patch(
+            "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ):
             entrypoint()
             assert "encountered an error" in log_mock.error.call_args.args[0]
@@ -121,6 +153,16 @@ class TestTESSLowFidelityScheduleIngestionTask:
         ), patch(
             "across_data_ingestion.tasks.schedules.tess.low_fidelity_planned.TESS_ORBIT_TIMES_FILE",
             new=mock_orbit_times_placeholder_obs_file,
+        ), patch(
+            "across_data_ingestion.util.across_api.telescope.get",
+            return_value=[
+                {
+                    "id": "some-tess-telescope-uuid",
+                    "instruments": [{"id": "some-tess-instrument-uuid"}],
+                }
+            ],
+        ), patch(
+            "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ):
             entrypoint()
             assert "ran at" in log_mock.info.call_args.args[0]
