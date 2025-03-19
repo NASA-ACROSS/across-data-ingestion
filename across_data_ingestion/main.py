@@ -49,6 +49,7 @@ app.add_middleware(
 )
 
 
+# Health Check Route
 @app.get(
     "/",
     summary="Health Check",
