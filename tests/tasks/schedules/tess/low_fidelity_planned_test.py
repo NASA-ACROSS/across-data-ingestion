@@ -75,7 +75,6 @@ class TestTESSLowFidelityScheduleIngestionTask:
             "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ):
             schedules = entrypoint()
-            print(json.dumps(schedules, indent=4))
             with open(across_schedule_placeholder_obs_output) as expected_output_file:
                 expected = json.load(expected_output_file)
                 assert json.dumps(schedules) == json.dumps(expected)
@@ -106,7 +105,6 @@ class TestTESSLowFidelityScheduleIngestionTask:
             "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ):
             schedules = entrypoint()
-            print(json.dumps(schedules, indent=4))
             with open(across_schedule_orbits_obs_output) as expected_output_file:
                 expected = json.load(expected_output_file)
                 assert json.dumps(schedules) == json.dumps(expected)
