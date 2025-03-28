@@ -1,4 +1,7 @@
 from across_data_ingestion.tasks.example import example_task
+from across_data_ingestion.tasks.schedules.fermi.lat_planned import (
+    entrypoint as fermi_planned_schedule_ingestion_task,
+)
 from across_data_ingestion.tasks.schedules.tess.low_fidelity_planned import (
     entrypoint as TESS_low_fidelity_schedule_ingestion_task,
 )
@@ -12,3 +15,4 @@ async def init_tasks():
     """
     await example_task()
     await TESS_low_fidelity_schedule_ingestion_task()
+    await fermi_planned_schedule_ingestion_task()
