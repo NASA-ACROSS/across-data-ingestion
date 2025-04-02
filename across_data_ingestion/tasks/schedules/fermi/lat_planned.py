@@ -1,12 +1,12 @@
 import logging
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 from urllib.error import HTTPError
 
 import astropy.units as u  # type: ignore[import-untyped]
 import numpy as np
-from astropy.io import fits
-from astropy.table import Table
+from astropy.io import fits  # type: ignore[import-untyped]
+from astropy.table import Table  # type: ignore[import-untyped]
 from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
@@ -23,7 +23,7 @@ FERMI_JD_WEEK_23 = (
 )  # Fermi schedules start at Fermi week 23 on the 311th day of 2008
 FERMI_LAT_MIN_ENERGY = 0.02  # GeV
 FERMI_LAT_MAX_ENERGY = 300  # GeV
-FERMI_FILETYPE_DICTIONARY = {
+FERMI_FILETYPE_DICTIONARY: dict[int, Literal["PRELIM", "FINAL"]] = {
     3: "PRELIM",
     1: "FINAL",
     0: "FINAL",
@@ -65,7 +65,7 @@ def calculate_date_from_fermi_week(fermi_week: int) -> str:
     return fermi_week_year + fermi_week_day
 
 
-def ingest():
+def ingest() -> list | None:
     """
     Method that posts Fermi Large Area Telescope (LAT) low and high fidelity observing schedules via
     pointing files found here: "https://fermi.gsfc.nasa.gov/ssc/observations/timeline/ft2/files/"
@@ -122,12 +122,13 @@ def ingest():
                     logger.error(
                         f"{__name__}: Reading {filetype} file for Fermi week {fermi_week_to_ingest} version {version} unexpectedly failed"
                     )
-                    return
+                    return None
             except Exception as e:
                 logger.error(
-                    f"{__name__}: Reading {filetype} file for Fermi week {fermi_week_to_ingest} version {version} unexpectedly failed with error {e}"
+                    f"{__name__}: Reading {filetype} file for Fermi week {fermi_week_to_ingest} version {version} unexpectedly failed with error {e}",
+                    exc_info=True,
                 )
-                return
+                return None
 
         if data is None:
             logger.error(
@@ -139,7 +140,7 @@ def ingest():
         data = data[data["IN_SAA"] == False]  # noqa: E712
 
         # Write schedule metadata
-        schedule = {
+        schedule: dict[str, Any] = {
             "telescope_id": telescope_id,
             "name": f"fermi_lat_week_{fermi_week_to_ingest}",
             "date_range": {
@@ -189,13 +190,13 @@ def ingest():
 
 
 @repeat_every(seconds=SECONDS_IN_A_WEEK)  # Weekly
-def entrypoint():
+def entrypoint() -> None:
     current_time = Time.now()
 
     try:
-        schedules = ingest()
+        ingest()
         logger.info(f"{__name__} ran at {current_time}")
-        return schedules
+        return
     except Exception as e:
         # Surface the error through logging, if we do not catch everything and log, the errors get voided
         logger.error(f"{__name__} encountered an error {e} at {current_time}")

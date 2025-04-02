@@ -3,12 +3,13 @@ import os
 from unittest.mock import patch
 from urllib.error import HTTPError
 
-from astropy.io import fits
-from astropy.table import Table
+from astropy.io import fits  # type: ignore[import-untyped]
+from astropy.table import Table  # type: ignore[import-untyped]
 
 from across_data_ingestion.tasks.schedules.fermi.lat_planned import (
     calculate_date_from_fermi_week,
     entrypoint,
+    ingest,
 )
 
 
@@ -52,7 +53,7 @@ class TestFermiLATPlannedScheduleIngestionTask:
             "across_data_ingestion.tasks.schedules.fermi.lat_planned.FERMI_FILETYPE_DICTIONARY",
             new={0: "PRELIM"},
         ):
-            schedules = entrypoint()
+            schedules = ingest()
             with open(mock_output_schedule_file) as expected_output_file:
                 expected = json.load(expected_output_file)
                 assert json.dumps(schedules) == json.dumps(expected)
@@ -83,7 +84,7 @@ class TestFermiLATPlannedScheduleIngestionTask:
             "across_data_ingestion.tasks.schedules.fermi.lat_planned.FERMI_FILETYPE_DICTIONARY",
             new={0: "FINAL"},
         ):
-            schedules = entrypoint()
+            schedules = ingest()
             with open(mock_output_schedule_file) as expected_output_file:
                 expected = json.load(expected_output_file)
                 assert json.dumps(schedules) == json.dumps(expected)
@@ -112,7 +113,7 @@ class TestFermiLATPlannedScheduleIngestionTask:
             "across_data_ingestion.tasks.schedules.fermi.lat_planned.FERMI_FILETYPE_DICTIONARY",
             new={0: "FINAL"},
         ):
-            schedules = entrypoint()
+            schedules = ingest()
             assert len(schedules[0]["observations"]) > 0
 
     def test_should_log_warning_when_retrieving_file_returns_404(self):
