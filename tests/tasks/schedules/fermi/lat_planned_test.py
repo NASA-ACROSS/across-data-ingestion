@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 from unittest.mock import patch
 from urllib.error import HTTPError
 
@@ -52,6 +53,9 @@ class TestFermiLATPlannedScheduleIngestionTask:
         ), patch(
             "across_data_ingestion.tasks.schedules.fermi.lat_planned.FERMI_FILETYPE_DICTIONARY",
             new={0: "PRELIM"},
+        ), patch(
+            "across_data_ingestion.tasks.schedules.fermi.lat_planned.get_current_time",
+            return_value=datetime(2025, 3, 28, 0, 0, 0).isoformat(),
         ):
             schedules = ingest()
             with open(mock_output_schedule_file) as expected_output_file:
@@ -83,6 +87,9 @@ class TestFermiLATPlannedScheduleIngestionTask:
         ), patch(
             "across_data_ingestion.tasks.schedules.fermi.lat_planned.FERMI_FILETYPE_DICTIONARY",
             new={0: "FINAL"},
+        ), patch(
+            "across_data_ingestion.tasks.schedules.fermi.lat_planned.get_current_time",
+            return_value=datetime(2025, 3, 28, 0, 0, 0).isoformat(),
         ):
             schedules = ingest()
             with open(mock_output_schedule_file) as expected_output_file:
@@ -121,7 +128,7 @@ class TestFermiLATPlannedScheduleIngestionTask:
         with patch(
             "across_data_ingestion.tasks.schedules.fermi.lat_planned.logger"
         ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.retrieve_lat_pointing_file",
+            "astropy.io.fits.open",
             return_value=None,
             side_effect=HTTPError(url="", code=404, msg="", hdrs=None, fp=None),
         ), patch(

@@ -6,7 +6,7 @@ from urllib.error import HTTPError
 import astropy.units as u  # type: ignore[import-untyped]
 import numpy as np
 from astropy.io import fits  # type: ignore[import-untyped]
-from astropy.table import Table  # type: ignore[import-untyped]
+from astropy.table import Row, Table  # type: ignore[import-untyped]
 from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
@@ -21,6 +21,7 @@ FERMI_LAT_POINTING_FILE_BASE_PATH = (
 FERMI_JD_WEEK_23 = (
     Time("2008-01-01 00:00:00").jd + 310
 )  # Fermi schedules start at Fermi week 23 on the 311th day of 2008
+FERMI_TIME_START_EPOCH = Time("2001-01-01")  # Start of Fermi time system
 FERMI_LAT_MIN_ENERGY = 0.02  # GeV
 FERMI_LAT_MAX_ENERGY = 300  # GeV
 FERMI_FILETYPE_DICTIONARY: dict[int, Literal["PRELIM", "FINAL"]] = {
@@ -28,6 +29,13 @@ FERMI_FILETYPE_DICTIONARY: dict[int, Literal["PRELIM", "FINAL"]] = {
     1: "FINAL",
     0: "FINAL",
 }  # Dictionary of filetypes and number of weeks ahead to ingest
+# Assume Fermi LAT footprint is a circle, so no pointing angle needed
+FERMI_LAT_POINTING_ANGLE = 0
+
+
+def get_current_time():
+    """Wrapper around datetime.now to enable better testing"""
+    return datetime.now().isoformat()
 
 
 def retrieve_lat_pointing_file(
@@ -36,18 +44,32 @@ def retrieve_lat_pointing_file(
     start_date: str,
     end_date: str,
     version: str,
-) -> Table:
+) -> Table | None:
     """
     Retrieve either a preliminary or final LAT pointing file given a Fermi week,
     start date, end date, and version, and return its contents as an astropy Table
     """
-    filename = (
-        f"FERMI_POINTING_{filetype}_{week}_{start_date}_{end_date}_{version}.fits"
-    )
-    hdu = fits.open(FERMI_LAT_POINTING_FILE_BASE_PATH + filename)
-    data = Table(hdu[1].data)
+    try:
+        filename = (
+            f"FERMI_POINTING_{filetype}_{week}_{start_date}_{end_date}_{version}.fits"
+        )
+        hdu = fits.open(FERMI_LAT_POINTING_FILE_BASE_PATH + filename)
+        data = Table(hdu[1].data)
 
-    return data
+        return data
+    except HTTPError as e:
+        if e.status == 404:
+            # File wasn't found, so log a warning and try finding an older version
+            logger.warning(
+                f"{__name__}: {filetype} file for Fermi week {week} version {version} not found, skipping"
+            )
+            return None
+        else:
+            # We got an unexpected error
+            logger.error(
+                f"{__name__}: Reading {filetype} file for Fermi week {week} version {version} unexpectedly failed"
+            )
+            return None
 
 
 def calculate_date_from_fermi_week(fermi_week: int) -> str:
@@ -65,6 +87,54 @@ def calculate_date_from_fermi_week(fermi_week: int) -> str:
     return fermi_week_year + fermi_week_day
 
 
+def create_schedule(
+    telescope_id: str,
+    fermi_week_to_ingest: int,
+    data: Table,
+    filetype: Literal["PRELIM", "FINAL"],
+) -> dict[str, Any]:
+    return {
+        "telescope_id": telescope_id,
+        "name": f"fermi_lat_week_{fermi_week_to_ingest}",
+        "date_range": {
+            # START and STOP times are in seconds from 2001-01-01 00:00:00
+            "begin": f"{(FERMI_TIME_START_EPOCH + data[0]['START'] * u.second).isot}",
+            "end": f"{(FERMI_TIME_START_EPOCH + data[-1]['STOP'] * u.second).isot}",
+        },
+        "status": "planned",
+        "fidelity": "low" if filetype == "PRELIM" else "high",
+    }
+
+
+def create_observation(
+    instrument_id: str, fermi_week_to_ingest: int, i: int, row: Row
+) -> dict[str, Any]:
+    return {
+        "instrument_id": instrument_id,
+        "object_name": f"fermi_week_{fermi_week_to_ingest}_observation_{i}",
+        "pointing_position": {
+            "ra": f"{row['RA_SCZ']}",
+            "dec": f"{row['DEC_SCZ']}",
+        },
+        "date_range": {
+            "begin": f"{(FERMI_TIME_START_EPOCH + row['START'] * u.second).isot}",
+            "end": f"{(FERMI_TIME_START_EPOCH + row['STOP'] * u.second).isot}",
+        },
+        "external_observation_id": f"fermi_week_{fermi_week_to_ingest}_observation_{i}",
+        "type": "imaging",
+        "status": "planned",
+        "pointing_angle": FERMI_LAT_POINTING_ANGLE,
+        "exposure_time": float(row["STOP"] - row["START"]),
+        "bandpass": {
+            "filter_name": "fermi_lat",
+            "min": FERMI_LAT_MIN_ENERGY,
+            "max": FERMI_LAT_MAX_ENERGY,
+            "type": "ENERGY",
+            "unit": "GeV",
+        },
+    }
+
+
 def ingest() -> list | None:
     """
     Method that posts Fermi Large Area Telescope (LAT) low and high fidelity observing schedules via
@@ -77,7 +147,7 @@ def ingest() -> list | None:
     It filters out times when the spacecraft is within the South Atlantic Anomaly (SAA) and is not taking data.
     """
     # Calculate current Fermi mission week
-    now = datetime.now().isoformat()
+    now = get_current_time()
     current_fermi_week = int(np.floor((Time(now).jd - FERMI_JD_WEEK_23) / 7 + 23))
 
     # GET Telescope by name
@@ -98,7 +168,6 @@ def ingest() -> list | None:
         fermi_week_to_ingest = current_fermi_week + weeks_ahead
         week_start_date = calculate_date_from_fermi_week(fermi_week_to_ingest)
         week_end_date = calculate_date_from_fermi_week(fermi_week_to_ingest + 1)
-        data = None
         # Loop through possible file versions starting with most recent
         for version in ["07", "06", "05", "04", "03", "02", "01", "00"]:
             try:
@@ -110,19 +179,8 @@ def ingest() -> list | None:
                     version,
                 )
                 # Break after first successful retrieval so we only read the most recent file
-                break
-            except HTTPError as e:
-                if e.status == 404:
-                    # File wasn't found, so log a warning and try finding an older version
-                    logger.warning(
-                        f"{__name__}: No {filetype} file for Fermi week {fermi_week_to_ingest} version {version} found, skipping"
-                    )
-                else:
-                    # We got an unexpected error
-                    logger.error(
-                        f"{__name__}: Reading {filetype} file for Fermi week {fermi_week_to_ingest} version {version} unexpectedly failed"
-                    )
-                    return None
+                if data is not None:
+                    break
             except Exception as e:
                 logger.error(
                     f"{__name__}: Reading {filetype} file for Fermi week {fermi_week_to_ingest} version {version} unexpectedly failed with error {e}",
@@ -140,46 +198,14 @@ def ingest() -> list | None:
         data = data[data["IN_SAA"] == False]  # noqa: E712
 
         # Write schedule metadata
-        schedule: dict[str, Any] = {
-            "telescope_id": telescope_id,
-            "name": f"fermi_lat_week_{fermi_week_to_ingest}",
-            "date_range": {
-                # START and STOP times are in seconds from 2001-01-01 00:00:00
-                "begin": f"{(Time('2001-01-01') + data[0]['START'] * u.second).isot}",
-                "end": f"{(Time('2001-01-01') + data[-1]['STOP'] * u.second).isot}",
-            },
-            "status": "planned",
-            "fidelity": "low" if filetype == "PRELIM" else "high",
-        }
+        schedule = create_schedule(telescope_id, fermi_week_to_ingest, data, filetype)
 
         # Loop through each discrete pointing and write it as an observation
         observations = []
         for i, row in enumerate(data):
-            observation = {
-                "instrument_id": instrument_id,
-                "object_name": f"fermi_week_{fermi_week_to_ingest}_observation_{i}",
-                "pointing_position": {
-                    "ra": f"{row['RA_SCZ']}",
-                    "dec": f"{row['DEC_SCZ']}",
-                },
-                "date_range": {
-                    "begin": f"{(Time('2001-01-01') + row['START'] * u.second).isot}",
-                    "end": f"{(Time('2001-01-01') + row['STOP'] * u.second).isot}",
-                },
-                "external_observation_id": f"fermi_week_{fermi_week_to_ingest}_observation_{i}",
-                "type": "imaging",
-                "status": "planned",
-                "pointing_angle": 0,
-                "exposure_time": float(row["STOP"] - row["START"]),
-                "bandpass": {
-                    "filter_name": "fermi_lat",
-                    "min": FERMI_LAT_MIN_ENERGY,
-                    "max": FERMI_LAT_MAX_ENERGY,
-                    "type": "ENERGY",
-                    "unit": "GeV",
-                },
-            }
-
+            observation = create_observation(
+                instrument_id, fermi_week_to_ingest, i, row
+            )
             observations.append(observation)
 
         schedule["observations"] = observations
