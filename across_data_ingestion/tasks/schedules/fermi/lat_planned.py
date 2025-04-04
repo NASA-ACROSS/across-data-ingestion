@@ -1,9 +1,11 @@
 import logging
+import re
 from datetime import datetime
-from typing import Any, Literal
+from typing import Literal
 from urllib.error import HTTPError
 
 import astropy.units as u  # type: ignore[import-untyped]
+import httpx
 import numpy as np
 from astropy.io import fits  # type: ignore[import-untyped]
 from astropy.table import Row, Table  # type: ignore[import-untyped]
@@ -43,17 +45,33 @@ def retrieve_lat_pointing_file(
     week: int,
     start_date: str,
     end_date: str,
-    version: str,
 ) -> Table | None:
     """
     Retrieve either a preliminary or final LAT pointing file given a Fermi week,
     start date, end date, and version, and return its contents as an astropy Table
+    Scrapes the page for links to FT2 files, selecting those that match the inputs,
+    and reads the data from the most recent file
     """
+    html_content = httpx.get(FERMI_LAT_POINTING_FILE_BASE_PATH).text.splitlines()
+
+    fermi_files = []
+    for line in html_content:
+        filename = re.sub("<.*?>", " ", line).strip().split()
+        if filename and filename[0].startswith("FERMI"):
+            if (
+                str(week) == filename[0].split("_")[3]
+                and start_date == filename[0].split("_")[4]
+                and end_date == filename[0].split("_")[5]
+                and filetype in filename[0]
+            ):
+                fermi_files.append(FERMI_LAT_POINTING_FILE_BASE_PATH + filename[0])
+
+    if len(fermi_files) == 0:
+        return None
+
+    # Read the most recent version
     try:
-        filename = (
-            f"FERMI_POINTING_{filetype}_{week}_{start_date}_{end_date}_{version}.fits"
-        )
-        hdu = fits.open(FERMI_LAT_POINTING_FILE_BASE_PATH + filename)
+        hdu = fits.open(sorted(fermi_files, reverse=True)[0])
         data = Table(hdu[1].data)
 
         return data
@@ -61,13 +79,13 @@ def retrieve_lat_pointing_file(
         if e.status == 404:
             # File wasn't found, so log a warning and try finding an older version
             logger.warning(
-                f"{__name__}: {filetype} file for Fermi week {week} version {version} not found, skipping"
+                f"{__name__}: {filetype} file for Fermi week {week} not found, skipping"
             )
             return None
         else:
             # We got an unexpected error
             logger.error(
-                f"{__name__}: Reading {filetype} file for Fermi week {week} version {version} unexpectedly failed"
+                f"{__name__}: Reading {filetype} file for Fermi week {week} unexpectedly failed"
             )
             return None
 
@@ -92,7 +110,7 @@ def create_schedule(
     fermi_week_to_ingest: int,
     data: Table,
     filetype: Literal["PRELIM", "FINAL"],
-) -> dict[str, Any]:
+) -> dict[str, str | dict[str, str] | list]:
     return {
         "telescope_id": telescope_id,
         "name": f"fermi_lat_week_{fermi_week_to_ingest}",
@@ -108,7 +126,7 @@ def create_schedule(
 
 def create_observation(
     instrument_id: str, fermi_week_to_ingest: int, i: int, row: Row
-) -> dict[str, Any]:
+) -> dict[str, str | dict[str, str | float] | float]:
     return {
         "instrument_id": instrument_id,
         "object_name": f"fermi_week_{fermi_week_to_ingest}_observation_{i}",
@@ -169,24 +187,20 @@ def ingest() -> list | None:
         week_start_date = calculate_date_from_fermi_week(fermi_week_to_ingest)
         week_end_date = calculate_date_from_fermi_week(fermi_week_to_ingest + 1)
         # Loop through possible file versions starting with most recent
-        for version in ["07", "06", "05", "04", "03", "02", "01", "00"]:
-            try:
-                data = retrieve_lat_pointing_file(
-                    filetype,
-                    fermi_week_to_ingest,
-                    week_start_date,
-                    week_end_date,
-                    version,
-                )
-                # Break after first successful retrieval so we only read the most recent file
-                if data is not None:
-                    break
-            except Exception as e:
-                logger.error(
-                    f"{__name__}: Reading {filetype} file for Fermi week {fermi_week_to_ingest} version {version} unexpectedly failed with error {e}",
-                    exc_info=True,
-                )
-                return None
+        try:
+            data = retrieve_lat_pointing_file(
+                filetype,
+                fermi_week_to_ingest,
+                week_start_date,
+                week_end_date,
+            )
+
+        except Exception as e:
+            logger.error(
+                f"{__name__}: Reading {filetype} file for Fermi week {fermi_week_to_ingest} unexpectedly failed with error {e}",
+                exc_info=True,
+            )
+            continue
 
         if data is None:
             logger.error(

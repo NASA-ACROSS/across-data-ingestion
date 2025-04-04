@@ -6,11 +6,13 @@ from urllib.error import HTTPError
 
 from astropy.io import fits  # type: ignore[import-untyped]
 from astropy.table import Table  # type: ignore[import-untyped]
+from httpx import Response
 
 from across_data_ingestion.tasks.schedules.fermi.lat_planned import (
     calculate_date_from_fermi_week,
     entrypoint,
     ingest,
+    retrieve_lat_pointing_file,
 )
 
 
@@ -123,6 +125,42 @@ class TestFermiLATPlannedScheduleIngestionTask:
             schedules = ingest()
             assert len(schedules[0]["observations"]) > 0
 
+    def test_retrieve_lat_pointing_file_should_return_astropy_table(self):
+        """Should return an astropy Table for a retrieved LAT pointing file"""
+        with patch(
+            "httpx.get",
+            return_value=Response(
+                status_code=200,
+                text="FERMI_POINTING_PRELIM_881_2025107_2025114_00.fits 27-Mar-2025 15:37  1.4M ",
+            ),
+        ):
+            data = retrieve_lat_pointing_file("PRELIM", 881, "2025107", "2025114")
+            assert isinstance(data, Table)
+
+    def test_retrieve_lat_pointing_file_should_return_none_if_no_file_found(self):
+        """Should return None if no LAT pointing file was found"""
+        with patch("httpx.get", return_value=Response(status_code=200, text="")):
+            data = retrieve_lat_pointing_file("PRELIM", 881, "2025107", "2025114")
+            assert data is None
+
+    def test_should_log_error_when_retrieving_file_returns_unexpected_status_code(self):
+        """Should log error when retrieving a file returns an unexpected status code"""
+        with patch(
+            "across_data_ingestion.tasks.schedules.fermi.lat_planned.logger"
+        ) as log_mock, patch(
+            "astropy.io.fits.open",
+            return_value=None,
+            side_effect=HTTPError(url="", code=500, msg="", hdrs=None, fp=None),
+        ), patch(
+            "httpx.get",
+            return_value=Response(
+                status_code=200,
+                text="FERMI_POINTING_PRELIM_881_2025107_2025114_00.fits 27-Mar-2025 15:37  1.4M ",
+            ),
+        ):
+            retrieve_lat_pointing_file("PRELIM", 881, "2025107", "2025114")
+            assert "unexpectedly failed" in log_mock.error.call_args.args[0]
+
     def test_should_log_warning_when_retrieving_file_returns_404(self):
         """Should log warning when retrieving a file returns a 404"""
         with patch(
@@ -140,34 +178,17 @@ class TestFermiLATPlannedScheduleIngestionTask:
                 }
             ],
         ), patch(
+            "httpx.get",
+            return_value=Response(
+                status_code=200,
+                text="FERMI_POINTING_PRELIM_881_2025107_2025114_00.fits 27-Mar-2025 15:37  1.4M ",
+            ),
+        ), patch(
             "across_data_ingestion.tasks.schedules.fermi.lat_planned.FERMI_FILETYPE_DICTIONARY",
             new={0: "FINAL"},
         ):
-            entrypoint()
+            retrieve_lat_pointing_file("PRELIM", 881, "2025107", "2025114")
             assert "skipping" in log_mock.warning.call_args.args[0]
-
-    def test_should_log_error_when_retrieving_file_returns_unexpected_status_code(self):
-        """Should log error when retrieving a file returns an unexpected status code"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.logger"
-        ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.retrieve_lat_pointing_file",
-            return_value=None,
-            side_effect=HTTPError(url="", code=500, msg="", hdrs=None, fp=None),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "fermi_lat_telescope_uuid",
-                    "instruments": [{"id": "fermi_lat_instrument_uuid"}],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.FERMI_FILETYPE_DICTIONARY",
-            new={0: "FINAL"},
-        ):
-            entrypoint()
-            assert "unexpectedly failed" in log_mock.error.call_args.args[0]
 
     def test_should_log_error_when_data_processing_fails(self):
         """Should log error when processing a pointing file raises an exception"""
