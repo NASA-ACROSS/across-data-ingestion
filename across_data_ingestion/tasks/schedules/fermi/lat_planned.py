@@ -52,7 +52,12 @@ def retrieve_lat_pointing_file(
     Scrapes the page for links to FT2 files, selecting those that match the inputs,
     and reads the data from the most recent file
     """
-    html_content = httpx.get(FERMI_LAT_POINTING_FILE_BASE_PATH).text.splitlines()
+    request = httpx.get(FERMI_LAT_POINTING_FILE_BASE_PATH)
+    if request.status_code != 200:
+        logger.warning(f"{__name__}: Could not query for Fermi LAT pointing files")
+        return None
+
+    html_content = request.text.splitlines()
 
     fermi_files = []
     for line in html_content:

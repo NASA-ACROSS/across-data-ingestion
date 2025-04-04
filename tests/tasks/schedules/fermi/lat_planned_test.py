@@ -137,6 +137,22 @@ class TestFermiLATPlannedScheduleIngestionTask:
             data = retrieve_lat_pointing_file("PRELIM", 881, "2025107", "2025114")
             assert isinstance(data, Table)
 
+    def test_retrieve_lat_pointing_file_should_log_warning_if_get_request_status_not_200(
+        self,
+    ):
+        """Should log a warning if GET request for LAT pointing files returns anything but a 200"""
+        with patch(
+            "across_data_ingestion.tasks.schedules.fermi.lat_planned.logger"
+        ) as log_mock, patch(
+            "httpx.get",
+            return_value=Response(
+                status_code=404,
+                text=" ",
+            ),
+        ):
+            retrieve_lat_pointing_file("PRELIM", 881, "2025107", "2025114")
+            assert "Could not query" in log_mock.warning.call_args.args[0]
+
     def test_retrieve_lat_pointing_file_should_return_none_if_no_file_found(self):
         """Should return None if no LAT pointing file was found"""
         with patch("httpx.get", return_value=Response(status_code=200, text="")):
