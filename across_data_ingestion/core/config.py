@@ -20,9 +20,6 @@ class Config(BaseConfig):
     # Adjusts the output being rendered as JSON (False for dev with pretty-print).
     LOG_JSON_FORMAT: bool = False
 
-    # Request Headers
-    REQUEST_ID_HEADER: str = "X-Request-ID"
-
     def is_local(self):
         return self.APP_ENV == Environments.LOCAL
 

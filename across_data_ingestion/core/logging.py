@@ -1,29 +1,14 @@
 import logging
 import sys
-import typing
-from collections.abc import MutableMapping
 from types import TracebackType
 
 import structlog
-from asgi_correlation_id import correlation_id
 from structlog.types import Processor
-
-
-def _add_correlation(
-    logger: logging.Logger,
-    method_name: str,
-    event_dict: MutableMapping[str, typing.Any],
-) -> MutableMapping[str, typing.Any]:
-    """Add request id to log message."""
-    if request_id := correlation_id.get():
-        event_dict["request_id"] = request_id
-    return event_dict
 
 
 # This setup was heavily borrowed from https://gist.github.com/nymous/f138c7f06062b7c43c060bf03759c29e
 def setup(json_logs: bool = False, log_level: str = "INFO") -> None:
     shared_processors: list[Processor] = [
-        _add_correlation,
         structlog.processors.TimeStamper(fmt="%Y-%m-%dT%H:%M:%S.%f"),
         structlog.contextvars.merge_contextvars,
         structlog.stdlib.add_logger_name,
