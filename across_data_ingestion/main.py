@@ -1,12 +1,19 @@
-import logging
+import os
+import time
 from contextlib import asynccontextmanager
 
+import structlog
 from fastapi import FastAPI, status
 
-from .core.config import config
+from .core import config, logging
 from .tasks.task_loader import init_tasks
 
-logger = logging.getLogger("uvicorn.error")
+# Configure UTC system time
+os.environ["TZ"] = "UTC"
+time.tzset()
+
+logging.setup(json_logs=config.LOG_JSON_FORMAT, log_level=config.LOG_LEVEL)
+logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
 
 @asynccontextmanager
@@ -32,5 +39,6 @@ app = FastAPI(
     description="Container Health Check Route",
     status_code=status.HTTP_200_OK,
 )
-async def get():
+async def get() -> str:
+    logger.debug("health check!")
     return "ok"

@@ -231,6 +231,8 @@ sqlalchemy==2.0.36
     #   geoalchemy2
 starlette==0.37.2
     # via fastapi
+structlog==25.2.0
+    # via -r requirements/base.in
 typer==0.14.0
     # via fastapi-cli
 types-cachetools==5.5.0.20240820
