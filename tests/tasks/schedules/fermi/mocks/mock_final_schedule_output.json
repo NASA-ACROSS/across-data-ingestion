@@ -1,0 +1,254 @@
+[
+    {
+        "telescope_id": "fermi_lat_telescope_uuid",
+        "name": "fermi_lat_week_878",
+        "date_range": {
+            "begin": "2025-03-05T23:58:55.000",
+            "end": "2025-03-06T00:08:55.000"
+        },
+        "status": "planned",
+        "fidelity": "high",
+        "observations": [
+            {
+                "instrument_id": "fermi_lat_instrument_uuid",
+                "object_name": "fermi_week_878_observation_0",
+                "pointing_position": {
+                    "ra": "30.83741569519043",
+                    "dec": "-26.251014709472656"
+                },
+                "date_range": {
+                    "begin": "2025-03-05T23:58:55.000",
+                    "end": "2025-03-05T23:59:55.000"
+                },
+                "external_observation_id": "fermi_week_878_observation_0",
+                "type": "imaging",
+                "status": "planned",
+                "pointing_angle": 0,
+                "exposure_time": 60.0,
+                "bandpass": {
+                    "filter_name": "fermi_lat",
+                    "min": 0.02,
+                    "max": 300,
+                    "type": "ENERGY",
+                    "unit": "GeV"
+                }
+            },
+            {
+                "instrument_id": "fermi_lat_instrument_uuid",
+                "object_name": "fermi_week_878_observation_1",
+                "pointing_position": {
+                    "ra": "33.52640914916992",
+                    "dec": "56.46604537963867"
+                },
+                "date_range": {
+                    "begin": "2025-03-05T23:59:55.000",
+                    "end": "2025-03-06T00:00:55.000"
+                },
+                "external_observation_id": "fermi_week_878_observation_1",
+                "type": "imaging",
+                "status": "planned",
+                "pointing_angle": 0,
+                "exposure_time": 60.0,
+                "bandpass": {
+                    "filter_name": "fermi_lat",
+                    "min": 0.02,
+                    "max": 300,
+                    "type": "ENERGY",
+                    "unit": "GeV"
+                }
+            },
+            {
+                "instrument_id": "fermi_lat_instrument_uuid",
+                "object_name": "fermi_week_878_observation_2",
+                "pointing_position": {
+                    "ra": "36.50568771362305",
+                    "dec": "54.795448303222656"
+                },
+                "date_range": {
+                    "begin": "2025-03-06T00:00:55.000",
+                    "end": "2025-03-06T00:01:55.000"
+                },
+                "external_observation_id": "fermi_week_878_observation_2",
+                "type": "imaging",
+                "status": "planned",
+                "pointing_angle": 0,
+                "exposure_time": 60.0,
+                "bandpass": {
+                    "filter_name": "fermi_lat",
+                    "min": 0.02,
+                    "max": 300,
+                    "type": "ENERGY",
+                    "unit": "GeV"
+                }
+            },
+            {
+                "instrument_id": "fermi_lat_instrument_uuid",
+                "object_name": "fermi_week_878_observation_3",
+                "pointing_position": {
+                    "ra": "39.39778137207031",
+                    "dec": "53.13978958129883"
+                },
+                "date_range": {
+                    "begin": "2025-03-06T00:01:55.000",
+                    "end": "2025-03-06T00:02:55.000"
+                },
+                "external_observation_id": "fermi_week_878_observation_3",
+                "type": "imaging",
+                "status": "planned",
+                "pointing_angle": 0,
+                "exposure_time": 60.0,
+                "bandpass": {
+                    "filter_name": "fermi_lat",
+                    "min": 0.02,
+                    "max": 300,
+                    "type": "ENERGY",
+                    "unit": "GeV"
+                }
+            },
+            {
+                "instrument_id": "fermi_lat_instrument_uuid",
+                "object_name": "fermi_week_878_observation_4",
+                "pointing_position": {
+                    "ra": "42.21775436401367",
+                    "dec": "51.50264358520508"
+                },
+                "date_range": {
+                    "begin": "2025-03-06T00:02:55.000",
+                    "end": "2025-03-06T00:03:55.000"
+                },
+                "external_observation_id": "fermi_week_878_observation_4",
+                "type": "imaging",
+                "status": "planned",
+                "pointing_angle": 0,
+                "exposure_time": 60.0,
+                "bandpass": {
+                    "filter_name": "fermi_lat",
+                    "min": 0.02,
+                    "max": 300,
+                    "type": "ENERGY",
+                    "unit": "GeV"
+                }
+            },
+            {
+                "instrument_id": "fermi_lat_instrument_uuid",
+                "object_name": "fermi_week_878_observation_5",
+                "pointing_position": {
+                    "ra": "44.9782829284668",
+                    "dec": "49.8873405456543"
+                },
+                "date_range": {
+                    "begin": "2025-03-06T00:03:55.000",
+                    "end": "2025-03-06T00:04:55.000"
+                },
+                "external_observation_id": "fermi_week_878_observation_5",
+                "type": "imaging",
+                "status": "planned",
+                "pointing_angle": 0,
+                "exposure_time": 60.0,
+                "bandpass": {
+                    "filter_name": "fermi_lat",
+                    "min": 0.02,
+                    "max": 300,
+                    "type": "ENERGY",
+                    "unit": "GeV"
+                }
+            },
+            {
+                "instrument_id": "fermi_lat_instrument_uuid",
+                "object_name": "fermi_week_878_observation_6",
+                "pointing_position": {
+                    "ra": "47.690086364746094",
+                    "dec": "48.29701614379883"
+                },
+                "date_range": {
+                    "begin": "2025-03-06T00:04:55.000",
+                    "end": "2025-03-06T00:05:55.000"
+                },
+                "external_observation_id": "fermi_week_878_observation_6",
+                "type": "imaging",
+                "status": "planned",
+                "pointing_angle": 0,
+                "exposure_time": 60.0,
+                "bandpass": {
+                    "filter_name": "fermi_lat",
+                    "min": 0.02,
+                    "max": 300,
+                    "type": "ENERGY",
+                    "unit": "GeV"
+                }
+            },
+            {
+                "instrument_id": "fermi_lat_instrument_uuid",
+                "object_name": "fermi_week_878_observation_7",
+                "pointing_position": {
+                    "ra": "50.362308502197266",
+                    "dec": "46.73466491699219"
+                },
+                "date_range": {
+                    "begin": "2025-03-06T00:05:55.000",
+                    "end": "2025-03-06T00:06:55.000"
+                },
+                "external_observation_id": "fermi_week_878_observation_7",
+                "type": "imaging",
+                "status": "planned",
+                "pointing_angle": 0,
+                "exposure_time": 60.0,
+                "bandpass": {
+                    "filter_name": "fermi_lat",
+                    "min": 0.02,
+                    "max": 300,
+                    "type": "ENERGY",
+                    "unit": "GeV"
+                }
+            },
+            {
+                "instrument_id": "fermi_lat_instrument_uuid",
+                "object_name": "fermi_week_878_observation_8",
+                "pointing_position": {
+                    "ra": "53.002777099609375",
+                    "dec": "45.20315170288086"
+                },
+                "date_range": {
+                    "begin": "2025-03-06T00:06:55.000",
+                    "end": "2025-03-06T00:07:55.000"
+                },
+                "external_observation_id": "fermi_week_878_observation_8",
+                "type": "imaging",
+                "status": "planned",
+                "pointing_angle": 0,
+                "exposure_time": 60.0,
+                "bandpass": {
+                    "filter_name": "fermi_lat",
+                    "min": 0.02,
+                    "max": 300,
+                    "type": "ENERGY",
+                    "unit": "GeV"
+                }
+            },
+            {
+                "instrument_id": "fermi_lat_instrument_uuid",
+                "object_name": "fermi_week_878_observation_9",
+                "pointing_position": {
+                    "ra": "55.61822509765625",
+                    "dec": "43.705265045166016"
+                },
+                "date_range": {
+                    "begin": "2025-03-06T00:07:55.000",
+                    "end": "2025-03-06T00:08:55.000"
+                },
+                "external_observation_id": "fermi_week_878_observation_9",
+                "type": "imaging",
+                "status": "planned",
+                "pointing_angle": 0,
+                "exposure_time": 60.0,
+                "bandpass": {
+                    "filter_name": "fermi_lat",
+                    "min": 0.02,
+                    "max": 300,
+                    "type": "ENERGY",
+                    "unit": "GeV"
+                }
+            }
+        ]
+    }
+]
