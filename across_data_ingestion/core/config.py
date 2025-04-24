@@ -15,6 +15,11 @@ class Config(BaseConfig):
     ACROSS_SERVER_URL: str = "http://localhost:8000/api/"
     ACROSS_INGESTION_SERVICE_ACCOUNT_KEY: str = "local-data-ingestion-service-account"
 
+    # Logging
+    LOG_LEVEL: str = "DEBUG"
+    # Adjusts the output being rendered as JSON (False for dev with pretty-print).
+    LOG_JSON_FORMAT: bool = False
+
     def is_local(self):
         return self.APP_ENV == Environments.LOCAL
 
