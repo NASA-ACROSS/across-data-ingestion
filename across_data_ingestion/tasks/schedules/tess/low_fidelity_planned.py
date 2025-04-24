@@ -10,8 +10,14 @@ from ....util import across_api
 logger = logging.getLogger("uvicorn.error")
 
 SECONDS_IN_A_WEEK = 60 * 60 * 24 * 7
-TESS_CENTRAL_WAVELENGTH = 7865
-TESS_BANDWIDTH = 4000
+TESS_BANDPASS = {
+    "min": 5865,
+    "max": 10565,
+    "peak_wavelength": 8865,
+    "unit": "angstrom",
+    "filter_name": "TESS_red",
+}
+
 # When running locally and debugging, it is recommended to save the results of these files and load them from a local path to reduce external thrashing
 TESS_POINTINGS_FILE = "https://raw.githubusercontent.com/tessgi/tesswcs/main/src/tesswcs/data/pointings.csv"
 TESS_ORBIT_TIMES_FILE = "https://tess.mit.edu/public/files/TESS_orbit_times.csv"
@@ -37,11 +43,7 @@ def create_orbit_observation(
         "exposure_time": int(exposure_time.to(u.second).value),
         "status": "planned",
         "type": "imaging",
-        "bandpass": {
-            "central_wavelength": TESS_CENTRAL_WAVELENGTH,
-            "bandwidth": TESS_BANDWIDTH,
-            "filter_name": "TESS",
-        },
+        "bandpass": TESS_BANDPASS,
     }
 
 
@@ -59,11 +61,7 @@ def create_placeholder_observation(
         "exposure_time": int(exposure_time.to(u.second).value),
         "status": "planned",
         "type": "imaging",
-        "bandpass": {
-            "central_wavelength": TESS_CENTRAL_WAVELENGTH,
-            "bandwidth": TESS_BANDWIDTH,
-            "filter_name": "TESS",
-        },
+        "bandpass": TESS_BANDPASS,
     }
 
 
