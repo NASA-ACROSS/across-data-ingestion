@@ -26,9 +26,11 @@
               "status": "planned",
               "type": "imaging",
               "bandpass": {
-                  "central_wavelength": 7865,
-                  "bandwidth": 4000,
-                  "filter_name": "TESS"
+                  "min": 5865,
+                  "max": 10565,
+                  "peak_wavelength": 8865,
+                  "unit": "angstrom",
+                  "filter_name": "TESS_red"
               }
           },
           {
@@ -48,10 +50,12 @@
               "status": "planned",
               "type": "imaging",
               "bandpass": {
-                  "central_wavelength": 7865,
-                  "bandwidth": 4000,
-                  "filter_name": "TESS"
-              }
+                "min": 5865,
+                "max": 10565,
+                "peak_wavelength": 8865,
+                "unit": "angstrom",
+                "filter_name": "TESS_red"
+            }
           },
           {
               "instrument_id": "some-tess-instrument-uuid",
@@ -70,9 +74,11 @@
               "status": "planned",
               "type": "imaging",
               "bandpass": {
-                  "central_wavelength": 7865,
-                  "bandwidth": 4000,
-                  "filter_name": "TESS"
+                "min": 5865,
+                "max": 10565,
+                "peak_wavelength": 8865,
+                "unit": "angstrom",
+                "filter_name": "TESS_red"
               }
           },
           {
@@ -92,9 +98,11 @@
               "status": "planned",
               "type": "imaging",
               "bandpass": {
-                  "central_wavelength": 7865,
-                  "bandwidth": 4000,
-                  "filter_name": "TESS"
+                "min": 5865,
+                "max": 10565,
+                "peak_wavelength": 8865,
+                "unit": "angstrom",
+                "filter_name": "TESS_red"
               }
           }
       ]
@@ -126,9 +134,11 @@
               "status": "planned",
               "type": "imaging",
               "bandpass": {
-                  "central_wavelength": 7865,
-                  "bandwidth": 4000,
-                  "filter_name": "TESS"
+                "min": 5865,
+                "max": 10565,
+                "peak_wavelength": 8865,
+                "unit": "angstrom",
+                "filter_name": "TESS_red"
               }
           },
           {
@@ -148,9 +158,11 @@
               "status": "planned",
               "type": "imaging",
               "bandpass": {
-                  "central_wavelength": 7865,
-                  "bandwidth": 4000,
-                  "filter_name": "TESS"
+                "min": 5865,
+                "max": 10565,
+                "peak_wavelength": 8865,
+                "unit": "angstrom",
+                "filter_name": "TESS_red"
               }
           },
           {
@@ -170,9 +182,11 @@
               "status": "planned",
               "type": "imaging",
               "bandpass": {
-                  "central_wavelength": 7865,
-                  "bandwidth": 4000,
-                  "filter_name": "TESS"
+                "min": 5865,
+                "max": 10565,
+                "peak_wavelength": 8865,
+                "unit": "angstrom",
+                "filter_name": "TESS_red"
               }
           },
           {
@@ -192,9 +206,11 @@
               "status": "planned",
               "type": "imaging",
               "bandpass": {
-                  "central_wavelength": 7865,
-                  "bandwidth": 4000,
-                  "filter_name": "TESS"
+                "min": 5865,
+                "max": 10565,
+                "peak_wavelength": 8865,
+                "unit": "angstrom",
+                "filter_name": "TESS_red"
               }
           }
       ]
