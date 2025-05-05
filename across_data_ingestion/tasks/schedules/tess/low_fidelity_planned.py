@@ -11,9 +11,9 @@ logger = logging.getLogger("uvicorn.error")
 
 SECONDS_IN_A_WEEK = 60 * 60 * 24 * 7
 TESS_BANDPASS = {
-    "min": 5865,
-    "max": 10565,
-    "peak_wavelength": 8865,
+    "min": 5820,
+    "max": 11080,
+    "peak_wavelength": 8580,
     "unit": "angstrom",
     "filter_name": "TESS_red",
 }
