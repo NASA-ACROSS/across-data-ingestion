@@ -1,0 +1,110 @@
+[
+    {
+        "telescope_id": "nustar_telescope_uuid",
+        "name": "nustar_as_flown_2025-05-04_2025-05-06",
+        "date_range": {
+            "begin": "2025-05-04T20:26:09.600",
+            "end": "2025-05-06T20:01:06.240"
+        },
+        "status": "performed",
+        "fidelity": "high",
+        "observations": [
+            {
+                "instrument_id": "nustar_instrument_uuid",
+                "object_name": "GX_1p4",
+                "pointing_position": {
+                    "ra": "263.0411",
+                    "dec": "-24.7155"
+                },
+                "date_range": {
+                    "begin": "2025-05-04T20:46:10.560",
+                    "end": "2025-05-05T07:41:05.280"
+                },
+                "external_observation_id": "31002031015",
+                "type": "timing",
+                "status": "performed",
+                "pointing_angle": 159.3491,
+                "exposure_time": 39294.71999995876,
+                "bandpass": {
+                    "filter_name": "NuSTAR",
+                    "min": 3.0,
+                    "max": 78.4,
+                    "type": "ENERGY",
+                    "unit": "keV"
+                }
+            },
+            {
+                "instrument_id": "nustar_instrument_uuid",
+                "object_name": "SGR_1935p2154",
+                "pointing_position": {
+                    "ra": "293.7577",
+                    "dec": "21.9405"
+                },
+                "date_range": {
+                    "begin": "2025-05-05T08:11:11.040",
+                    "end": "2025-05-06T08:11:11.040"
+                },
+                "external_observation_id": "31002033006",
+                "type": "timing",
+                "status": "performed",
+                "pointing_angle": 131.8833,
+                "exposure_time": 86400.0,
+                "bandpass": {
+                    "filter_name": "NuSTAR",
+                    "min": 3.0,
+                    "max": 78.4,
+                    "type": "ENERGY",
+                    "unit": "keV"
+                }
+            },
+            {
+                "instrument_id": "nustar_instrument_uuid",
+                "object_name": "SGR_1935p2154",
+                "pointing_position": {
+                    "ra": "293.7578",
+                    "dec": "21.9408"
+                },
+                "date_range": {
+                    "begin": "2025-05-05T07:41:05.280",
+                    "end": "2025-05-05T08:11:11.040"
+                },
+                "external_observation_id": "31002033005",
+                "type": "timing",
+                "status": "performed",
+                "pointing_angle": 132.1977,
+                "exposure_time": 1805.7599996449426,
+                "bandpass": {
+                    "filter_name": "NuSTAR",
+                    "min": 3.0,
+                    "max": 78.4,
+                    "type": "ENERGY",
+                    "unit": "keV"
+                }
+            },
+            {
+                "instrument_id": "nustar_instrument_uuid",
+                "object_name": "RBS707",
+                "pointing_position": {
+                    "ra": "128.0422",
+                    "dec": "37.0936"
+                },
+                "date_range": {
+                    "begin": "2025-05-06T08:56:06.720",
+                    "end": "2025-05-06T20:01:06.240"
+                },
+                "external_observation_id": "60061081002",
+                "type": "timing",
+                "status": "performed",
+                "pointing_angle": 344.5139,
+                "exposure_time": 39899.519999767654,
+                "bandpass": {
+                    "filter_name": "NuSTAR",
+                    "min": 3.0,
+                    "max": 78.4,
+                    "type": "ENERGY",
+                    "unit": "keV"
+                }
+            }
+        ]
+    }
+]
