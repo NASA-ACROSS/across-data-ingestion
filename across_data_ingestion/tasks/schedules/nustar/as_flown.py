@@ -1,17 +1,21 @@
-import logging
+import json
 from datetime import datetime, timedelta
+from typing import Literal, TypedDict
 
+import structlog
 from astropy.table import Table  # type: ignore[import-untyped]
 from astropy.time import Time  # type: ignore[import-untyped]
 from astroquery.heasarc import Heasarc  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
+from ....core import config, logging
+from ....core.constants import SECONDS_IN_A_DAY, SECONDS_IN_A_WEEK
+
 # from ....util import across_api # TODO: Uncomment when integrating with server
 
-logger = logging.getLogger("uvicorn.error")
+logging.setup(json_logs=config.LOG_JSON_FORMAT, log_level=config.LOG_LEVEL)
+logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
-SECONDS_IN_A_DAY = 60 * 60 * 24
-SECONDS_IN_A_WEEK = 60 * 60 * 24 * 7
 # Bandpass information found here: https://www.nustar.caltech.edu/page/optics
 NUSTAR_BANDPASS = {
     "filter_name": "NuSTAR",
@@ -22,6 +26,38 @@ NUSTAR_BANDPASS = {
 }
 
 
+class DateRange(TypedDict):
+    begin: str
+    end: str
+
+
+class PointingPosition(TypedDict):
+    ra: str
+    dec: str
+
+
+class Schedule(TypedDict):
+    telescope_id: str
+    name: str
+    date_range: DateRange
+    status: Literal["planned", "scheduled", "performed"]
+    fidelity: Literal["high", "low"]
+    observations: list
+
+
+class Observation(TypedDict):
+    instrument_id: str
+    object_name: str
+    pointing_position: PointingPosition
+    date_range: DateRange
+    external_observation_id: str
+    type: Literal["imaging", "spectroscopy", "timing"]
+    status: Literal["planned", "scheduled", "unscheduled", "performed", "aborted"]
+    pointing_angle: float
+    exposure_time: float
+    bandpass: dict
+
+
 def query_nustar_catalog(start_time: int) -> Table | None:
     """
     Queries the NuMASTER HEASARC catalog for all NuSTAR observations
@@ -29,15 +65,15 @@ def query_nustar_catalog(start_time: int) -> Table | None:
     """
     try:
         result = Heasarc.query_tap(f"SELECT * from numaster where time > {start_time}")
-    except ValueError:
-        logger.error(f"{__name__}: Could not query for NUMASTER catalog on HEASARC")
-        return None
-    except Exception:
-        # We got an unexpected error
-        logger.error(
-            f"{__name__}: Reading NuSTAR HEASARC catalog unexpectedly failed",
-            exc_info=True,
+    except ValueError as err:
+        logger.warn(
+            "Could not query for NuMASTER catalog on HEASARC",
+            start_time=start_time,
+            err=err,
         )
+        return None
+    except Exception as err:
+        logger.error("Reading NuSTAR HEASARC catalog unexpectedly failed", err=err)
         return None
 
     table = result.to_table()
@@ -45,9 +81,7 @@ def query_nustar_catalog(start_time: int) -> Table | None:
     return table
 
 
-def create_schedule(
-    telescope_id: str, data: Table
-) -> dict[str, str | dict[str, str] | list]:
+def create_schedule(telescope_id: str, data: Table) -> Schedule | dict:
     if len(data) == 0:
         # Empty schedule, return
         return {}
@@ -67,8 +101,8 @@ def create_schedule(
     }
 
 
-def create_observation(instrument_id: str, row: Table.Row):
-    obs = {
+def transform_to_across_observation(instrument_id: str, row: Table.Row) -> Observation:
+    return {
         "instrument_id": instrument_id,
         "object_name": f"{row["name"]}",
         "pointing_position": {
@@ -86,10 +120,9 @@ def create_observation(instrument_id: str, row: Table.Row):
         "exposure_time": float(row["end_time"] - row["time"]) * SECONDS_IN_A_DAY,
         "bandpass": NUSTAR_BANDPASS,
     }
-    return obs
 
 
-def ingest() -> list | None:
+def ingest() -> None:
     """
     Method that POSTs NuSTAR as-flown observing schedules to the ACROSS server
     Queries completed observations via the HEASARC `NUMASTER` catalog
@@ -97,9 +130,9 @@ def ingest() -> list | None:
     last_week = datetime.now() - timedelta(days=7)
     last_week_mjd = Time(last_week).mjd
 
-    observation_table = query_nustar_catalog(last_week_mjd)
-    if observation_table is None:
-        logger.error(f"{__name__}: Could not query NuSTAR observations from HEASARC")
+    nustar_observation_data = query_nustar_catalog(last_week_mjd)
+    if nustar_observation_data is None:
+        logger.error("Could not query NuSTAR observations from HEASARC")
         return None
 
     # Get telescope and instrument IDs
@@ -107,37 +140,35 @@ def ingest() -> list | None:
     instrument_id = "nustar_instrument_uuid"
 
     # Initialize list of schedules to append
-    schedules: list[dict] = []
+    schedules: list[Schedule | dict] = []
 
-    schedule = create_schedule(telescope_id, observation_table)
+    schedule = create_schedule(telescope_id, nustar_observation_data)
+
     if not schedule:
         # No observations found for the queried time range, return empty list
-        logger.warning(
-            f"{__name__}: Empty table returned from HEASARC NUMASTER catalog"
-        )
-        return schedules
-    observations: list[dict] = []
-    for row in observation_table:
+        logger.warn("Empty table returned from HEASARC NUMASTER catalog")
+        return None
+    observations: list[Observation] = []
+
+    for row in nustar_observation_data:
         if row["observation_mode"] == "SCIENCE":
-            obs = create_observation(instrument_id, row)
+            obs = transform_to_across_observation(instrument_id, row)
             observations.append(obs)
 
     schedule["observations"] = observations
-    logger.info(schedule)  # TODO: POST to the API endpoint
+    logger.info(json.dumps(schedule))  # TODO: POST to the API endpoint
     schedules.append(schedule)
 
-    return schedules
+    return None
 
 
 @repeat_every(seconds=SECONDS_IN_A_WEEK)  # Weekly
 def entrypoint() -> None:
-    current_time = Time.now()
-
     try:
         ingest()
-        logger.info(f"{__name__} ran at {current_time}")
+        logger.info("NuSTAR as-flown schedule ingestion completed.")
         return
     except Exception as e:
         # Surface the error through logging, if we do not catch everything and log, the errors get voided
-        logger.error(f"{__name__} encountered an error {e} at {current_time}")
+        logger.error("NuSTAR as-flown schedule ingestion encountered an error", err=e)
         return

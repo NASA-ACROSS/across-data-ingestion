@@ -38,11 +38,14 @@ class TestNustarAsFlownScheduleIngestionTask:
             ],
         ), patch(
             "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ):
-            schedules = ingest()
+        ), patch(
+            "across_data_ingestion.tasks.schedules.nustar.as_flown.logger"
+        ) as log_mock:
+            ingest()
+            schedules = log_mock.info.call_args.args[0]
             with open(mock_output_schedule_file) as expected_output_file:
                 expected = json.load(expected_output_file)
-                assert json.dumps(schedules) == json.dumps(expected)
+                assert [json.loads(schedules)] == expected
 
     def test_should_generate_observations_with_schedule(self):
         """Should generate list of observations with an ACROSS schedule"""
@@ -61,9 +64,12 @@ class TestNustarAsFlownScheduleIngestionTask:
             ],
         ), patch(
             "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ):
-            schedules = ingest()
-            assert len(schedules[0]["observations"]) > 0
+        ), patch(
+            "across_data_ingestion.tasks.schedules.nustar.as_flown.logger"
+        ) as log_mock:
+            ingest()
+            schedules = log_mock.info.call_args.args[0]
+            assert len(json.loads(schedules)["observations"]) > 0
 
     def test_query_nustar_catalog_should_return_astropy_table_when_successful(self):
         """Should return an astropy Table when successfully querying NuSTAR catalog"""
@@ -94,7 +100,7 @@ class TestNustarAsFlownScheduleIngestionTask:
             side_effect=ValueError(),
         ):
             query_nustar_catalog(self.mock_start_time)
-            assert "Could not query" in log_mock.error.call_args.args[0]
+            assert "Could not query" in log_mock.warn.call_args.args[0]
 
     def test_query_nustar_catalog_should_log_error_when_unexpected_error_raised(self):
         """Should log error when querying the NUMASTER catalog raises an unexpected error"""
@@ -150,7 +156,7 @@ class TestNustarAsFlownScheduleIngestionTask:
             return_value={},
         ):
             ingest()
-            assert "Empty table" in log_mock.warning.call_args.args[0]
+            assert "Empty table" in log_mock.warn.call_args.args[0]
 
     def test_should_log_error_when_query_nustar_catalog_returns_none(self):
         """Should log an error when NUMASTER query returns None"""
@@ -184,7 +190,7 @@ class TestNustarAsFlownScheduleIngestionTask:
             "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ):
             entrypoint()
-            assert "ran at" in log_mock.info.call_args.args[0]
+            assert "ingestion completed" in log_mock.info.call_args.args[0]
 
     def test_should_log_error_when_schedule_ingestion_fails(self):
         """Should log an error when schedule ingestion fails"""
