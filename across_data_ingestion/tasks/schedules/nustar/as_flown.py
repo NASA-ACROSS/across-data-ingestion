@@ -8,12 +8,10 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from astroquery.heasarc import Heasarc  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
-from ....core import config, logging
 from ....core.constants import SECONDS_IN_A_DAY, SECONDS_IN_A_WEEK
 
 # from ....util import across_api # TODO: Uncomment when integrating with server
 
-logging.setup(json_logs=config.LOG_JSON_FORMAT, log_level=config.LOG_LEVEL)
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
 # Bandpass information found here: https://www.nustar.caltech.edu/page/optics
@@ -36,7 +34,7 @@ class PointingPosition(TypedDict):
     dec: str
 
 
-class Schedule(TypedDict):
+class AcrossSchedule(TypedDict):
     telescope_id: str
     name: str
     date_range: DateRange
@@ -45,7 +43,7 @@ class Schedule(TypedDict):
     observations: list
 
 
-class Observation(TypedDict):
+class AcrossObservation(TypedDict):
     instrument_id: str
     object_name: str
     pointing_position: PointingPosition
@@ -81,7 +79,7 @@ def query_nustar_catalog(start_time: int) -> Table | None:
     return table
 
 
-def create_schedule(telescope_id: str, data: Table) -> Schedule | dict:
+def create_schedule(telescope_id: str, data: Table) -> AcrossSchedule | dict:
     if len(data) == 0:
         # Empty schedule, return
         return {}
@@ -101,7 +99,7 @@ def create_schedule(telescope_id: str, data: Table) -> Schedule | dict:
     }
 
 
-def transform_to_across_observation(instrument_id: str, row: Table.Row) -> Observation:
+def transform_to_observation(instrument_id: str, row: Table.Row) -> AcrossObservation:
     return {
         "instrument_id": instrument_id,
         "object_name": f"{row["name"]}",
@@ -140,7 +138,7 @@ def ingest() -> None:
     instrument_id = "nustar_instrument_uuid"
 
     # Initialize list of schedules to append
-    schedules: list[Schedule | dict] = []
+    schedules: list[AcrossSchedule | dict] = []
 
     schedule = create_schedule(telescope_id, nustar_observation_data)
 
@@ -148,12 +146,12 @@ def ingest() -> None:
         # No observations found for the queried time range, return empty list
         logger.warn("Empty table returned from HEASARC NUMASTER catalog")
         return None
-    observations: list[Observation] = []
+    observations: list[AcrossObservation] = []
 
     for row in nustar_observation_data:
         if row["observation_mode"] == "SCIENCE":
-            obs = transform_to_across_observation(instrument_id, row)
-            observations.append(obs)
+            across_observation = transform_to_observation(instrument_id, row)
+            observations.append(across_observation)
 
     schedule["observations"] = observations
     logger.info(json.dumps(schedule))  # TODO: POST to the API endpoint
