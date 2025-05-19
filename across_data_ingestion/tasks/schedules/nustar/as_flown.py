@@ -8,7 +8,7 @@ from astroquery.heasarc import Heasarc  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
 from ....core.constants import SECONDS_IN_A_DAY, SECONDS_IN_A_WEEK
-from ....core.types import AcrossObservation, AcrossSchedule
+from ..types import AcrossObservation, AcrossSchedule
 
 # from ....util import across_api # TODO: Uncomment when integrating with server
 
