@@ -47,7 +47,12 @@ class TestFermiLATPlannedScheduleIngestionTask:
             return_value=[
                 {
                     "id": "fermi_lat_telescope_uuid",
-                    "instruments": [{"id": "fermi_lat_instrument_uuid"}],
+                    "instruments": [
+                        {
+                            "id": "fermi_lat_instrument_uuid",
+                            "name": "Large Area Telescope",
+                        }
+                    ],
                 }
             ],
         ), patch(
@@ -81,7 +86,12 @@ class TestFermiLATPlannedScheduleIngestionTask:
             return_value=[
                 {
                     "id": "fermi_lat_telescope_uuid",
-                    "instruments": [{"id": "fermi_lat_instrument_uuid"}],
+                    "instruments": [
+                        {
+                            "id": "fermi_lat_instrument_uuid",
+                            "name": "Large Area Telescope",
+                        }
+                    ],
                 }
             ],
         ), patch(
@@ -113,7 +123,12 @@ class TestFermiLATPlannedScheduleIngestionTask:
             return_value=[
                 {
                     "id": "fermi_lat_telescope_uuid",
-                    "instruments": [{"id": "fermi_lat_instrument_uuid"}],
+                    "instruments": [
+                        {
+                            "id": "fermi_lat_instrument_uuid",
+                            "name": "Large Area Telescope",
+                        }
+                    ],
                 }
             ],
         ), patch(
@@ -190,7 +205,12 @@ class TestFermiLATPlannedScheduleIngestionTask:
             return_value=[
                 {
                     "id": "fermi_lat_telescope_uuid",
-                    "instruments": [{"id": "fermi_lat_instrument_uuid"}],
+                    "instruments": [
+                        {
+                            "id": "fermi_lat_instrument_uuid",
+                            "name": "Large Area Telescope",
+                        }
+                    ],
                 }
             ],
         ), patch(
@@ -219,7 +239,12 @@ class TestFermiLATPlannedScheduleIngestionTask:
             return_value=[
                 {
                     "id": "fermi_lat_telescope_uuid",
-                    "instruments": [{"id": "fermi_lat_instrument_uuid"}],
+                    "instruments": [
+                        {
+                            "id": "fermi_lat_instrument_uuid",
+                            "name": "Large Area Telescope",
+                        }
+                    ],
                 }
             ],
         ), patch(
@@ -241,7 +266,12 @@ class TestFermiLATPlannedScheduleIngestionTask:
             return_value=[
                 {
                     "id": "fermi_lat_telescope_uuid",
-                    "instruments": [{"id": "fermi_lat_instrument_uuid"}],
+                    "instruments": [
+                        {
+                            "id": "fermi_lat_instrument_uuid",
+                            "name": "Large Area Telescope",
+                        }
+                    ],
                 }
             ],
         ), patch(
@@ -268,7 +298,12 @@ class TestFermiLATPlannedScheduleIngestionTask:
             return_value=[
                 {
                     "id": "fermi_lat_telescope_uuid",
-                    "instruments": [{"id": "fermi_lat_instrument_uuid"}],
+                    "instruments": [
+                        {
+                            "id": "fermi_lat_instrument_uuid",
+                            "name": "Large Area Telescope",
+                        }
+                    ],
                 }
             ],
         ), patch(
@@ -301,7 +336,12 @@ class TestFermiLATPlannedScheduleIngestionTask:
             return_value=[
                 {
                     "id": "fermi_lat_telescope_uuid",
-                    "instruments": [{"id": "fermi_lat_instrument_uuid"}],
+                    "instruments": [
+                        {
+                            "id": "fermi_lat_instrument_uuid",
+                            "name": "Large Area Telescope",
+                        }
+                    ],
                 }
             ],
         ), patch(

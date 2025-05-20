@@ -14,7 +14,7 @@ from fastapi_utils.tasks import repeat_every
 
 from ....core.constants import SECONDS_IN_A_WEEK
 
-# from ....util import across_api # TODO: Uncomment when integrating with server
+from ....util import across_api
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -175,14 +175,11 @@ def ingest() -> list | None:
     current_fermi_week = int(np.floor((Time(now).jd - FERMI_JD_WEEK_23) / 7 + 23))
 
     # GET Telescope by name
-    # TODO: Add Fermi observatory migration to server and uncomment the following lines
-    # fermi_telescope_info = across_api.telescope.get({"name": "fermi_lat"})[0]
-    # telescope_id = fermi_telescope_info["id"]
-    # instrument_id = fermi_telescope_info["instruments"][0]["id"]
-
-    # For now they're hardcoded
-    telescope_id = "fermi_lat_telescope_uuid"
-    instrument_id = "fermi_lat_instrument_uuid"
+    lat_telescope_info = across_api.telescope.get({"name": "lat"})[0]
+    telescope_id = lat_telescope_info["id"]
+    for instrument in lat_telescope_info["instruments"]:
+        if instrument["name"] == "Large Area Telescope":
+            instrument_id = instrument["id"]
 
     # Initialize list of schedules to append
     schedules = []
@@ -229,7 +226,7 @@ def ingest() -> list | None:
             observations.append(observation)
 
         schedule["observations"] = observations
-        logger.info(schedule)  # TODO: POST to the API endpoint
+        across_api.schedule.post(schedule)
         schedules.append(schedule)
 
     return schedules
