@@ -12,11 +12,12 @@ from astropy.table import Row, Table  # type: ignore[import-untyped]
 from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
+from ....core.constants import SECONDS_IN_A_WEEK
+
 # from ....util import across_api # TODO: Uncomment when integrating with server
 
 logger = logging.getLogger("uvicorn.error")
 
-SECONDS_IN_A_WEEK = 60 * 60 * 24 * 7
 FERMI_LAT_POINTING_FILE_BASE_PATH = (
     "https://fermi.gsfc.nasa.gov/ssc/observations/timeline/ft2/files/"
 )

@@ -5,11 +5,11 @@ import pandas as pd
 from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
+from ....core.constants import SECONDS_IN_A_WEEK
 from ....util import across_api
 
 logger = logging.getLogger("uvicorn.error")
 
-SECONDS_IN_A_WEEK = 60 * 60 * 24 * 7
 TESS_BANDPASS = {
     "min": 6000,
     "max": 10000,
