@@ -7,7 +7,7 @@ from ....core.exceptions import AcrossHTTPException  # type: ignore[import-untyp
 
 logger = logging.getLogger("uvicorn.error")
 
-SCHEDULE_URL: str = f"{config.ACROSS_SERVER_URL}schedule/"
+SCHEDULE_URL: str = f"{config.across_server_url()}/schedule"
 
 
 def post(data: dict = {}) -> None:
