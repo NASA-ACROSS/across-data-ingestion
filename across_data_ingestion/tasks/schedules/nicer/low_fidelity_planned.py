@@ -1,6 +1,5 @@
-import logging
-
 import pandas as pd
+import structlog
 from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
@@ -8,7 +7,7 @@ from ....core.constants import SECONDS_IN_A_WEEK
 from ....util import across_api
 from ..types import AcrossObservation, AcrossSchedule
 
-logger = logging.getLogger("uvicorn.error")
+logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
 NICER_BANDPASS = {
     "min": 0.2,
@@ -98,13 +97,13 @@ def ingest(schedule_modes: list[str] = ["Scheduled"]) -> AcrossSchedule | dict:
     """
     nicer_df = query_nicer_catalog()
     if nicer_df is None:
-        logger.error("Failed to read NICER timeline file")
+        logger.warn("Failed to read NICER timeline file")
         return {}
 
     # Only get planned observations
     nicer_planned = nicer_df.loc[nicer_df["Mode"].isin(schedule_modes)]
     if nicer_planned.empty:
-        logger.info(f"No {schedule_modes} observations found in NICER timeline file.")
+        logger.warn(f"No {schedule_modes} observations found in NICER timeline file.")
         return {}
 
     # GET Telescope by name

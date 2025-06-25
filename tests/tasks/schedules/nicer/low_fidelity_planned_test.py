@@ -122,7 +122,7 @@ class TestNicerLowFidelityScheduleIngestionTask:
         ):
             ingest()
             assert (
-                "Failed to read NICER timeline file" in log_mock.error.call_args.args[0]
+                "Failed to read NICER timeline file" in log_mock.warn.call_args.args[0]
             )
 
     def test_should_return_empty_dict_when_no_schedule_modes(self):

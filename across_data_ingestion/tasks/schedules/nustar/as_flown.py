@@ -75,6 +75,10 @@ def transform_to_observation(instrument_id: str, row: Table.Row) -> AcrossObserv
             "ra": f"{row["ra"]}",
             "dec": f"{row["dec"]}",
         },
+        "object_position": {
+            "ra": f"{row["ra"]}",
+            "dec": f"{row["dec"]}",
+        },
         "date_range": {
             "begin": Time(f"{row['time']}", format="mjd").isot,
             "end": Time(f"{row["end_time"]}", format="mjd").isot,

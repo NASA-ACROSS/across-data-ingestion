@@ -1,5 +1,7 @@
 from typing import Literal, TypedDict
 
+from typing_extensions import NotRequired
+
 
 class DateRange(TypedDict):
     begin: str
@@ -24,7 +26,7 @@ class AcrossObservation(TypedDict):
     instrument_id: str
     object_name: str
     pointing_position: Position
-    object_position: Position | None
+    object_position: NotRequired[Position | None]
     date_range: DateRange
     external_observation_id: str
     type: Literal["imaging", "spectroscopy", "timing"]
