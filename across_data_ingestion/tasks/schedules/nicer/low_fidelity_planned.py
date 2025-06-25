@@ -25,7 +25,6 @@ NICER_TIMELINE_FILE = (
 def query_nicer_catalog() -> pd.DataFrame | None:
     """
     Queries the NICER HEASARC catalog for all NICER observations
-    beginning after the input `start_time`
     """
     try:
         df = pd.read_csv(NICER_TIMELINE_FILE)
@@ -38,6 +37,9 @@ def query_nicer_catalog() -> pd.DataFrame | None:
 def nicer_schedule(
     telescope_id: str, data: pd.DataFrame, status: str, fidelity: str
 ) -> AcrossSchedule | dict:
+    """
+    Creates a NICER schedule from the provided data.
+    If the data is empty, it returns an empty dictionary."""
     if len(data) == 0:
         # Empty schedule, return
         return {}
@@ -58,6 +60,9 @@ def nicer_schedule(
 
 
 def nicer_observation(instrument_id: str, row: dict) -> AcrossObservation:
+    """
+    Creates a NICER observation from the provided row of data.
+    """
     return {
         "instrument_id": instrument_id,
         "object_name": f"{row["Target"]}",
