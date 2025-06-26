@@ -32,7 +32,7 @@ class Config(BaseConfig):
         return f"{self.HOST}:{self.PORT}{self.ROOT_PATH}"
 
     def across_server_url(self):
-        return f"{self.ACROSS_SERVER_HOST}:{self.ACROSS_SERVER_PORT}/{self.ACROSS_SERVER_ROOT_PATH}/{self.ACROSS_SERVER_VERSION}"
+        return f"{self.ACROSS_SERVER_HOST}:{self.ACROSS_SERVER_PORT}{self.ACROSS_SERVER_ROOT_PATH}{self.ACROSS_SERVER_VERSION}"
 
 
 config = Config()

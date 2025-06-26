@@ -5,7 +5,7 @@ import httpx
 from ....core.config import config  # type: ignore[import-untyped]
 from ....core.exceptions import AcrossHTTPException  # type: ignore[import-untyped]
 
-TELESCOPE_URL: str = f"{config.across_server_url()}/telescope"
+TELESCOPE_URL: str = f"{config.across_server_url()}/telescope/"
 
 
 def get(params: dict = {}) -> list[dict]:
