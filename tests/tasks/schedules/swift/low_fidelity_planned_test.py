@@ -3,7 +3,7 @@ import os
 from unittest.mock import patch
 
 from across_data_ingestion.tasks.schedules.swift.low_fidelity_planned import (
-    CustomSwiftEntry,
+    CustomSwiftObsEntry,
     CustomUVOTModeEntry,
     entrypoint,
     ingest,
@@ -25,7 +25,7 @@ class CustomSwiftUVOTMode:
         pass
 
 
-def read_test_swift_data(file_path: str) -> list[CustomSwiftEntry]:
+def read_test_swift_data(file_path: str) -> list[CustomSwiftObsEntry]:
     """
     Helper function to read test data from a json file.
     """
@@ -33,7 +33,7 @@ def read_test_swift_data(file_path: str) -> list[CustomSwiftEntry]:
     with open(file_path, "r") as file:
         data = json.load(file)
 
-    return [CustomSwiftEntry(**entry) for entry in data]
+    return [CustomSwiftObsEntry(**entry) for entry in data]
 
 
 def read_test_uvot_data(file_path: str) -> dict[str, list[CustomUVOTModeEntry]]:
@@ -120,7 +120,7 @@ class TestSwiftLowFidelityScheduleIngestionTask:
             ),
         ):
             data = query_swift_plan()
-            assert isinstance(data[0], CustomSwiftEntry)
+            assert isinstance(data[0], CustomSwiftObsEntry)
 
     def test_query_swift_catalog_should_return_none_if_query_fails(self):
         """Should return None if querying Swift catalog fails"""
