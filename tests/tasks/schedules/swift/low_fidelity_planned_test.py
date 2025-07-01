@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import timedelta
 from unittest.mock import patch
 
 from across_data_ingestion.tasks.schedules.swift.low_fidelity_planned import (
@@ -25,15 +26,21 @@ class CustomSwiftUVOTMode:
         pass
 
 
-def read_test_swift_data(file_path: str) -> list[CustomSwiftObsEntry]:
+def read_test_swift_data(
+    file_path: str, exposure_time_as_timedelta: bool = False
+) -> list[CustomSwiftObsEntry]:
     """
     Helper function to read test data from a json file.
     """
 
     with open(file_path, "r") as file:
         data = json.load(file)
-
-    return [CustomSwiftObsEntry(**entry) for entry in data]
+    ret = []
+    for entry in data:
+        if exposure_time_as_timedelta:
+            entry["exposure"] = timedelta(seconds=entry["exposure"])
+        ret.append(CustomSwiftObsEntry(**entry))
+    return ret
 
 
 def read_test_uvot_data(file_path: str) -> dict[str, list[CustomUVOTModeEntry]]:
@@ -116,7 +123,8 @@ class TestSwiftLowFidelityScheduleIngestionTask:
         with patch(
             "swifttools.swift_too.PlanQuery",
             return_value=read_test_swift_data(
-                self.mock_file_base_path + self.mock_observation_table
+                self.mock_file_base_path + self.mock_observation_table,
+                exposure_time_as_timedelta=True,
             ),
         ):
             data = query_swift_plan()

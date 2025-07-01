@@ -112,7 +112,7 @@ class CustomSwiftObsEntry:
             dec=entry.dec,
             begin=Time(entry.begin).isot,
             end=Time(entry.end).isot,
-            exposure=entry.exposure,
+            exposure=entry.exposure.seconds,
             roll=entry.roll,
             uvot=entry.uvot,
             bat=entry.bat,
@@ -151,9 +151,13 @@ def swift_uvot_mode_dict(modes: list[str]) -> dict[str, list[CustomUVOTModeEntry
     # import json
     uvot_mode_dict = {}
     for mode in modes:
+        entries = swift_too.UVOTMode(mode).entries
+
+        if not entries:
+            continue
+
         uvot_mode_dict[mode] = [
-            CustomUVOTModeEntry.from_entry(mode_entry)
-            for mode_entry in swift_too.UVOTMode(mode).entries
+            CustomUVOTModeEntry.from_entry(mode_entry) for mode_entry in entries
         ]
 
     test = {}
@@ -345,6 +349,7 @@ def ingest(days_in_future: int = 4) -> list[AcrossSchedule | dict]:
 
     swift_uvot_schedule["observations"] = uvot_schedule_observations
 
+    # Post the schedules to the ACROSS API
     across_api.schedule.post(dict(swift_xrt_schedule))
     across_api.schedule.post(dict(swift_bat_schedule))
     across_api.schedule.post(dict(swift_uvot_schedule))
