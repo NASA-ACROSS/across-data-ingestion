@@ -1,16 +1,12 @@
 from datetime import datetime, timedelta, timezone
-from typing import Literal
+from typing import Any, Callable, Literal
 
 import structlog
 from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
-from swifttools import swift_too  # type: ignore[import-untyped]
-from swifttools.swift_too.swift_planquery import (  # type: ignore[import-untyped]
-    PPSTEntry,
-)
-from swifttools.swift_too.swift_uvot import (  # type: ignore[import-untyped]
-    UVOTModeEntry,
-)
+from swifttools import swift_too  # type: ignore
+from swifttools.swift_too.swift_planquery import PPSTEntry  # type: ignore
+from swifttools.swift_too.swift_uvot import UVOTModeEntry  # type: ignore
 
 from ....core.constants import SECONDS_IN_A_DAY
 from ....util import across_api
@@ -69,7 +65,7 @@ class CustomUVOTModeEntry:
         """
         Converts a UVOTModeEntry to a CustomUVOTModeEntry.
         """
-        return cls(filter_name=entry.filter_name, weight=entry.weight)
+        return cls(filter_name=str.lower(entry.filter_name), weight=entry.weight)
 
 
 class CustomSwiftObsEntry:
@@ -165,7 +161,7 @@ def swift_uvot_mode_dict(modes: list[str]) -> dict[str, list[CustomUVOTModeEntry
     return uvot_mode_dict
 
 
-def swift_schedule(
+def swift_to_across_schedule(
     telescope_id: str, telescope_short_name: str, data: list[CustomSwiftObsEntry]
 ) -> AcrossSchedule | dict:
     begins = [obs.begin for obs in data]
@@ -186,71 +182,56 @@ def swift_schedule(
     }
 
 
-def swift_observation(
+def swift_to_across_observation(
     instrument_id: str,
-    row: CustomSwiftObsEntry,
+    observation: CustomSwiftObsEntry,
     bandpass: dict,
     observation_type: Literal["imaging", "spectroscopy", "timing"],
     exposure_time: float,
 ) -> AcrossObservation:
     return {
         "instrument_id": instrument_id,
-        "object_name": row.targname,
+        "object_name": observation.targname,
         "pointing_position": {
-            "ra": row.ra,
-            "dec": row.dec,
+            "ra": observation.ra,
+            "dec": observation.dec,
         },
         "object_position": {
-            "ra": row.ra,
-            "dec": row.dec,
+            "ra": observation.ra,
+            "dec": observation.dec,
         },
         "date_range": {
-            "begin": Time(row.begin).isot,
-            "end": Time(row.end).isot,
+            "begin": Time(observation.begin).isot,
+            "end": Time(observation.end).isot,
         },
-        "external_observation_id": row.obsid,
+        "external_observation_id": observation.obsid,
         "type": observation_type,
         "status": "planned",
-        "pointing_angle": row.roll,
+        "pointing_angle": observation.roll,
         "exposure_time": exposure_time,
         "bandpass": bandpass,
     }
 
 
-def create_swift_across_schedule(
-    telescope_name: str,
+def create_observations(
+    instrument_id: str,
     observation_data: list[CustomSwiftObsEntry],
+    bandpass: dict,
     observation_type: Literal["imaging", "spectroscopy", "timing"],
-    bandpass: dict = {},
-    do_uvot: bool = False,
-) -> AcrossSchedule | dict:
-    # Get the swift xrt telescope ids along with their instrument ids
-    telescope_info = across_api.telescope.get({"name": telescope_name})[0]
-    telescope_id = telescope_info["id"]
-    instrument_id = telescope_info["instruments"][0]["id"]
+) -> list[AcrossObservation]:
+    return [
+        swift_to_across_observation(
+            instrument_id, obs, bandpass, observation_type, obs.exposure
+        )
+        for obs in observation_data
+    ]
 
-    # Create the schedule for Swift XRT
-    schedule = swift_schedule(
-        telescope_id=telescope_id,
-        telescope_short_name=telescope_name,
-        data=observation_data,
-    )
 
-    if not do_uvot:
-        # Create observations for Swift XRT
-        schedule["observations"] = [
-            swift_observation(
-                instrument_id=instrument_id,
-                row=obs,
-                bandpass=bandpass,
-                observation_type=observation_type,
-                exposure_time=obs.exposure,
-            )
-            for obs in observation_data
-        ]
-
-        return schedule
-
+def create_uvot_observations(
+    instrument_id: str,
+    observation_data: list[CustomSwiftObsEntry],
+    *kwargs: dict[str, Any],
+):
     # Aggregate unique uvot modes
     uvot_modes = list(set([obs.uvot for obs in observation_data]))
 
@@ -259,49 +240,80 @@ def create_swift_across_schedule(
     uvot_mode_dict = swift_uvot_mode_dict(uvot_modes)
 
     uvot_schedule_observations = []
-    for obs in observation_data:
-        # Get the UVOT observations from the uvot mode
-        if obs.uvot not in uvot_mode_dict:
-            logger.warn(
-                f"UVOT: {obs.uvot} not found in uvot_mode_dict, skipping observations for this mode."
-            )
-            continue
 
-        swift_uvot_observations = uvot_mode_dict[obs.uvot]
+    observations = [obs for obs in observation_data if obs.uvot in uvot_mode_dict]
+
+    for obs_data in observations:
+        swift_uvot_observations = uvot_mode_dict[obs_data.uvot]
 
         # Calculate the total weight of all UVOT observations to normalize exposure times
         observation_total_weight = sum(
-            entry.weight for entry in swift_uvot_observations if entry.weight
+            uvot_obs.weight for uvot_obs in swift_uvot_observations if uvot_obs.weight
         )
 
-        for uvot_observation in swift_uvot_observations:
-            # If the filter name is not in the SWIFT_UVOT_BANDPASS_DICT, skip the observation
-            if uvot_observation.filter_name not in SWIFT_UVOT_BANDPASS_DICT:
-                logger.warn(
-                    f"UVOT: {obs.uvot} filter {uvot_observation.filter_name} not found in SWIFT_UVOT_BANDPASS_DICT, skipping."
-                )
-            else:
-                # Calculate exposure time factor based on the weight of the observation
-                exposure_time_factor = (
-                    uvot_observation.weight / observation_total_weight
-                )
+        unknown_filter_observations = [
+            uvot_obs
+            for uvot_obs in swift_uvot_observations
+            if uvot_obs.filter_name not in SWIFT_UVOT_BANDPASS_DICT
+        ]
+        known_filter_observations = [
+            uvot_obs
+            for uvot_obs in swift_uvot_observations
+            if uvot_obs.filter_name in SWIFT_UVOT_BANDPASS_DICT
+        ]
 
-                uvot_schedule_observations.append(
-                    swift_observation(
-                        instrument_id=instrument_id,
-                        row=obs,
-                        bandpass=SWIFT_UVOT_BANDPASS_DICT[uvot_observation.filter_name],
-                        observation_type="imaging",
-                        exposure_time=obs.exposure * exposure_time_factor,
-                    )
-                )
+        for uvot_obs in unknown_filter_observations:
+            logger.warn(
+                "Skipping observation, filter not found.",
+                uvot=obs_data.uvot,
+                filter=uvot_obs.filter_name,
+            )
 
-    schedule["observations"] = uvot_schedule_observations
+        for uvot_obs in known_filter_observations:
+            # Calculate exposure time factor based on the weight of the observation
+            exposure_time_factor = uvot_obs.weight / observation_total_weight
+
+            uvot_schedule_observations.append(
+                swift_to_across_observation(
+                    instrument_id=instrument_id,
+                    observation=obs_data,
+                    bandpass=SWIFT_UVOT_BANDPASS_DICT[uvot_obs.filter_name],
+                    observation_type="imaging",
+                    exposure_time=obs_data.exposure * exposure_time_factor,
+                )
+            )
+
+    return uvot_schedule_observations
+
+
+def create_swift_across_schedule(
+    telescope_name: str,
+    observation_data: list[CustomSwiftObsEntry],
+    observation_type: Literal["imaging", "spectroscopy", "timing"],
+    create_observations: Callable = create_observations,
+    bandpass: dict = {},
+) -> AcrossSchedule | dict:
+    telescope_info = across_api.telescope.get({"name": telescope_name})[0]
+    telescope_id = telescope_info["id"]
+    instrument_id = telescope_info["instruments"][0]["id"]
+
+    schedule = swift_to_across_schedule(
+        telescope_id=telescope_id,
+        telescope_short_name=telescope_name,
+        data=observation_data,
+    )
+
+    schedule["observations"] = create_observations(
+        instrument_id,
+        observation_data,
+        bandpass,
+        observation_type,
+    )
 
     return schedule
 
 
-def ingest(days_in_future: int = 4) -> list[AcrossSchedule | dict]:
+def ingest(days_in_future: int = 4) -> None:
     """
     Method that POSTs Swift low fidelity planned observing schedules to the ACROSS server
     For the Swift Observatory, this includes the XRT, BAT, and UVOT Telescopes.
@@ -316,7 +328,7 @@ def ingest(days_in_future: int = 4) -> list[AcrossSchedule | dict]:
     swift_observation_data = query_swift_plan(days_in_future)
     if swift_observation_data is None:
         logger.warn("Failed to query Swift planned observations.")
-        return [{}]
+        return
 
     # XRT
     swift_xrt_schedule = create_swift_across_schedule(
@@ -324,6 +336,7 @@ def ingest(days_in_future: int = 4) -> list[AcrossSchedule | dict]:
         observation_data=swift_observation_data,
         bandpass=SWIFT_XRT_BANDPASS,
         observation_type="spectroscopy",
+        create_observations=create_observations,
     )
 
     # BAT
@@ -332,6 +345,7 @@ def ingest(days_in_future: int = 4) -> list[AcrossSchedule | dict]:
         observation_data=swift_observation_data,
         bandpass=SWIFT_BAT_BANDPASS,
         observation_type="imaging",
+        create_observations=create_observations,
     )
 
     # UVOT
@@ -339,15 +353,13 @@ def ingest(days_in_future: int = 4) -> list[AcrossSchedule | dict]:
         telescope_name="swift_uvot",
         observation_data=swift_observation_data,
         observation_type="imaging",
-        do_uvot=True,
+        create_observations=create_uvot_observations,
     )
 
     # Post the schedules to the ACROSS API
     across_api.schedule.post(swift_xrt_schedule)
     across_api.schedule.post(swift_bat_schedule)
     across_api.schedule.post(swift_uvot_schedule)
-
-    return [swift_xrt_schedule, swift_bat_schedule, swift_uvot_schedule]
 
 
 @repeat_every(seconds=1 * SECONDS_IN_A_DAY)  # daily

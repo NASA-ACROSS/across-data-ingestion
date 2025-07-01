@@ -1,5 +1,5 @@
 from datetime import timedelta
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from across_data_ingestion.tasks.schedules.swift.low_fidelity_planned import (
     CustomSwiftObsEntry,
@@ -7,7 +7,7 @@ from across_data_ingestion.tasks.schedules.swift.low_fidelity_planned import (
     entrypoint,
     ingest,
     query_swift_plan,
-    swift_schedule,
+    swift_to_across_schedule,
     swift_uvot_mode_dict,
 )
 
@@ -57,7 +57,7 @@ def mock_swift_uvot_modes() -> dict[str, list[CustomUVOTModeEntry]]:
 
 
 class TestSwiftLowFidelityScheduleIngestionTask:
-    def test_should_generate_across_schedules(self):
+    def test_should_generate_across_schedules(self, mock_schedule_post: Mock):
         """Should generate ACROSS schedules"""
 
         with patch(
@@ -74,33 +74,12 @@ class TestSwiftLowFidelityScheduleIngestionTask:
         ), patch(
             "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.swift_uvot_mode_dict",
             return_value=mock_swift_uvot_modes(),
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ):
-            schedules = ingest()
-            assert schedules == swift_low_fidelity_planned_schedule
-
-    def test_should_generate_observations_with_schedule(self):
-        """Should generate list of observations with an ACROSS schedule"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.query_swift_plan",
-            return_value=mock_swift_data(),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "swift_telescope_id",
-                    "instruments": [{"id": "swift_instrument_id"}],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.swift_uvot_mode_dict",
-            return_value=mock_swift_uvot_modes(),
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ):
-            schedules = ingest()
-            assert len(schedules[0]["observations"]) > 0
+            ingest()
+            # asserts that the last call was made with the specific value
+            mock_schedule_post.assert_called_with(
+                swift_low_fidelity_planned_schedule[2]
+            )
 
     def test_query_swift_plan_should_return_list_entries_when_successful(self):
         """Should return a list of custom entries if querying Swift catalog is successful"""
@@ -136,7 +115,9 @@ class TestSwiftLowFidelityScheduleIngestionTask:
     def test_create_schedule_should_return_expected(self):
         """Should return an expected schedule dictionary when given valid data"""
         mock_data = mock_swift_data()
-        schedule = swift_schedule("swift_telescope_id", "short_name", mock_data)
+        schedule = swift_to_across_schedule(
+            "swift_telescope_id", "short_name", mock_data
+        )
         expected_schedule = {
             "telescope_id": "swift_telescope_id",
             "name": "short_name_low_fidelity_planned_2025-07-01_2025-07-01",
@@ -224,37 +205,6 @@ class TestSwiftLowFidelityScheduleIngestionTask:
             values = swift_uvot_mode_dict(modes=["v"])
             assert values == expected
 
-    def test_swift_uvot_should_skip_modes_not_in_dict(self):
-        """Should skip UVOT modes not in the dictionary"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.query_swift_plan",
-            return_value=mock_swift_data(),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "swift_telescope_id",
-                    "instruments": [{"id": "swift_instrument_id"}],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.swift_uvot_mode_dict",
-            return_value={
-                "bad_filter_name": [
-                    CustomUVOTModeEntry(filter_name="bad_filter_name", weight=100)
-                ]
-            },
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ), patch(
-            "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.logger"
-        ) as log_mock:
-            ingest()
-            assert (
-                "not found in uvot_mode_dict, skipping"
-                in log_mock.warn.call_args.args[0]
-            )
-
     def test_swift_uvot_should_skip_filter_names_not_in_dict(self):
         """Should skip UVOT modes not in the dictionary"""
         with patch(
@@ -282,6 +232,6 @@ class TestSwiftLowFidelityScheduleIngestionTask:
         ) as log_mock:
             ingest()
             assert (
-                "not found in SWIFT_UVOT_BANDPASS_DICT, skipping"
+                "Skipping observation, filter not found"
                 in log_mock.warn.call_args.args[0]
             )
