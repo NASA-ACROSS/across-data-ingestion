@@ -19,6 +19,9 @@ from .schedules.ixpe.low_fidelity_planned import (
 from .schedules.nustar.as_flown import (
     entrypoint as nustar_as_flown_schedule_ingestion_task,
 )
+from .schedules.swift.low_fidelity_planned import (
+    entrypoint as swift_low_fidelity_schedule_ingestion_task,
+)
 from .schedules.tess.low_fidelity_planned import (
     entrypoint as TESS_low_fidelity_schedule_ingestion_task,
 )
@@ -42,3 +45,4 @@ async def init_tasks():
     await HST_low_fidelity_schedule_ingestion_task()
     await chandra_high_fidelity_planned_schedule_ingestion_task()
     await tle_ingestion_task()
+    await swift_low_fidelity_schedule_ingestion_task()
