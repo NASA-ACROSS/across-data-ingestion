@@ -5,10 +5,10 @@ import structlog
 from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 from swifttools import swift_too  # type: ignore[import-untyped]
-from swifttools.swift_too.swift_planquery import (
-    Swift_PPST_Entry,  # type: ignore[import-untyped]
+from swifttools.swift_too.swift_planquery import (  # type: ignore[import-untyped]
+    Swift_PPST_Entry,
 )
-from swifttools.swift_too.swift_uvot import (
+from swifttools.swift_too.swift_uvot import (  # type: ignore[import-untyped]
     Swift_UVOTModeEntry,  # type: ignore[import-untyped]
 )
 
@@ -72,7 +72,7 @@ class CustomUVOTModeEntry:
         return cls(filter_name=entry.filter_name, weight=entry.weight)
 
 
-class CustomSwiftEntry:
+class CustomSwiftObsEntry:
     """
     Custom Swift_PPST_Entry to handle the UVOT mode as a string instead of a UVOTMode object.
     This is necessary to avoid multiple HTTP requests to the Swift TOO catalog.
@@ -101,7 +101,7 @@ class CustomSwiftEntry:
             setattr(self, key, value)
 
     @classmethod
-    def from_entry(cls, entry: Swift_PPST_Entry) -> "CustomSwiftEntry":
+    def from_entry(cls, entry: Swift_PPST_Entry) -> "CustomSwiftObsEntry":
         """
         Converts a Swift_PPST_Entry to a CustomSwiftEntry.
         """
@@ -123,7 +123,7 @@ class CustomSwiftEntry:
         )
 
 
-def query_swift_plan(days_in_future=4) -> list[CustomSwiftEntry] | None:
+def query_swift_plan(days_in_future: int = 4) -> list[CustomSwiftObsEntry] | None:
     """
     Queries the Swift catalog for all Swift planned observations from now until 4 days from now.
     """
@@ -135,7 +135,7 @@ def query_swift_plan(days_in_future=4) -> list[CustomSwiftEntry] | None:
         return None
 
     non_SAA_query = [
-        CustomSwiftEntry.from_entry(observation)
+        CustomSwiftObsEntry.from_entry(observation)
         for observation in query
         if observation.uvot not in ["0x0009"]
     ]
@@ -164,7 +164,7 @@ def swift_uvot_mode_dict(modes: list[str]) -> dict[str, list[CustomUVOTModeEntry
 
 
 def swift_schedule(
-    telescope_id: str, telescope_short_name: str, data: list[CustomSwiftEntry]
+    telescope_id: str, telescope_short_name: str, data: list[CustomSwiftObsEntry]
 ) -> AcrossSchedule | dict:
     if len(data) == 0:
         # Empty schedule, return
@@ -190,7 +190,7 @@ def swift_schedule(
 
 def swift_observation(
     instrument_id: str,
-    row: CustomSwiftEntry,
+    row: CustomSwiftObsEntry,
     bandpass: dict,
     observation_type: Literal["imaging", "spectroscopy", "timing"],
     exposure_time: float,
@@ -219,7 +219,7 @@ def swift_observation(
     }
 
 
-def ingest() -> list[AcrossSchedule | dict]:
+def ingest(days_in_future: int = 4) -> list[AcrossSchedule | dict]:
     """
     Method that POSTs Swift low fidelity planned observing schedules to the ACROSS server
     For the Swift Observatory, this includes the XRT, BAT, and UVOT Telescopes.
@@ -231,7 +231,7 @@ def ingest() -> list[AcrossSchedule | dict]:
     """
 
     # Get the swift telescope ids along with their instrument ids
-    swift_observation_data = query_swift_plan()
+    swift_observation_data = query_swift_plan(days_in_future)
     if swift_observation_data is None:
         logger.warn("Failed to query Swift planned observations.")
         return [{}]
