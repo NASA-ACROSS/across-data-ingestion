@@ -6,10 +6,10 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 from swifttools import swift_too  # type: ignore[import-untyped]
 from swifttools.swift_too.swift_planquery import (  # type: ignore[import-untyped]
-    Swift_PPST_Entry,
+    PPSTEntry,
 )
 from swifttools.swift_too.swift_uvot import (  # type: ignore[import-untyped]
-    Swift_UVOTModeEntry,  # type: ignore[import-untyped]
+    UVOTModeEntry,
 )
 
 from ....core.constants import SECONDS_IN_A_DAY
@@ -65,9 +65,9 @@ class CustomUVOTModeEntry:
         return self.filter_name == value.filter_name and self.weight == value.weight
 
     @classmethod
-    def from_entry(cls, entry: Swift_UVOTModeEntry) -> "CustomUVOTModeEntry":
+    def from_entry(cls, entry: UVOTModeEntry) -> "CustomUVOTModeEntry":
         """
-        Converts a UVOTMode to a CustomUVOTModeEntry.
+        Converts a UVOTModeEntry to a CustomUVOTModeEntry.
         """
         return cls(filter_name=entry.filter_name, weight=entry.weight)
 
@@ -101,9 +101,9 @@ class CustomSwiftObsEntry:
             setattr(self, key, value)
 
     @classmethod
-    def from_entry(cls, entry: Swift_PPST_Entry) -> "CustomSwiftObsEntry":
+    def from_entry(cls, entry: PPSTEntry) -> "CustomSwiftObsEntry":
         """
-        Converts a Swift_PPST_Entry to a CustomSwiftEntry.
+        Converts a PPSTEntry to a CustomSwiftEntry.
         """
         return cls(
             obsid=entry.obsid,
@@ -134,13 +134,13 @@ def query_swift_plan(days_in_future: int = 4) -> list[CustomSwiftObsEntry] | Non
     except Exception:
         return None
 
-    non_SAA_query = [
+    non_saa_query = [
         CustomSwiftObsEntry.from_entry(observation)
         for observation in query
         if observation.uvot not in ["0x0009"]
     ]
 
-    return non_SAA_query
+    return non_saa_query
 
 
 def swift_uvot_mode_dict(modes: list[str]) -> dict[str, list[CustomUVOTModeEntry]]:
