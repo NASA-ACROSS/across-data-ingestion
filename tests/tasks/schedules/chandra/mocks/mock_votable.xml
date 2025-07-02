@@ -1,0 +1,211 @@
+<VOTABLE version="1.2"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.ivoa.net/xml/VOTable/v1.2 http://www.ivoa.net/xml/VOTable/v1.2"
+ xmlns="http://www.ivoa.net/xml/VOTable/v1.2">
+<!--
+ !  VOTable written by STIL version 3.0-3 (edu.harvard.cfa.tap.out.TapVOTableWriter)
+ !  at 2025-07-01T15:41:25
+ !-->
+<RESOURCE type="results">
+<INFO name='QUERY_STATUS' value='OK'/>
+<TABLE name="results">
+<FIELD datatype="int" name="obsid" ucd="meta.id">
+<DESCRIPTION>Chandra observation identifier</DESCRIPTION>
+<VALUES null='-2147483648'/>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="start_date" ucd="time.start" xtype="adql:TIMESTAMP">
+<DESCRIPTION>Start date of the observation (UTC)</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="ra" ucd="pos.eq.ra" unit="deg">
+<DESCRIPTION>Right ascension, ICRS(J2000)</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="dec" ucd="pos.eq.dec" unit="deg">
+<DESCRIPTION>Declination, ICRS(J2000)</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="instrument" ucd="meta.id;instr">
+<DESCRIPTION>Instrument: ACIS, ACIS-I, ACIS-S, HRC, HRC-I, HRC-S</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="grating" ucd="meta.id;instr">
+<DESCRIPTION>Grating: LETG, HETG, None</DESCRIPTION>
+</FIELD>
+<FIELD arraysize="*" datatype="char" name="exposure_mode" ucd="instr.setup">
+<DESCRIPTION>Exposure mode: ACIS Timed Exposure (TE), ACIS Continuous Clocking (CC), HRC Timing</DESCRIPTION>
+</FIELD>
+<DATA>
+<TABLEDATA>
+  <TR>
+    <TD>29892</TD>
+    <TD>2025-07-06T11:06:14</TD>
+    <TD>187.5752375</TD>
+    <TD>7.840247222222222</TD>
+    <TD>ACIS-S</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>30982</TD>
+    <TD>2025-07-06T06:37:46</TD>
+    <TD>265.9833333333333</TD>
+    <TD>-29.231944444444444</TD>
+    <TD>ACIS-I</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>29617</TD>
+    <TD>2025-07-05T23:38:28</TD>
+    <TD>207.21958333333336</TD>
+    <TD>26.590833333333332</TD>
+    <TD>ACIS-I</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>30985</TD>
+    <TD>2025-07-05T19:39:48</TD>
+    <TD>266.5505</TD>
+    <TD>-28.8887</TD>
+    <TD>ACIS-I</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>29616</TD>
+    <TD>2025-07-05T12:07:05</TD>
+    <TD>207.21958333333336</TD>
+    <TD>26.590833333333332</TD>
+    <TD>ACIS-I</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>30984</TD>
+    <TD>2025-07-05T08:30:59</TD>
+    <TD>266.5505</TD>
+    <TD>-28.8887</TD>
+    <TD>ACIS-I</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>29615</TD>
+    <TD>2025-07-05T00:59:15</TD>
+    <TD>207.21958333333336</TD>
+    <TD>26.590833333333332</TD>
+    <TD>ACIS-I</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>28857</TD>
+    <TD>2025-07-04T20:47:28</TD>
+    <TD>266.5505</TD>
+    <TD>-28.8887</TD>
+    <TD>ACIS-I</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>29614</TD>
+    <TD>2025-07-04T13:15:40</TD>
+    <TD>207.21958333333336</TD>
+    <TD>26.590833333333332</TD>
+    <TD>ACIS-I</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>30978</TD>
+    <TD>2025-07-03T21:35:59</TD>
+    <TD>295.610535</TD>
+    <TD>-10.26675</TD>
+    <TD>ACIS-S</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>30980</TD>
+    <TD>2025-07-03T16:17:57</TD>
+    <TD>15.05425</TD>
+    <TD>28.0405</TD>
+    <TD>ACIS-I</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>28726</TD>
+    <TD>2025-07-03T10:38:02</TD>
+    <TD>265.9833333333333</TD>
+    <TD>-29.231944444444444</TD>
+    <TD>ACIS-I</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>28693</TD>
+    <TD>2025-07-03T02:22:31</TD>
+    <TD>198.575</TD>
+    <TD>-25.26388888888889</TD>
+    <TD>ACIS-I</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>28173</TD>
+    <TD>2025-07-02T15:46:09</TD>
+    <TD>15.05425</TD>
+    <TD>28.0405</TD>
+    <TD>ACIS-I</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>30979</TD>
+    <TD>2025-07-02T12:21:24</TD>
+    <TD>284.398773</TD>
+    <TD>-19.153131</TD>
+    <TD>ACIS-I</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>30981</TD>
+    <TD>2025-07-02T08:58:27</TD>
+    <TD>10.4448595</TD>
+    <TD>-9.1131984</TD>
+    <TD>ACIS-I</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>30983</TD>
+    <TD>2025-07-02T05:49:50</TD>
+    <TD>39.96041666666667</TD>
+    <TD>-1.5856000000000001</TD>
+    <TD>ACIS-I</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+  <TR>
+    <TD>28745</TD>
+    <TD>2025-07-02T01:21:57</TD>
+    <TD>352.19849999999997</TD>
+    <TD>5.248397222222223</TD>
+    <TD>HRC-I</TD>
+    <TD>NONE</TD>
+    <TD></TD>
+  </TR>
+  <TR>
+    <TD>30986</TD>
+    <TD>2025-07-01T21:12:12</TD>
+    <TD>262.6729583333333</TD>
+    <TD>-21.491667</TD>
+    <TD>ACIS-S</TD>
+    <TD>NONE</TD>
+    <TD>TE</TD>
+  </TR>
+</TABLEDATA>
+</DATA>
+</TABLE>
+</RESOURCE>
+</VOTABLE>

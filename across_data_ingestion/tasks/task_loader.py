@@ -1,6 +1,9 @@
 from asyncio import create_task
 
 from .example import example_task
+from .schedules.chandra.high_fidelity_planned import (
+    entrypoint as chandra_high_fidelity_planned_schedule_ingestion_task,
+)
 from .schedules.fermi.lat_planned import (
     entrypoint as fermi_planned_schedule_ingestion_task,
 )
@@ -32,4 +35,5 @@ async def init_tasks():
     await nustar_as_flown_schedule_ingestion_task()
     await ixpe_low_fidelity_schedule_ingestion_task()
     await HST_low_fidelity_schedule_ingestion_task()
+    await chandra_high_fidelity_planned_schedule_ingestion_task()
     await tle_ingestion_task()
