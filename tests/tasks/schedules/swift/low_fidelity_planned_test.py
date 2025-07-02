@@ -30,11 +30,11 @@ class CustomSwiftUVOTMode:
         pass
 
 
-def read_test_swift_data(
+def mock_swift_data(
     exposure_time_as_timedelta: bool = False,
 ) -> list[CustomSwiftObsEntry]:
     """
-    Helper function to read test data from a json file.
+    Gets the mock swift plan
     """
     ret = []
     for entry in swift_10_rows_plan:
@@ -44,9 +44,9 @@ def read_test_swift_data(
     return ret
 
 
-def read_test_uvot_data() -> dict[str, list[CustomUVOTModeEntry]]:
+def mock_swift_uvot_modes() -> dict[str, list[CustomUVOTModeEntry]]:
     """
-    Helper function to read test UVOT data from a json file.
+    Gets the mock swift uvot modes
     """
     data = uvot_modes_entries
 
@@ -62,7 +62,7 @@ class TestSwiftLowFidelityScheduleIngestionTask:
 
         with patch(
             "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.query_swift_plan",
-            return_value=read_test_swift_data(),
+            return_value=mock_swift_data(),
         ), patch(
             "across_data_ingestion.util.across_api.telescope.get",
             return_value=[
@@ -73,7 +73,7 @@ class TestSwiftLowFidelityScheduleIngestionTask:
             ],
         ), patch(
             "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.swift_uvot_mode_dict",
-            return_value=read_test_uvot_data(),
+            return_value=mock_swift_uvot_modes(),
         ), patch(
             "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ):
@@ -84,7 +84,7 @@ class TestSwiftLowFidelityScheduleIngestionTask:
         """Should generate list of observations with an ACROSS schedule"""
         with patch(
             "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.query_swift_plan",
-            return_value=read_test_swift_data(),
+            return_value=mock_swift_data(),
         ), patch(
             "across_data_ingestion.util.across_api.telescope.get",
             return_value=[
@@ -95,7 +95,7 @@ class TestSwiftLowFidelityScheduleIngestionTask:
             ],
         ), patch(
             "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.swift_uvot_mode_dict",
-            return_value=read_test_uvot_data(),
+            return_value=mock_swift_uvot_modes(),
         ), patch(
             "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ):
@@ -106,7 +106,7 @@ class TestSwiftLowFidelityScheduleIngestionTask:
         """Should return a list of custom entries if querying Swift catalog is successful"""
         with patch(
             "swifttools.swift_too.PlanQuery",
-            return_value=read_test_swift_data(exposure_time_as_timedelta=True),
+            return_value=mock_swift_data(exposure_time_as_timedelta=True),
         ):
             data = query_swift_plan()
             assert isinstance(data[0], CustomSwiftObsEntry)
@@ -135,7 +135,7 @@ class TestSwiftLowFidelityScheduleIngestionTask:
 
     def test_create_schedule_should_return_expected(self):
         """Should return an expected schedule dictionary when given valid data"""
-        mock_data = read_test_swift_data()
+        mock_data = mock_swift_data()
         schedule = swift_schedule("swift_telescope_id", "short_name", mock_data)
         expected_schedule = {
             "telescope_id": "swift_telescope_id",
@@ -167,7 +167,7 @@ class TestSwiftLowFidelityScheduleIngestionTask:
         """Should log info with ran at when success"""
         with patch(
             "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.query_swift_plan",
-            return_value=read_test_swift_data(),
+            return_value=mock_swift_data(),
         ), patch(
             "across_data_ingestion.util.across_api.telescope.get",
             return_value=[
@@ -178,7 +178,7 @@ class TestSwiftLowFidelityScheduleIngestionTask:
             ],
         ), patch(
             "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.swift_uvot_mode_dict",
-            return_value=read_test_uvot_data(),
+            return_value=mock_swift_uvot_modes(),
         ), patch(
             "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ), patch(
@@ -228,7 +228,7 @@ class TestSwiftLowFidelityScheduleIngestionTask:
         """Should skip UVOT modes not in the dictionary"""
         with patch(
             "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.query_swift_plan",
-            return_value=read_test_swift_data(),
+            return_value=mock_swift_data(),
         ), patch(
             "across_data_ingestion.util.across_api.telescope.get",
             return_value=[
@@ -259,7 +259,7 @@ class TestSwiftLowFidelityScheduleIngestionTask:
         """Should skip UVOT modes not in the dictionary"""
         with patch(
             "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.query_swift_plan",
-            return_value=read_test_swift_data()[:1],
+            return_value=mock_swift_data()[:1],
         ), patch(
             "across_data_ingestion.util.across_api.telescope.get",
             return_value=[
