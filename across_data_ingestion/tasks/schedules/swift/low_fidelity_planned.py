@@ -19,26 +19,26 @@ from ..types import AcrossObservation, AcrossSchedule
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
 SWIFT_XRT_BANDPASS = {
-    "name": "Swift XRT",
+    "filter_name": "Swift XRT",
     "min": 0.3,
     "max": 10.0,
     "unit": "keV",
 }
 SWIFT_BAT_BANDPASS = {
-    "name": "Swift BAT",
+    "filter_name": "Swift BAT",
     "min": 15.0,
     "max": 150.0,
     "unit": "keV",
 }
 
 SWIFT_UVOT_BANDPASS_DICT = {
-    "u": {"name": "Swift UVOT u", "min": 308, "max": 385, "unit": "nm"},
-    "b": {"name": "Swift UVOT b", "min": 391, "max": 487, "unit": "nm"},
-    "v": {"name": "Swift UVOT v", "min": 509, "max": 585, "unit": "nm"},
-    "uvw1": {"name": "Swift UVOT uvw1", "min": 226, "max": 294, "unit": "nm"},
-    "uvw2": {"name": "Swift UVOT uvw2", "min": 160, "max": 225, "unit": "nm"},
-    "uvm2": {"name": "Swift UVOT uvm2", "min": 200, "max": 249, "unit": "nm"},
-    "white": {"name": "Swift UVOT white", "min": 160, "max": 800, "unit": "nm"},
+    "u": {"filter_name": "Swift UVOT u", "min": 308, "max": 385, "unit": "nm"},
+    "b": {"filter_name": "Swift UVOT b", "min": 391, "max": 487, "unit": "nm"},
+    "v": {"filter_name": "Swift UVOT v", "min": 509, "max": 585, "unit": "nm"},
+    "uvw1": {"filter_name": "Swift UVOT uvw1", "min": 226, "max": 294, "unit": "nm"},
+    "uvw2": {"filter_name": "Swift UVOT uvw2", "min": 160, "max": 225, "unit": "nm"},
+    "uvm2": {"filter_name": "Swift UVOT uvm2", "min": 200, "max": 249, "unit": "nm"},
+    "white": {"filter_name": "Swift UVOT white", "min": 160, "max": 800, "unit": "nm"},
 }
 
 
@@ -140,7 +140,10 @@ def query_swift_plan(days_in_future: int = 4) -> list[CustomSwiftObsEntry] | Non
         if observation.uvot not in ["0x0009"]
     ]
 
-    return non_saa_query
+    if len(non_saa_query):
+        return non_saa_query
+
+    return None
 
 
 def swift_uvot_mode_dict(modes: list[str]) -> dict[str, list[CustomUVOTModeEntry]]:
@@ -148,7 +151,6 @@ def swift_uvot_mode_dict(modes: list[str]) -> dict[str, list[CustomUVOTModeEntry
     Creates a dictionary of UVOT modes from a list of mode names.
     This is used to avoid multiple HTTP requests to the Swift TOO catalog.
     """
-    # import json
     uvot_mode_dict = {}
     for mode in modes:
         entries = swift_too.UVOTMode(mode).entries
@@ -160,20 +162,12 @@ def swift_uvot_mode_dict(modes: list[str]) -> dict[str, list[CustomUVOTModeEntry
             CustomUVOTModeEntry.from_entry(mode_entry) for mode_entry in entries
         ]
 
-    test = {}
-    for mode, entries in uvot_mode_dict.items():
-        test[mode] = [entry.__dict__ for entry in entries]
-
     return uvot_mode_dict
 
 
 def swift_schedule(
     telescope_id: str, telescope_short_name: str, data: list[CustomSwiftObsEntry]
 ) -> AcrossSchedule | dict:
-    if len(data) == 0:
-        # Empty schedule, return
-        return {}
-
     begins = [obs.begin for obs in data]
     ends = [obs.end for obs in data]
 
@@ -182,7 +176,7 @@ def swift_schedule(
 
     return {
         "telescope_id": telescope_id,
-        "name": f"swift_{telescope_short_name}_low_fidelity_planned_{begin.split('T')[0]}_{end.split('T')[0]}",
+        "name": f"{telescope_short_name}_low_fidelity_planned_{begin.split('T')[0]}_{end.split('T')[0]}",
         "date_range": {
             "begin": begin,
             "end": end,
@@ -223,94 +217,49 @@ def swift_observation(
     }
 
 
-def ingest(days_in_future: int = 4) -> list[AcrossSchedule | dict]:
-    """
-    Method that POSTs Swift low fidelity planned observing schedules to the ACROSS server
-    For the Swift Observatory, this includes the XRT, BAT, and UVOT Telescopes.
-    It interprets a single planned observation as an observation for each instrument since it
-     takes data in parallel
-
-    Queries planned observations via the swifttools Swift TOO catalog
-    This is a low fidelity schedule, meaning it is not guaranteed to be accurate or complete.
-    """
-
-    # Get the swift telescope ids along with their instrument ids
-    swift_observation_data = query_swift_plan(days_in_future)
-    if swift_observation_data is None:
-        logger.warn("Failed to query Swift planned observations.")
-        return [{}]
-
-    # XRT
+def create_swift_across_schedule(
+    telescope_name: str,
+    observation_data: list[CustomSwiftObsEntry],
+    observation_type: Literal["imaging", "spectroscopy", "timing"],
+    bandpass: dict = {},
+    do_uvot: bool = False,
+) -> AcrossSchedule | dict:
     # Get the swift xrt telescope ids along with their instrument ids
-    swift_xrt_telescope_info = across_api.telescope.get({"name": "swift_xrt"})[0]
-    xrt_telescope_id = swift_xrt_telescope_info["id"]
-    xrt_instrument_id = swift_xrt_telescope_info["instruments"][0]["id"]
+    telescope_info = across_api.telescope.get({"name": telescope_name})[0]
+    telescope_id = telescope_info["id"]
+    instrument_id = telescope_info["instruments"][0]["id"]
 
     # Create the schedule for Swift XRT
-    swift_xrt_schedule = swift_schedule(
-        telescope_id=xrt_telescope_id,
-        telescope_short_name="xrt",
-        data=swift_observation_data,
+    schedule = swift_schedule(
+        telescope_id=telescope_id,
+        telescope_short_name=telescope_name,
+        data=observation_data,
     )
 
-    # Create observations for Swift XRT
-    swift_xrt_schedule["observations"] = [
-        swift_observation(
-            instrument_id=xrt_instrument_id,
-            row=obs,
-            bandpass=SWIFT_XRT_BANDPASS,
-            observation_type="spectroscopy",
-            exposure_time=obs.exposure,
-        )
-        for obs in swift_observation_data
-    ]
+    if not do_uvot:
+        # Create observations for Swift XRT
+        schedule["observations"] = [
+            swift_observation(
+                instrument_id=instrument_id,
+                row=obs,
+                bandpass=bandpass,
+                observation_type=observation_type,
+                exposure_time=obs.exposure,
+            )
+            for obs in observation_data
+        ]
 
-    # BAT
-    # Get the swift bat telescope ids along with their instrument ids
-    swift_bat_telescope_info = across_api.telescope.get({"name": "swift_bat"})[0]
-    bat_telescope_id = swift_bat_telescope_info["id"]
-    bat_instrument_id = swift_bat_telescope_info["instruments"][0]["id"]
-
-    # Create the schedule for Swift BAT
-    swift_bat_schedule = swift_schedule(
-        telescope_id=bat_telescope_id,
-        telescope_short_name="bat",
-        data=swift_observation_data,
-    )
-    # Create observations for Swift BAT
-    swift_bat_schedule["observations"] = [
-        swift_observation(
-            instrument_id=bat_instrument_id,
-            row=obs,
-            bandpass=SWIFT_BAT_BANDPASS,
-            observation_type="spectroscopy",
-            exposure_time=obs.exposure,
-        )
-        for obs in swift_observation_data
-    ]
-
-    # UVOT
-    # Get the swift uvot telescope ids along with their instrument ids
-    swift_uvot_telescope_info = across_api.telescope.get({"name": "swift_uvot"})[0]
-    uvot_telescope_id = swift_uvot_telescope_info["id"]
-    uvot_instrument_id = swift_uvot_telescope_info["instruments"][0]["id"]
+        return schedule
 
     # Aggregate unique uvot modes
-    uvot_modes = list(set([obs.uvot for obs in swift_observation_data]))
+    uvot_modes = list(set([obs.uvot for obs in observation_data]))
 
     # This triggers an HTTP request via swifttools to get the UVOT modes
     # doing it here over unique list to avoid multiple requests
     uvot_mode_dict = swift_uvot_mode_dict(uvot_modes)
 
-    # Create the schedule for Swift UVOT
-    swift_uvot_schedule = swift_schedule(
-        telescope_id=uvot_telescope_id,
-        telescope_short_name="uvot",
-        data=swift_observation_data,
-    )
-
     uvot_schedule_observations = []
-    for obs in swift_observation_data:
+    for obs in observation_data:
         # Get the UVOT observations from the uvot mode
         if obs.uvot not in uvot_mode_dict:
             logger.warn(
@@ -339,7 +288,7 @@ def ingest(days_in_future: int = 4) -> list[AcrossSchedule | dict]:
 
                 uvot_schedule_observations.append(
                     swift_observation(
-                        instrument_id=uvot_instrument_id,
+                        instrument_id=instrument_id,
                         row=obs,
                         bandpass=SWIFT_UVOT_BANDPASS_DICT[uvot_observation.filter_name],
                         observation_type="imaging",
@@ -347,12 +296,56 @@ def ingest(days_in_future: int = 4) -> list[AcrossSchedule | dict]:
                     )
                 )
 
-    swift_uvot_schedule["observations"] = uvot_schedule_observations
+    schedule["observations"] = uvot_schedule_observations
+
+    return schedule
+
+
+def ingest(days_in_future: int = 4) -> list[AcrossSchedule | dict]:
+    """
+    Method that POSTs Swift low fidelity planned observing schedules to the ACROSS server
+    For the Swift Observatory, this includes the XRT, BAT, and UVOT Telescopes.
+    It interprets a single planned observation as an observation for each instrument since it
+     takes data in parallel
+
+    Queries planned observations via the swifttools Swift TOO catalog
+    This is a low fidelity schedule, meaning it is not guaranteed to be accurate or complete.
+    """
+
+    # Get the swift telescope ids along with their instrument ids
+    swift_observation_data = query_swift_plan(days_in_future)
+    if swift_observation_data is None:
+        logger.warn("Failed to query Swift planned observations.")
+        return [{}]
+
+    # XRT
+    swift_xrt_schedule = create_swift_across_schedule(
+        telescope_name="swift_xrt",
+        observation_data=swift_observation_data,
+        bandpass=SWIFT_XRT_BANDPASS,
+        observation_type="spectroscopy",
+    )
+
+    # BAT
+    swift_bat_schedule = create_swift_across_schedule(
+        telescope_name="swift_bat",
+        observation_data=swift_observation_data,
+        bandpass=SWIFT_BAT_BANDPASS,
+        observation_type="imaging",
+    )
+
+    # UVOT
+    swift_uvot_schedule = create_swift_across_schedule(
+        telescope_name="swift_uvot",
+        observation_data=swift_observation_data,
+        observation_type="imaging",
+        do_uvot=True,
+    )
 
     # Post the schedules to the ACROSS API
-    across_api.schedule.post(dict(swift_xrt_schedule))
-    across_api.schedule.post(dict(swift_bat_schedule))
-    across_api.schedule.post(dict(swift_uvot_schedule))
+    across_api.schedule.post(swift_xrt_schedule)
+    across_api.schedule.post(swift_bat_schedule)
+    across_api.schedule.post(swift_uvot_schedule)
 
     return [swift_xrt_schedule, swift_bat_schedule, swift_uvot_schedule]
 
