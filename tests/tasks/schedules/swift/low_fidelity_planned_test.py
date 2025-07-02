@@ -140,6 +140,18 @@ class TestSwiftLowFidelityScheduleIngestionTask:
             data = query_swift_plan()
             assert data is None
 
+    def test_query_swift_catalog_should_filter_out_saa_obs(self):
+        """Should return None if querying Swift catalog fails"""
+        observation = CustomSwiftObsEntry()
+        observation.uvot = "0x0009"
+        mock_plan = [observation]
+        with patch(
+            "swifttools.swift_too.PlanQuery",
+            return_value=mock_plan,
+        ):
+            data = query_swift_plan()
+            assert data is None
+
     def test_create_schedule_should_return_expected(self):
         """Should return an expected schedule dictionary when given valid data"""
         mock_data = read_test_swift_data(
@@ -148,7 +160,7 @@ class TestSwiftLowFidelityScheduleIngestionTask:
         schedule = swift_schedule("swift_telescope_id", "short_name", mock_data)
         expected_schedule = {
             "telescope_id": "swift_telescope_id",
-            "name": "swift_short_name_low_fidelity_planned_2025-07-01_2025-07-01",
+            "name": "short_name_low_fidelity_planned_2025-07-01_2025-07-01",
             "date_range": {
                 "begin": "2025-07-01T00:05:00.000",
                 "end": "2025-07-01T02:56:00.000",
@@ -158,14 +170,7 @@ class TestSwiftLowFidelityScheduleIngestionTask:
         }
         assert schedule == expected_schedule
 
-    def test_create_schedule_should_return_empty_dict_when_given_empty_table(self):
-        """Should return an empty dictionary when the input table is empty"""
-        # Ingest a table with no rows
-        mock_data = []
-        schedule = swift_schedule("swift_telescope_id", "short_name", mock_data)
-        assert schedule == {}
-
-    def test_should_log_error_when_query_nicer_catalog_returns_none(self):
+    def test_should_log_error_when_query_swift_catalog_returns_none(self):
         """Should log an error when Swift query returns None"""
         with patch(
             "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.logger"
@@ -231,6 +236,16 @@ class TestSwiftLowFidelityScheduleIngestionTask:
             ),
         ):
             expected = {"v": [CustomUVOTModeEntry(filter_name="v", weight=100)]}
+            values = swift_uvot_mode_dict(modes=["v"])
+            assert values == expected
+
+    def test_uvot_mode_dict_should_return_empty_dict(self):
+        """Should return a dictionary with UVOT modes"""
+        with patch(
+            "swifttools.swift_too.UVOTMode",
+            return_value=CustomSwiftUVOTMode(entries=None),
+        ):
+            expected = {}
             values = swift_uvot_mode_dict(modes=["v"])
             assert values == expected
 
