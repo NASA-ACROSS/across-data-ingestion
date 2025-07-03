@@ -2,11 +2,14 @@ import logging
 
 import astropy.units as u  # type: ignore[import-untyped]
 import httpx
+import pandas as pd
 from astropy.time import Time  # type: ignore[import-untyped]
 from bs4 import BeautifulSoup  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
 from ....util import across_api
+
+# from ..types import AcrossObservation, AcrossSchedule
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -17,7 +20,7 @@ IXPE_MIN_ENERGY = 2.0  # keV
 IXPE_MAX_ENERGY = 8.0  # keV
 
 
-def fetch_ixpe_schedule(url):
+def query_ixpe_schedule(url) -> pd.DataFrame | None:
     try:
         # Send a GET request to the webpage
         response = httpx.get(url)
@@ -36,14 +39,37 @@ def fetch_ixpe_schedule(url):
                 columns = row.find_all("td")
                 schedule_data.append([col.get_text(strip=True) for col in columns])
 
-        return schedule_data
+        header = schedule_data.pop(0)
+        return pd.DataFrame(schedule_data, columns=header)
 
     except httpx._exceptions.RequestError as e:
         print(f"Error fetching the webpage: {e}")
         return None
 
 
-def create_ixpe_observation(
+def ixpe_schedule(
+    telescope_id: str, data: pd.DataFrame, status: str, fidelity: str
+):  # -> AcrossSchedule | dict:
+    """
+    Creates a NICER schedule from the provided data.
+    """
+
+    begin = Time(f"{min(data["Start"])}", format="isot").isot
+    end = Time(f"{max(data["Stop"])}", format="isot").isot
+
+    return {
+        "telescope_id": telescope_id,
+        "name": f"nicer_obs_planned_{begin.split('T')[0]}_{end.split('T')[0]}",
+        "date_range": {
+            "begin": begin,
+            "end": end,
+        },
+        "status": status,
+        "fidelity": fidelity,
+    }
+
+
+def ixpe_observation(
     object_name, ra, dec, obs_start, obs_end, instrument_id, P_s, Pnum
 ):
     # orbit start/end times are strings (non isot)
@@ -79,7 +105,8 @@ def ingest():
     tess_telescope_info = across_api.telescope.get({"name": "ixpe"})[0]
     telescope_id = tess_telescope_info["id"]
     instrument_id = tess_telescope_info["instruments"][0]["id"]
-    schedule_data = fetch_ixpe_schedule(IXPE_LTP_URL)
+    schedule_data = query_ixpe_schedule(IXPE_LTP_URL)
+
     schedule_observations = []
     if schedule_data:
         # Process the schedule data as needed
@@ -96,7 +123,7 @@ def ingest():
             else:
                 end_time = entry[5]
 
-            observation = create_ixpe_observation(
+            observation = ixpe_observation(
                 object_name=Name,
                 ra=Ra,
                 dec=Dec,
@@ -118,8 +145,8 @@ def ingest():
             "fidelity": "low",
         }
 
-        sched_start_at = Time(schedule_start, format="isot")
-        sched_end_at = Time(schedule_end, format="isot")
+        sched_start_at = Time(schedule_start, format="isot").isot
+        sched_end_at = Time(schedule_end, format="isot").isot
 
         schedule["date_range"] = {
             "begin": str(sched_start_at.to_datetime()),
@@ -133,18 +160,9 @@ def ingest():
 
 @repeat_every(seconds=SECONDS_IN_A_WEEK)  # Weekly
 def entrypoint():
-    current_time = Time.now()
-
     try:
-        schedules = ingest()
-        logger.info(f"{__name__} ran at {current_time}")
-        return schedules
+        ingest()
+        logger.info("Schedule ingestion completed.")
     except Exception as e:
         # Surface the error through logging, if we do not catch everything and log, the errors get voided
-        logger.error(f"{__name__} encountered an error {e} at {current_time}")
-        return
-
-
-if __name__ == "__main__":
-    # Run the function to test it
-    ingest()
+        logger.error("Schedule ingestion encountered an unknown error.", err=e)
