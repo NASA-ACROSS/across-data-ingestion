@@ -12,7 +12,12 @@ class Config(BaseConfig):
     HOST: str = "localhost"
     PORT: int = 8001
     ROOT_PATH: str = "/api"
-    ACROSS_SERVER_URL: str = "http://localhost:8000/api/"
+
+    ACROSS_SERVER_HOST: str = "http://localhost"
+    ACROSS_SERVER_PORT: int = 8000
+    ACROSS_SERVER_ROOT_PATH: str = "/api"
+    ACROSS_SERVER_VERSION: str = "/v1"
+
     ACROSS_INGESTION_SERVICE_ACCOUNT_KEY: str = "local-data-ingestion-service-account"
 
     # Logging
@@ -25,6 +30,9 @@ class Config(BaseConfig):
 
     def base_url(self):
         return f"{self.HOST}:{self.PORT}{self.ROOT_PATH}"
+
+    def across_server_url(self):
+        return f"{self.ACROSS_SERVER_HOST}:{self.ACROSS_SERVER_PORT}{self.ACROSS_SERVER_ROOT_PATH}{self.ACROSS_SERVER_VERSION}"
 
 
 config = Config()
