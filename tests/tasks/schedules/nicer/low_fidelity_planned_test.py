@@ -105,13 +105,6 @@ class TestNicerLowFidelityScheduleIngestionTask:
         }
         assert schedule == expected_schedule
 
-    def test_create_schedule_should_return_empty_dict_when_given_empty_table(self):
-        """Should return an empty dictionary when the input table is empty"""
-        # Ingest a table with no rows
-        mock_data = pd.DataFrame({})
-        schedule = nicer_schedule("nicer_telescope_id", mock_data, "planned", "low")
-        assert schedule == {}
-
     def test_should_log_error_when_query_nicer_catalog_returns_none(self):
         """Should log an error when NICER query returns None"""
         with patch(
@@ -158,7 +151,7 @@ class TestNicerLowFidelityScheduleIngestionTask:
             "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.logger"
         ) as log_mock:
             entrypoint()
-            assert "Ingestion completed" in log_mock.info.call_args.args[0]
+            assert "ingestion completed" in log_mock.info.call_args.args[0]
 
     def test_should_log_error_when_schedule_ingestion_fails(self):
         """Should log an error when schedule ingestion fails"""
@@ -180,4 +173,7 @@ class TestNicerLowFidelityScheduleIngestionTask:
             "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ):
             entrypoint()
-            assert "encountered an error" in log_mock.error.call_args.args[0]
+            assert (
+                "Schedule ingestion encountered an unknown error"
+                in log_mock.error.call_args.args[0]
+            )

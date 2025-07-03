@@ -38,10 +38,7 @@ def nicer_schedule(
 ) -> AcrossSchedule | dict:
     """
     Creates a NICER schedule from the provided data.
-    If the data is empty, it returns an empty dictionary."""
-    if len(data) == 0:
-        # Empty schedule, return
-        return {}
+    """
 
     begin = Time(f"{min(data["Start"])}", format="isot").isot
     end = Time(f"{max(data["Stop"])}", format="isot").isot
@@ -135,13 +132,9 @@ def ingest(schedule_modes: list[str] = ["Scheduled"]) -> AcrossSchedule | dict:
 
 @repeat_every(seconds=2 * SECONDS_IN_A_WEEK)  # BiWeekly
 def entrypoint():
-    current_time = Time.now()
-
     try:
-        schedule = ingest()
-        logger.info(f"Ingestion completed: {__name__} ran at {current_time}")
-        return schedule
+        ingest()
+        logger.info("Schedule ingestion completed.")
     except Exception as e:
         # Surface the error through logging, if we do not catch everything and log, the errors get voided
-        logger.error(f"{__name__} encountered an error {e} at {current_time}")
-        return
+        logger.error("Schedule ingestion encountered an unknown error.", err=e)
