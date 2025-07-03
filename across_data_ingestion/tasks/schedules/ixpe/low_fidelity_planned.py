@@ -38,16 +38,16 @@ def query_ixpe_schedule(url) -> pd.DataFrame | None:
 
             # Convert to a pandas dataframe with header information
             header = schedule_data.pop(0)
+
             ixpe_df = pd.DataFrame(schedule_data, columns=header)
 
-            # TODO: delete
-            import json
-
-            df_json = ixpe_df.to_json()
-            pw_to_mock_dump = "/Users/sdwyatt/Work/git-clones/across-data-ingestion/tests/tasks/schedules/ixpe/mocks/mock_ixpe_query.py"
-            with open(pw_to_mock_dump, "w") as f:
-                json.dump(df_json, f, indent=2)
-            ###
+            # IXPE doesn't give an end time for these schedules
+            # Populate them with the next observations start time.
+            # The last target won't have an end time, so fill it with its start time
+            ixpe_df["Start"] = pd.to_datetime(ixpe_df["Start"])
+            ixpe_df["Stop"] = ixpe_df["Start"].shift(-1).fillna(ixpe_df["Start"])
+            ixpe_df["Start"] = ixpe_df["Start"].astype(str)
+            ixpe_df["Stop"] = ixpe_df["Stop"].astype(str)
 
             return ixpe_df
 
@@ -125,11 +125,6 @@ def ingest() -> AcrossSchedule | dict:
         logger.warn("Failed to read IXPE timeline file")
         return {}
 
-    # IXPE doesn't give an end time for these schedules
-    # Populate them with the next observations start time.
-    # The last target won't have an end time, so fill it with its start time
-    ixpe_df["Stop"] = ixpe_df["Start"].shift(-1).fillna(ixpe_df["Start"])
-
     # GET Telescope by name
     tess_telescope_info = across_api.telescope.get({"name": "ixpe"})[0]
     telescope_id = tess_telescope_info["id"]
@@ -150,14 +145,6 @@ def ingest() -> AcrossSchedule | dict:
 
     # Post schedule
     across_api.schedule.post(dict(schedule))
-
-    # TODO: delete
-    import json
-
-    pw_to_mock_dump = "/Users/sdwyatt/Work/git-clones/across-data-ingestion/tests/tasks/schedules/ixpe/mocks/ixpe_across_schedule.py"
-    with open(pw_to_mock_dump, "w") as f:
-        json.dump(schedule, f, indent=2)
-    ###
 
     return schedule
 

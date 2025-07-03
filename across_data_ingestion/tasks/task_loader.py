@@ -20,7 +20,7 @@ async def init_tasks():
     For more information see https://fastapiutils.github.io/fastapi-utils//user-guide/repeated-tasks/
     """
     await example_task()
-    await ixpe_low_fidelity_schedule_ingestion_task()
     await TESS_low_fidelity_schedule_ingestion_task()
     await fermi_planned_schedule_ingestion_task()
     await nustar_as_flown_schedule_ingestion_task()
+    await ixpe_low_fidelity_schedule_ingestion_task()
