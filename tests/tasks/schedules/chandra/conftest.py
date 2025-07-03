@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock
 
 import pytest
 from astropy.table import Row, Table  # type: ignore[import-untyped]
@@ -51,13 +51,17 @@ def mock_observation_table(mock_observation_data: dict) -> Table:
 
 
 @pytest.fixture
-def mock_query_vo_service(mock_observation_data: dict) -> AsyncMock:
-    return AsyncMock(return_value=mock_observation_data)
+def mock_query_vo_service(mock_observation_table: dict) -> AsyncMock:
+    return AsyncMock(return_value=mock_observation_table)
 
 
 @pytest.fixture
-def mock_format_vo_table(mock_observation_table: Table) -> Mock:
-    return Mock(return_value=mock_observation_table)
+def mock_query_vo_service_for_exposure_times(mock_observation_table: dict) -> AsyncMock:
+    """
+    Return the mock observation table the first time query is called
+    and None the second time
+    """
+    return AsyncMock(side_effect=[mock_observation_table, None])
 
 
 @pytest.fixture

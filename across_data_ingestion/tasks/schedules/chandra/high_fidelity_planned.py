@@ -1,17 +1,15 @@
 import json
 from datetime import datetime, timedelta, timezone
-from io import BytesIO
 from typing import Literal
 
-import httpx
 import structlog
-from astropy.io import votable  # type: ignore[import-untyped]
 from astropy.table import Table  # type: ignore[import-untyped]
 from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
 from ....core.constants import SECONDS_IN_A_DAY
 from ....util import across_api
+from ....util.vo_service import VOService
 from ..types import AcrossObservation, AcrossSchedule
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
@@ -77,72 +75,6 @@ CHANDRA_OBSERVATION_TYPES: dict[str, Literal["imaging", "spectroscopy", "timing"
 CHANDRA_TAP_URL = "https://cda.cfa.harvard.edu/cxctap/async"
 
 
-class VOService:
-    """Class to handle TAP queries to the Chandra VO service"""
-
-    url: str = CHANDRA_TAP_URL
-
-    def __init__(self) -> None:
-        self._start_client()
-
-    def _start_client(self) -> None:
-        self.client = httpx.AsyncClient()
-
-    async def _close_client(self) -> None:
-        await self.client.aclose()
-
-    async def initialize_query(self, query: str) -> None:
-        """Puts the query in a queue to be executed"""
-        data = {
-            "REQUEST": "doQuery",
-            "FORMAT": "votable",
-            "LANG": "ADQL",
-            "QUERY": query,
-        }
-        response = await self.client.request(
-            method="POST",
-            url=self.url,
-            follow_redirects=True,
-            data=data,
-        )
-        self.job_url = str(response.url)
-
-    async def run_query(self) -> bool:
-        """Runs the queued query"""
-        response = await self.client.request(
-            method="POST",
-            url=self.job_url + "/phase",
-            data={"PHASE": "RUN"},
-            follow_redirects=True,
-        )
-
-        await self._close_client()
-
-        if not response.text:
-            logger.warn("Chandra TAP query never ran, exiting")
-            return False
-        return True
-
-    def get_results(self) -> str:
-        """Gets the results from the ran query"""
-        response = httpx.get(self.job_url + "/results/result")
-        return response.text
-
-    async def query(self, query: str) -> str | None:
-        """Wrapper to initialize, run, and fetch results from query"""
-        await self.initialize_query(query)
-        query_ran = await self.run_query()
-        if query_ran:
-            return self.get_results()
-        return None
-
-
-def format_response_as_astropy_table(response_text: str) -> Table:
-    tabledata = votable.parse(BytesIO(response_text.encode()))
-    table = tabledata.get_first_table().to_table()
-    return table
-
-
 def get_instrument_info_from_observation(
     instrument_info: dict, row: Table.Row
 ) -> tuple[str, str]:
@@ -195,10 +127,6 @@ def get_instrument_info_from_observation(
 
 
 def create_schedule(telescope_id: str, data: Table) -> AcrossSchedule | dict:
-    if len(data) == 0:
-        # Empty schedule, return
-        return {}
-
     begin = f"{min(data["start_date"])}"
     end = f"{max(data["start_date"])}"
     return {
@@ -218,6 +146,12 @@ def transform_to_observation(
 ) -> AcrossObservation:
     instrument_id = observation_data["instrument_id"]
     instrument_name = observation_data["instrument_name"]
+    begin = observation_data["start_date"]
+    end = (
+        Time(begin, format="isot")
+        + timedelta(seconds=observation_data["t_plan_exptime"])
+    ).isot
+
     return {
         "instrument_id": instrument_id,
         "object_name": observation_data["target_name"],
@@ -230,8 +164,8 @@ def transform_to_observation(
             "dec": f"{observation_data["dec"]}",
         },
         "date_range": {
-            "begin": f"{observation_data['start_date']}",
-            "end": f"{(Time(observation_data["start_date"], format="isot") + timedelta(seconds=observation_data["t_plan_exptime"])).isot}",
+            "begin": f"{begin}",
+            "end": f"{end}",
         },
         "external_observation_id": observation_id,
         "type": CHANDRA_OBSERVATION_TYPES[instrument_name],
@@ -269,19 +203,13 @@ async def ingest() -> None:
     query += f"o.grating, o.exposure_mode from cxc.observation o where o.start_date > '{now}' "
     query += "and o.status='scheduled' order by o.start_date desc"
 
-    voservice = VOService()
-    observations_text = await voservice.query(query)
-    if not observations_text:
+    voservice = VOService(CHANDRA_TAP_URL)
+    observations_table = await voservice.query(query)
+    if not observations_table:
         logger.warn("No response returned for async request")
         return None
 
-    observations_table = format_response_as_astropy_table(observations_text)
-
     schedule = create_schedule(telescope_id, observations_table)
-    if not schedule:
-        # No observations found for the queried time range, return empty list
-        logger.warn("No results returned from Chandra VOTable query")
-        return None
 
     observations = {}
     for row in observations_table:
@@ -300,16 +228,15 @@ async def ingest() -> None:
         observation_id = str(observation_data.pop("obsid"))
         observations[observation_id] = observation_data
 
-    # Query TAP again to get planned exposure time for those IDs
+    # Query TAP again to get planned exposure time for observation IDs
     exposure_time_query = "select obs_id, target_name, t_plan_exptime from ivoa.obsplan"
     exposure_time_query += f" where obs_id in ('{"', '".join(str(obsid) for obsid in observations.keys())}')"
-    voservice = VOService()
-    exposure_time_results = await voservice.query(exposure_time_query)
-    if not exposure_time_results:
-        logger.warn("No response given for async request")
+    voservice = VOService(CHANDRA_TAP_URL)
+    exposure_time_table = await voservice.query(exposure_time_query)
+    if not exposure_time_table:
+        logger.warn("No exposure time for observations found")
         return None
 
-    exposure_time_table = format_response_as_astropy_table(exposure_time_results)
     for row in exposure_time_table:
         exposure_time_data = dict(row)
         observation_id = str(exposure_time_data.pop("obs_id"))
