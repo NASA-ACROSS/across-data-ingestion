@@ -2,11 +2,11 @@ from .example import example_task
 from .schedules.fermi.lat_planned import (
     entrypoint as fermi_planned_schedule_ingestion_task,
 )
-from .schedules.nustar.as_flown import (
-    entrypoint as nustar_as_flown_schedule_ingestion_task,
-)
 from .schedules.ixpe.low_fidelity_planned import (
     entrypoint as ixpe_low_fidelity_schedule_ingestion_task,
+)
+from .schedules.nustar.as_flown import (
+    entrypoint as nustar_as_flown_schedule_ingestion_task,
 )
 from .schedules.tess.low_fidelity_planned import (
     entrypoint as TESS_low_fidelity_schedule_ingestion_task,
