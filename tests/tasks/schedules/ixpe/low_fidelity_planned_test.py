@@ -87,7 +87,6 @@ class TestNicerLowFidelityScheduleIngestionTask:
         # Ingest a table with no rows
         mock_data = pd.DataFrame(mock_ixpe_query)
         schedule = ixpe_schedule("ixpe_telescope_id", mock_data, "planned", "low")
-        print(schedule)
         expected_schedule = {
             "date_range": {
                 "begin": "2025-04-08T06:00:00.000",
