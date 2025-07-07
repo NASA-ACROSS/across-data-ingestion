@@ -1,5 +1,3 @@
-import json
-import os
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -11,12 +9,12 @@ from across_data_ingestion.tasks.schedules.chandra.high_fidelity_planned import 
     ingest,
 )
 
+from .mocks.chandra_high_fidelity_planned_mock_schedule_output import (
+    chandra_planned_schedule,
+)
+
 
 class TestChandraHighFidelityPlannedScheduleIngestionTask:
-    mock_file_base_path = os.path.join(os.path.dirname(__file__), "mocks/")
-    mock_schedule_output = "chandra_high_fidelity_planned_mock_schedule_output.json"
-    mock_votable = "mock_votable.xml"
-
     @pytest.mark.asyncio
     async def test_should_generate_across_schedule(
         self,
@@ -24,7 +22,6 @@ class TestChandraHighFidelityPlannedScheduleIngestionTask:
         mock_query_vo_service: AsyncMock,
     ):
         """Should generate ACROSS schedules"""
-        mock_output_schedule_file = self.mock_file_base_path + self.mock_schedule_output
         with patch(
             "across_data_ingestion.util.across_api.telescope.get",
             return_value=mock_telescope_get,
@@ -34,14 +31,9 @@ class TestChandraHighFidelityPlannedScheduleIngestionTask:
         ), patch(
             "across_data_ingestion.tasks.schedules.chandra.high_fidelity_planned.VOService.query",
             mock_query_vo_service,
-        ), patch(
-            "across_data_ingestion.tasks.schedules.chandra.high_fidelity_planned.logger"
-        ) as log_mock:
-            await ingest()
-            schedules = log_mock.info.call_args.args[0]
-            with open(mock_output_schedule_file) as expected_output_file:
-                expected = json.load(expected_output_file)
-                assert json.loads(schedules) == expected
+        ):
+            schedules = await ingest()
+            assert schedules == [chandra_planned_schedule]
 
     @pytest.mark.asyncio
     async def test_should_generate_observations_with_schedule(
@@ -59,12 +51,9 @@ class TestChandraHighFidelityPlannedScheduleIngestionTask:
         ), patch(
             "across_data_ingestion.tasks.schedules.chandra.high_fidelity_planned.VOService.query",
             mock_query_vo_service,
-        ), patch(
-            "across_data_ingestion.tasks.schedules.chandra.high_fidelity_planned.logger"
-        ) as log_mock:
-            await ingest()
-            schedules = log_mock.info.call_args.args[0]
-            assert len(json.loads(schedules)["observations"]) > 0
+        ):
+            schedules = await ingest()
+            assert len(schedules[0]["observations"]) > 0
 
     @pytest.mark.asyncio
     async def test_should_log_warning_when_query_returns_no_response(

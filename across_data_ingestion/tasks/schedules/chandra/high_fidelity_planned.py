@@ -1,4 +1,3 @@
-import json
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
@@ -176,7 +175,7 @@ def transform_to_observation(
     }
 
 
-async def ingest() -> None:
+async def ingest() -> list[AcrossSchedule | dict]:
     """
     Ingests all scheduled Chandra observations by submitting a TAP query using
     the Chandra VO service.
@@ -207,7 +206,7 @@ async def ingest() -> None:
     observations_table = await voservice.query(query)
     if not observations_table:
         logger.warn("No response returned for async request")
-        return None
+        return [{}]
 
     schedule = create_schedule(telescope_id, observations_table)
 
@@ -219,7 +218,7 @@ async def ingest() -> None:
         )
         if not instrument_name:
             logger.error("Cannot parse observations with unknown instrument")
-            return None
+            return [{}]
         observation_data = dict(row)
         observation_data["instrument_id"] = instrument_id
         observation_data["instrument_name"] = instrument_name
@@ -235,7 +234,7 @@ async def ingest() -> None:
     exposure_time_table = await voservice.query(exposure_time_query)
     if not exposure_time_table:
         logger.warn("No exposure time for observations found")
-        return None
+        return [{}]
 
     for row in exposure_time_table:
         exposure_time_data = dict(row)
@@ -249,12 +248,11 @@ async def ingest() -> None:
     ]
 
     schedule["observations"] = across_observations
-    logger.info(json.dumps(schedule, indent=4))  # TODO: Remove
     schedules.append(schedule)
 
     across_api.schedule.post(schedule)
 
-    return None
+    return schedules
 
 
 @repeat_every(seconds=SECONDS_IN_A_DAY)  # Daily
