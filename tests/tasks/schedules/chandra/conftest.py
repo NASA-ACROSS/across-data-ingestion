@@ -1,7 +1,7 @@
 from unittest.mock import AsyncMock
 
 import pytest
-from astropy.table import Row, Table  # type: ignore[import-untyped]
+from astropy.table import Table  # type: ignore[import-untyped]
 
 
 @pytest.fixture
@@ -81,61 +81,6 @@ def mock_observation_configuration_table() -> Table:
             {"instrument": "BADINSTRUMENT", "grating": "", "exposure_mode": ""},
         ]
     )
-
-
-@pytest.fixture
-def mock_acis_observation_row(mock_observation_configuration_table) -> Row:
-    return mock_observation_configuration_table[0]
-
-
-@pytest.fixture
-def mock_acis_hetg_observation_row(mock_observation_configuration_table) -> Row:
-    return mock_observation_configuration_table[1]
-
-
-@pytest.fixture
-def mock_acis_letg_observation_row(mock_observation_configuration_table) -> Row:
-    return mock_observation_configuration_table[2]
-
-
-@pytest.fixture
-def mock_acis_cc_observation_row(mock_observation_configuration_table) -> Row:
-    return mock_observation_configuration_table[3]
-
-
-@pytest.fixture
-def mock_hrc_observation_row(mock_observation_configuration_table) -> Row:
-    return mock_observation_configuration_table[4]
-
-
-@pytest.fixture
-def mock_hrc_hetg_observation_row(mock_observation_configuration_table) -> Row:
-    return mock_observation_configuration_table[5]
-
-
-@pytest.fixture
-def mock_hrc_letg_observation_row(mock_observation_configuration_table) -> Row:
-    return mock_observation_configuration_table[6]
-
-
-@pytest.fixture
-def mock_hrc_timing_observation_row(mock_observation_configuration_table) -> Row:
-    return mock_observation_configuration_table[7]
-
-
-@pytest.fixture
-def mock_bad_acis_observation_row(mock_observation_configuration_table) -> Row:
-    return mock_observation_configuration_table[8]
-
-
-@pytest.fixture
-def mock_bad_hrc_observation_row(mock_observation_configuration_table) -> Row:
-    return mock_observation_configuration_table[9]
-
-
-@pytest.fixture
-def mock_bad_instrument_observation_row(mock_observation_configuration_table) -> Row:
-    return mock_observation_configuration_table[10]
 
 
 @pytest.fixture

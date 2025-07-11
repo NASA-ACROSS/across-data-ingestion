@@ -20,9 +20,6 @@ class VOService:
         self.url = url
         self.client = httpx.AsyncClient()
 
-    async def _close_client(self) -> None:
-        await self.client.aclose()
-
     async def _initialize_query(self, query: str) -> None:
         """Puts the query in a queue to be executed"""
         data = {
@@ -48,12 +45,11 @@ class VOService:
             follow_redirects=True,
         )
 
-        await self._close_client()
+        await self.client.aclose()
 
         if not response.text:
             logger.warn("Chandra TAP query never ran, exiting")
-            return False
-        return True
+        return bool(response.text)
 
     def _get_results(self) -> str:
         """Gets the results from the ran query"""

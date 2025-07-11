@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from astropy.table import Table  # type: ignore[import-untyped]
@@ -21,39 +21,20 @@ class TestChandraHighFidelityPlannedScheduleIngestionTask:
         mock_telescope_get: list[dict[str, str]],
         mock_query_vo_service: AsyncMock,
     ):
+        mock_post = Mock(return_value=None)
         """Should generate ACROSS schedules"""
         with patch(
             "across_data_ingestion.util.across_api.telescope.get",
             return_value=mock_telescope_get,
         ), patch(
             "across_data_ingestion.util.across_api.schedule.post",
-            return_value=None,
+            mock_post,
         ), patch(
             "across_data_ingestion.tasks.schedules.chandra.high_fidelity_planned.VOService.query",
             mock_query_vo_service,
         ):
-            schedules = await ingest()
-            assert schedules == [chandra_planned_schedule]
-
-    @pytest.mark.asyncio
-    async def test_should_generate_observations_with_schedule(
-        self,
-        mock_telescope_get: list[dict[str, str]],
-        mock_query_vo_service: AsyncMock,
-    ):
-        """Should generate list of observations with an ACROSS schedule"""
-        with patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=mock_telescope_get,
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post",
-            return_value=None,
-        ), patch(
-            "across_data_ingestion.tasks.schedules.chandra.high_fidelity_planned.VOService.query",
-            mock_query_vo_service,
-        ):
-            schedules = await ingest()
-            assert len(schedules[0]["observations"]) > 0
+            await ingest()
+            mock_post.assert_called_once_with(chandra_planned_schedule)
 
     @pytest.mark.asyncio
     async def test_should_log_warning_when_query_returns_no_response(
@@ -72,7 +53,7 @@ class TestChandraHighFidelityPlannedScheduleIngestionTask:
             "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ):
             await ingest()
-            assert "No response returned" in log_mock.warn.call_args.args[0]
+            assert "No observations" in log_mock.warn.call_args.args[0]
 
     @pytest.mark.asyncio
     async def test_should_log_warning_when_exposure_query_returns_no_response(
@@ -162,74 +143,69 @@ class TestChandraHighFidelityPlannedScheduleIngestionTask:
             assert "encountered an error" in log_mock.error.call_args.args[0]
 
     @pytest.mark.parametrize(
-        "row, expected_name, expected_id",
-        [
-            (
-                "mock_acis_observation_row",
-                "ACIS",
-                "acis-mock-id",
-            ),
-            (
-                "mock_acis_hetg_observation_row",
-                "ACIS-HETG",
-                "acis-hetg-mock-id",
-            ),
-            (
-                "mock_acis_letg_observation_row",
-                "ACIS-LETG",
-                "acis-letg-mock-id",
-            ),
-            (
-                "mock_acis_cc_observation_row",
-                "ACIS-CC",
-                "acis-cc-mock-id",
-            ),
-            (
-                "mock_hrc_observation_row",
-                "HRC",
-                "hrc-mock-id",
-            ),
-            (
-                "mock_hrc_hetg_observation_row",
-                "HRC-HETG",
-                "hrc-hetg-mock-id",
-            ),
-            (
-                "mock_hrc_letg_observation_row",
-                "HRC-LETG",
-                "hrc-letg-mock-id",
-            ),
-            (
-                "mock_hrc_timing_observation_row",
-                "HRC-Timing",
-                "hrc-timing-mock-id",
-            ),
-            (
-                "mock_bad_acis_observation_row",
-                "",
-                "",
-            ),
-            (
-                "mock_bad_hrc_observation_row",
-                "",
-                "",
-            ),
-            (
-                "mock_bad_instrument_observation_row",
-                "",
-                "",
-            ),
-        ],
+        "row, expected_instrument_info",
+        list(
+            enumerate(
+                [
+                    (
+                        "ACIS",
+                        "acis-mock-id",
+                    ),
+                    (
+                        "ACIS-HETG",
+                        "acis-hetg-mock-id",
+                    ),
+                    (
+                        "ACIS-LETG",
+                        "acis-letg-mock-id",
+                    ),
+                    (
+                        "ACIS-CC",
+                        "acis-cc-mock-id",
+                    ),
+                    (
+                        "HRC",
+                        "hrc-mock-id",
+                    ),
+                    (
+                        "HRC-HETG",
+                        "hrc-hetg-mock-id",
+                    ),
+                    (
+                        "HRC-LETG",
+                        "hrc-letg-mock-id",
+                    ),
+                    (
+                        "HRC-Timing",
+                        "hrc-timing-mock-id",
+                    ),
+                    (
+                        "",
+                        "",
+                    ),
+                    (
+                        "",
+                        "",
+                    ),
+                    (
+                        "",
+                        "",
+                    ),
+                ]
+            )
+        ),
     )
     def test_get_instrument_info_from_observation(
         self,
-        row: str,
-        expected_name: str,
-        expected_id: str,
-        request: pytest.FixtureRequest,
+        row: int,
+        expected_instrument_info: tuple,
         mock_instrument_info: dict,
+        mock_observation_configuration_table: Table,
     ) -> None:
         """Should return correct instrument name and id from observation row"""
-        assert get_instrument_info_from_observation(
-            mock_instrument_info, request.getfixturevalue(row)
-        ) == (expected_name, expected_id)
+        assert (
+            get_instrument_info_from_observation(
+                mock_instrument_info, mock_observation_configuration_table[row]
+            )
+            == expected_instrument_info
+        )
