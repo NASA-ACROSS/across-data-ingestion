@@ -65,33 +65,38 @@ def mock_query_vo_service_for_exposure_times(mock_observation_table: dict) -> As
 
 
 @pytest.fixture
-def mock_observation_configuration_table() -> Table:
-    return Table(
-        [
-            {"instrument": "ACIS", "grating": "NONE", "exposure_mode": "NONE"},
-            {"instrument": "ACIS", "grating": "HETG", "exposure_mode": "NONE"},
-            {"instrument": "ACIS", "grating": "LETG", "exposure_mode": "NONE"},
-            {"instrument": "ACIS", "grating": "NONE", "exposure_mode": "CC"},
-            {"instrument": "HRC", "grating": "NONE", "exposure_mode": ""},
-            {"instrument": "HRC", "grating": "HETG", "exposure_mode": ""},
-            {"instrument": "HRC", "grating": "LETG", "exposure_mode": ""},
-            {"instrument": "HRC", "grating": "NONE", "exposure_mode": "TIMING"},
-            {"instrument": "ACIS", "grating": "BADGRATING", "exposure_mode": ""},
-            {"instrument": "HRC", "grating": "BADGRATING", "exposure_mode": ""},
-            {"instrument": "BADINSTRUMENT", "grating": "", "exposure_mode": ""},
-        ]
-    )
-
-
-@pytest.fixture
-def mock_instrument_info() -> dict:
-    return {
-        "Advanced CCD Imaging Spectrometer": "acis-mock-id",
-        "Advanced CCD Imaging Spectrometer - High Energy Transmission Grating": "acis-hetg-mock-id",
-        "Advanced CCD Imaging Spectrometer - Low Energy Transmission Grating": "acis-letg-mock-id",
-        "Advanced CCD Imaging Spectrometer - Continuous Clocking Mode": "acis-cc-mock-id",
-        "High Resolution Camera": "hrc-mock-id",
-        "High Resolution Camera - High Energy Transmission Grating": "hrc-hetg-mock-id",
-        "High Resolution Camera - Low Energy Transmission Grating": "hrc-letg-mock-id",
-        "High Resolution Camera - Timing Mode": "hrc-timing-mock-id",
-    }
+def mock_instrument_info() -> list[dict]:
+    return [
+        {
+            "name": "Advanced CCD Imaging Spectrometer",
+            "id": "acis-mock-id",
+        },
+        {
+            "name": "Advanced CCD Imaging Spectrometer - High Energy Transmission Grating",
+            "id": "acis-hetg-mock-id",
+        },
+        {
+            "name": "Advanced CCD Imaging Spectrometer - Low Energy Transmission Grating",
+            "id": "acis-letg-mock-id",
+        },
+        {
+            "name": "Advanced CCD Imaging Spectrometer - Continuous Clocking Mode",
+            "id": "acis-cc-mock-id",
+        },
+        {
+            "name": "High Resolution Camera",
+            "id": "hrc-mock-id",
+        },
+        {
+            "name": "High Resolution Camera - High Energy Transmission Grating",
+            "id": "hrc-hetg-mock-id",
+        },
+        {
+            "name": "High Resolution Camera - Low Energy Transmission Grating",
+            "id": "hrc-letg-mock-id",
+        },
+        {
+            "name": "High Resolution Camera - Timing Mode",
+            "id": "hrc-timing-mock-id",
+        },
+    ]

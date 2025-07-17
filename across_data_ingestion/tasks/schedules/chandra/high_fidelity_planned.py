@@ -2,7 +2,6 @@ from datetime import datetime, timedelta, timezone
 from typing import Literal
 
 import structlog
-from astropy.table import Table  # type: ignore[import-untyped]
 from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
@@ -75,23 +74,26 @@ CHANDRA_TAP_URL = "https://cda.cfa.harvard.edu/cxctap/async"
 
 
 def get_instrument_info_from_observation(
-    instrument_info: dict, row: Table.Row
+    instruments: list[dict], tap_row: dict
 ) -> tuple[str, str]:
     """
     Constructs the instrument name from the observation parameters and
     returns both the name and the instrument id in across-server
     """
-    if "ACIS" in row["instrument"]:
+    instrument_dict = {
+        instrument["name"]: instrument["id"] for instrument in instruments
+    }
+    if "ACIS" in tap_row["instrument"]:
         instrument_full_name = "Advanced CCD Imaging Spectrometer"
-        if row["grating"] == "NONE" and row["exposure_mode"] != "CC":
+        if tap_row["grating"] == "NONE" and tap_row["exposure_mode"] != "CC":
             instrument_name = "ACIS"
-        elif row["grating"] == "HETG":
+        elif tap_row["grating"] == "HETG":
             instrument_name = "ACIS-HETG"
             instrument_full_name += " - High Energy Transmission Grating"
-        elif row["grating"] == "LETG":
+        elif tap_row["grating"] == "LETG":
             instrument_name = "ACIS-LETG"
             instrument_full_name += " - Low Energy Transmission Grating"
-        elif row["exposure_mode"] == "CC":
+        elif tap_row["exposure_mode"] == "CC":
             instrument_name = "ACIS-CC"
             instrument_full_name += " - Continuous Clocking Mode"
         else:
@@ -99,17 +101,17 @@ def get_instrument_info_from_observation(
                 "Could not parse observation parameters for correct instrument"
             )
             return "", ""
-    elif "HRC" in row["instrument"]:
+    elif "HRC" in tap_row["instrument"]:
         instrument_full_name = "High Resolution Camera"
-        if row["exposure_mode"] != "":
+        if tap_row["exposure_mode"] != "":
             instrument_name = "HRC-Timing"
             instrument_full_name += " - Timing Mode"
-        elif row["grating"] == "NONE":
+        elif tap_row["grating"] == "NONE":
             instrument_name = "HRC"
-        elif row["grating"] == "HETG":
+        elif tap_row["grating"] == "HETG":
             instrument_name = "HRC-HETG"
             instrument_full_name += " - High Energy Transmission Grating"
-        elif row["grating"] == "LETG":
+        elif tap_row["grating"] == "LETG":
             instrument_name = "HRC-LETG"
             instrument_full_name += " - Low Energy Transmission Grating"
         else:
@@ -121,7 +123,7 @@ def get_instrument_info_from_observation(
         logger.error("Could not parse observation parameters for correct instrument")
         return "", ""
 
-    instrument_id = instrument_info[instrument_full_name]
+    instrument_id = instrument_dict[instrument_full_name]
     return instrument_name, instrument_id
 
 
@@ -140,7 +142,7 @@ def create_schedule(telescope_id: str, observations: dict) -> AcrossSchedule | d
     }
 
 
-async def get_observation_parameters_from_tap(instrument_info_dict: dict) -> dict:
+async def get_observation_parameters_from_tap(instruments: list[dict]) -> dict:
     """Query Chandra TAP service to get most of the observation parameters"""
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     query = "select o.obsid, o.start_date, o.ra, o.dec, o.instrument, "
@@ -150,14 +152,15 @@ async def get_observation_parameters_from_tap(instrument_info_dict: dict) -> dic
     voservice = VOService(CHANDRA_TAP_URL)
     observations_table = await voservice.query(query)
     if not observations_table:
-        logger.warn("No observations found")
+        logger.info("No observations found")
         return {}
 
     observations = {}
     for row in observations_table:
         # Get correct instrument id from the observation parameters
+        row_dict = dict(row)
         instrument_name, instrument_id = get_instrument_info_from_observation(
-            instrument_info_dict, row
+            instruments, row_dict
         )
         if not instrument_name:
             logger.error("Cannot parse observations with unknown instrument")
@@ -239,16 +242,11 @@ async def ingest() -> None:
     # GET Telescope by name
     chandra_telescope_info = across_api.telescope.get({"name": "chandra"})[0]
     telescope_id = chandra_telescope_info["id"]
-    # Build dict of instrument name: id pairs for lookup later
-    instrument_info_dict = {
-        instrument["name"]: instrument["id"]
-        for instrument in chandra_telescope_info["instruments"]
-    }
 
     schedules: list[AcrossSchedule | dict] = []
 
     chandra_observation_data = await get_observation_parameters_from_tap(
-        instrument_info_dict
+        chandra_telescope_info["instruments"]
     )
     if not len(chandra_observation_data):
         return

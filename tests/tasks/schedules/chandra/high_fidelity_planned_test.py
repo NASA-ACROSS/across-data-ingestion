@@ -37,10 +37,10 @@ class TestChandraHighFidelityPlannedScheduleIngestionTask:
             mock_post.assert_called_once_with(chandra_planned_schedule)
 
     @pytest.mark.asyncio
-    async def test_should_log_warning_when_query_returns_no_response(
+    async def test_should_log_when_query_returns_no_response(
         self, mock_telescope_get: list[dict[str, str]]
     ):
-        """Should log a warning when querying VO service returns None"""
+        """Should log when querying VO service returns None"""
         with patch(
             "across_data_ingestion.tasks.schedules.chandra.high_fidelity_planned.logger"
         ) as log_mock, patch(
@@ -53,7 +53,7 @@ class TestChandraHighFidelityPlannedScheduleIngestionTask:
             "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ):
             await ingest()
-            assert "No observations" in log_mock.warn.call_args.args[0]
+            assert "No observations" in log_mock.info.call_args.args[0]
 
     @pytest.mark.asyncio
     async def test_should_log_warning_when_exposure_query_returns_no_response(
@@ -143,69 +143,95 @@ class TestChandraHighFidelityPlannedScheduleIngestionTask:
             assert "encountered an error" in log_mock.error.call_args.args[0]
 
     @pytest.mark.parametrize(
-        "row, expected_instrument_info",
-        list(
-            enumerate(
-                [
-                    (
-                        "ACIS",
-                        "acis-mock-id",
-                    ),
-                    (
-                        "ACIS-HETG",
-                        "acis-hetg-mock-id",
-                    ),
-                    (
-                        "ACIS-LETG",
-                        "acis-letg-mock-id",
-                    ),
-                    (
-                        "ACIS-CC",
-                        "acis-cc-mock-id",
-                    ),
-                    (
-                        "HRC",
-                        "hrc-mock-id",
-                    ),
-                    (
-                        "HRC-HETG",
-                        "hrc-hetg-mock-id",
-                    ),
-                    (
-                        "HRC-LETG",
-                        "hrc-letg-mock-id",
-                    ),
-                    (
-                        "HRC-Timing",
-                        "hrc-timing-mock-id",
-                    ),
-                    (
-                        "",
-                        "",
-                    ),
-                    (
-                        "",
-                        "",
-                    ),
-                    (
-                        "",
-                        "",
-                    ),
-                ]
-            )
-        ),
+        "mock_tap_row, expected_instrument_info",
+        [
+            (
+                {"instrument": "ACIS", "grating": "NONE", "exposure_mode": "NONE"},
+                (
+                    "ACIS",
+                    "acis-mock-id",
+                ),
+            ),
+            (
+                {"instrument": "ACIS", "grating": "HETG", "exposure_mode": "NONE"},
+                (
+                    "ACIS-HETG",
+                    "acis-hetg-mock-id",
+                ),
+            ),
+            (
+                {"instrument": "ACIS", "grating": "LETG", "exposure_mode": "NONE"},
+                (
+                    "ACIS-LETG",
+                    "acis-letg-mock-id",
+                ),
+            ),
+            (
+                {"instrument": "ACIS", "grating": "NONE", "exposure_mode": "CC"},
+                (
+                    "ACIS-CC",
+                    "acis-cc-mock-id",
+                ),
+            ),
+            (
+                {"instrument": "HRC", "grating": "NONE", "exposure_mode": ""},
+                (
+                    "HRC",
+                    "hrc-mock-id",
+                ),
+            ),
+            (
+                {"instrument": "HRC", "grating": "HETG", "exposure_mode": ""},
+                (
+                    "HRC-HETG",
+                    "hrc-hetg-mock-id",
+                ),
+            ),
+            (
+                {"instrument": "HRC", "grating": "LETG", "exposure_mode": ""},
+                (
+                    "HRC-LETG",
+                    "hrc-letg-mock-id",
+                ),
+            ),
+            (
+                {"instrument": "HRC", "grating": "NONE", "exposure_mode": "TIMING"},
+                (
+                    "HRC-Timing",
+                    "hrc-timing-mock-id",
+                ),
+            ),
+            (
+                {"instrument": "ACIS", "grating": "BADGRATING", "exposure_mode": ""},
+                (
+                    "",
+                    "",
+                ),
+            ),
+            (
+                {"instrument": "HRC", "grating": "BADGRATING", "exposure_mode": ""},
+                (
+                    "",
+                    "",
+                ),
+            ),
+            (
+                {"instrument": "BADINSTRUMENT", "grating": "", "exposure_mode": ""},
+                (
+                    "",
+                    "",
+                ),
+            ),
+        ],
     )
     def test_get_instrument_info_from_observation(
         self,
-        row: int,
+        mock_tap_row: dict,
         expected_instrument_info: tuple,
-        mock_instrument_info: dict,
-        mock_observation_configuration_table: Table,
+        mock_instrument_info: list,
     ) -> None:
         """Should return correct instrument name and id from observation row"""
         assert (
-            get_instrument_info_from_observation(
-                mock_instrument_info, mock_observation_configuration_table[row]
-            )
+            get_instrument_info_from_observation(mock_instrument_info, mock_tap_row)
             == expected_instrument_info
         )
