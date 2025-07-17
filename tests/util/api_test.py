@@ -115,16 +115,12 @@ class TestObservatoryApi:
 class TestTLEApi:
     class TestPost:
         def test_should_create_201(self):
-            """Should log a successful posted schedule"""
+            """Should return on a 201"""
             response = mock_response(status_code=201, text="test_tle_params")
 
-            with patch(
-                "across_data_ingestion.util.across_api.tle.api.logger"
-            ) as log_mock, patch("httpx.request", return_value=response):
-                tle.post(data={})
-                assert (
-                    f"TLE created: {response.text}" in log_mock.info.call_args.args[0]
-                )
+            with patch("httpx.request", return_value=response):
+                tle_post_return = tle.post(data={})
+                assert tle_post_return is None
 
         def test_should_be_duplicate_409(self):
             """Should log a duplicate TLE POST"""
@@ -137,7 +133,7 @@ class TestTLEApi:
                 "across_data_ingestion.util.across_api.tle.api.logger"
             ) as log_mock, patch("httpx.request", return_value=response):
                 tle.post(data={})
-                assert response.text in log_mock.info.call_args.args[0]
+                assert response.text in log_mock.warn.call_args.args[0]
 
         def test_should_raise_exception(self):
             """Should raise an exception in POST with non-201 or 409 status code"""

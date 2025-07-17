@@ -34,8 +34,8 @@ def post(data: dict = {}) -> None:
     response = httpx.request("POST", url=TLE_URL, json=data, headers=headers)
 
     if response.status_code == 201:
-        logger.info(f"TLE created: {response.text}")
+        return
     elif response.status_code == 409:
-        logger.info(response.text)
+        logger.warn(f"409: {response.text}")
     else:
         raise AcrossHTTPException(response.status_code, response.text, {})

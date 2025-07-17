@@ -28,7 +28,7 @@ class TestTLEIngestion:
             mock_observatory_info
         )
         assert (
-            list(tle_parameters.values())[0]
+            tle_parameters[0]["id"]
             == mock_observatory_info[0]["ephemeris_types"][0]["parameters"]["norad_id"]
         )
 
@@ -100,7 +100,7 @@ class TestTLEIngestion:
             "across_data_ingestion.util.across_api.tle.post", return_value=None
         ), patch("across_data_ingestion.tasks.tles.tle_ingestion.logger") as log_mock:
             entrypoint()  # type: ignore
-            assert "ran at" in log_mock.info.call_args.args[0]
+            assert "Completed TLE ingestion" in log_mock.info.call_args.args[0]
 
     def test_should_log_error_when_task_fails(self) -> None:
         """Should log error when the task fails"""
@@ -109,4 +109,7 @@ class TestTLEIngestion:
             Mock(return_value=None, side_effect=Exception),
         ), patch("across_data_ingestion.tasks.tles.tle_ingestion.logger") as log_mock:
             entrypoint()  # type: ignore
-            assert "encountered an error" in log_mock.error.call_args.args[0]
+            assert (
+                "TLE ingestion encountered an unknown error"
+                in log_mock.error.call_args.args[0]
+            )
