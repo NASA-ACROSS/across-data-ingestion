@@ -22,8 +22,17 @@ class TestVOService:
             async def aclose(self):
                 return None
 
+        class MockXMLElement:
+            text = "COMPLETED"
+
+        class MockXMLRoot:
+            def find(self, pattern):
+                return MockXMLElement
+
         self.mock_client = MockHttpxAsyncClient
         self.url = "mock url"
+
+        self.mock_xml_root = MockXMLRoot
 
     @pytest.mark.asyncio
     async def test_initialize_should_save_job_url_as_attr(self):
@@ -56,11 +65,29 @@ class TestVOService:
         """Should return query results when running get_results"""
         with patch("httpx.AsyncClient", self.mock_client), patch(
             "httpx.get", return_value=self.mock_client.response
-        ):
+        ), patch("xml.etree.ElementTree.fromstring", return_value=self.mock_xml_root()):
             service = VOService(self.url)
             service.job_url = "mock_job_url"
             results = service._get_results()
             assert len(results) > 0
+
+    def test_get_results_should_return_empty_string_if_no_results_found(self):
+        """Should return an empty string if no results are found"""
+
+        class MockBadXMLElement:
+            text = ""
+
+        class MockBadXMLRoot(self.mock_xml_root):
+            def find(self, pattern):
+                return MockBadXMLElement
+
+        with patch("httpx.AsyncClient", self.mock_client), patch(
+            "httpx.get", return_value=self.mock_client.response
+        ), patch("xml.etree.ElementTree.fromstring", return_value=MockBadXMLRoot()):
+            service = VOService(self.url)
+            service.job_url = "mock_job_url"
+            results = service._get_results()
+            assert len(results) == 0
 
     @pytest.mark.asyncio
     async def test_query_should_return_query_results(self):
@@ -73,6 +100,8 @@ class TestVOService:
             self.mock_client.response.text = table
             with patch("httpx.AsyncClient", self.mock_client), patch(
                 "httpx.get", return_value=self.mock_client.response
+            ), patch(
+                "xml.etree.ElementTree.fromstring", return_value=self.mock_xml_root()
             ):
                 service = VOService(self.url)
                 service.job_url = "mock_job_url"
