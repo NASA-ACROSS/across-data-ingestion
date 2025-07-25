@@ -23,6 +23,7 @@ def mock_telescope_get(mock_telescope_id, mock_instrument_id):
                 {
                     "id": mock_instrument_id,
                     "name": "Advanced CCD Imaging Spectrometer",
+                    "short_name": "ACIS",
                 },
             ],
         }
@@ -68,35 +69,35 @@ def mock_query_vo_service_for_exposure_times(mock_observation_table: dict) -> As
 def mock_instrument_info() -> list[dict]:
     return [
         {
-            "name": "Advanced CCD Imaging Spectrometer",
+            "short_name": "ACIS",
             "id": "acis-mock-id",
         },
         {
-            "name": "Advanced CCD Imaging Spectrometer - High Energy Transmission Grating",
+            "short_name": "ACIS-HETG",
             "id": "acis-hetg-mock-id",
         },
         {
-            "name": "Advanced CCD Imaging Spectrometer - Low Energy Transmission Grating",
+            "short_name": "ACIS-LETG",
             "id": "acis-letg-mock-id",
         },
         {
-            "name": "Advanced CCD Imaging Spectrometer - Continuous Clocking Mode",
+            "short_name": "ACIS-CC",
             "id": "acis-cc-mock-id",
         },
         {
-            "name": "High Resolution Camera",
+            "short_name": "HRC",
             "id": "hrc-mock-id",
         },
         {
-            "name": "High Resolution Camera - High Energy Transmission Grating",
+            "short_name": "HRC-HETG",
             "id": "hrc-hetg-mock-id",
         },
         {
-            "name": "High Resolution Camera - Low Energy Transmission Grating",
+            "short_name": "HRC-LETG",
             "id": "hrc-letg-mock-id",
         },
         {
-            "name": "High Resolution Camera - Timing Mode",
+            "short_name": "HRC-Timing",
             "id": "hrc-timing-mock-id",
         },
     ]

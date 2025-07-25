@@ -81,39 +81,27 @@ def get_instrument_info_from_observation(
     returns both the name and the instrument id in across-server
     """
     instrument_dict = {
-        instrument["name"]: instrument["id"] for instrument in instruments
+        instrument["short_name"]: instrument["id"] for instrument in instruments
     }
     if "ACIS" in tap_row["instrument"]:
-        instrument_full_name = "Advanced CCD Imaging Spectrometer"
         if tap_row["grating"] == "NONE" and tap_row["exposure_mode"] != "CC":
             instrument_name = "ACIS"
-        elif tap_row["grating"] == "HETG":
-            instrument_name = "ACIS-HETG"
-            instrument_full_name += " - High Energy Transmission Grating"
-        elif tap_row["grating"] == "LETG":
-            instrument_name = "ACIS-LETG"
-            instrument_full_name += " - Low Energy Transmission Grating"
+        elif tap_row["grating"] in ["HETG", "LETG"]:
+            instrument_name = f"ACIS-{tap_row["grating"]}"
         elif tap_row["exposure_mode"] == "CC":
             instrument_name = "ACIS-CC"
-            instrument_full_name += " - Continuous Clocking Mode"
         else:
             logger.error(
                 "Could not parse observation parameters for correct instrument"
             )
             return "", ""
     elif "HRC" in tap_row["instrument"]:
-        instrument_full_name = "High Resolution Camera"
         if tap_row["exposure_mode"] != "":
             instrument_name = "HRC-Timing"
-            instrument_full_name += " - Timing Mode"
         elif tap_row["grating"] == "NONE":
             instrument_name = "HRC"
-        elif tap_row["grating"] == "HETG":
-            instrument_name = "HRC-HETG"
-            instrument_full_name += " - High Energy Transmission Grating"
-        elif tap_row["grating"] == "LETG":
-            instrument_name = "HRC-LETG"
-            instrument_full_name += " - Low Energy Transmission Grating"
+        elif tap_row["grating"] in ["HETG", "LETG"]:
+            instrument_name = f"HRC-{tap_row["grating"]}"
         else:
             logger.error(
                 "Could not parse observation parameters for correct instrument"
@@ -123,7 +111,7 @@ def get_instrument_info_from_observation(
         logger.error("Could not parse observation parameters for correct instrument")
         return "", ""
 
-    instrument_id = instrument_dict[instrument_full_name]
+    instrument_id = instrument_dict[instrument_name]
     return instrument_name, instrument_id
 
 
@@ -244,6 +232,8 @@ async def ingest() -> None:
     telescope_id = chandra_telescope_info["id"]
 
     schedules: list[AcrossSchedule | dict] = []
+
+    logger.info(chandra_telescope_info["instruments"])
 
     chandra_observation_data = await get_observation_parameters_from_tap(
         chandra_telescope_info["instruments"]
