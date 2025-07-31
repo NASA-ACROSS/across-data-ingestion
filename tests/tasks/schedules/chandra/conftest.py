@@ -1,4 +1,5 @@
-from unittest.mock import AsyncMock
+from collections.abc import Generator
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from astropy.table import Table  # type: ignore[import-untyped]
@@ -15,19 +16,39 @@ def mock_instrument_id() -> str:
 
 
 @pytest.fixture
-def mock_telescope_get(mock_telescope_id, mock_instrument_id):
-    return [
-        {
-            "id": mock_telescope_id,
-            "instruments": [
-                {
-                    "id": mock_instrument_id,
-                    "name": "Advanced CCD Imaging Spectrometer",
-                    "short_name": "ACIS",
-                },
-            ],
-        }
-    ]
+def mock_telescope_get(mock_telescope_id, mock_instrument_id) -> Generator[AsyncMock]:
+    with patch(
+        "across_data_ingestion.util.across_api.telescope.get",
+        return_value=[
+            {
+                "id": mock_telescope_id,
+                "instruments": [
+                    {
+                        "id": mock_instrument_id,
+                        "name": "Advanced CCD Imaging Spectrometer",
+                        "short_name": "ACIS",
+                    },
+                ],
+            }
+        ],
+    ) as mock_telescope_get:
+        yield mock_telescope_get
+
+
+@pytest.fixture
+def mock_schedule_post() -> Generator[AsyncMock]:
+    with patch(
+        "across_data_ingestion.util.across_api.schedule.post", return_value=None
+    ) as mock_schedule_post:
+        yield mock_schedule_post
+
+
+@pytest.fixture
+def mock_logger() -> Generator[MagicMock]:
+    with patch(
+        "across_data_ingestion.tasks.schedules.chandra.high_fidelity_planned.logger"
+    ) as log_mock:
+        yield log_mock
 
 
 @pytest.fixture
@@ -52,17 +73,28 @@ def mock_observation_table(mock_observation_data: dict) -> Table:
 
 
 @pytest.fixture
-def mock_query_vo_service(mock_observation_table: dict) -> AsyncMock:
-    return AsyncMock(return_value=mock_observation_table)
+def mock_query_vo_service(mock_observation_table: dict) -> Generator[AsyncMock]:
+    with patch(
+        "across_data_ingestion.tasks.schedules.chandra.high_fidelity_planned.VOService.query",
+        return_value=mock_observation_table,
+    ) as mock_vo_service:
+        yield mock_vo_service
 
 
 @pytest.fixture
-def mock_query_vo_service_for_exposure_times(mock_observation_table: dict) -> AsyncMock:
-    """
-    Return the mock observation table the first time query is called
-    and None the second time
-    """
-    return AsyncMock(side_effect=[mock_observation_table, None])
+def mock_ingest() -> Generator[AsyncMock]:
+    with patch(
+        "across_data_ingestion.tasks.schedules.chandra.high_fidelity_planned.ingest",
+    ) as mock_ingest:
+        yield mock_ingest
+
+
+@pytest.fixture
+def mock_get_instrument_info_from_obs() -> Generator[AsyncMock]:
+    with patch(
+        "across_data_ingestion.tasks.schedules.chandra.high_fidelity_planned.get_instrument_info_from_observation",
+    ) as mock_get_instrument_info_from_obs:
+        yield mock_get_instrument_info_from_obs
 
 
 @pytest.fixture
