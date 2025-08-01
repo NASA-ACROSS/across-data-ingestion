@@ -1,5 +1,5 @@
 from collections.abc import Generator
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pandas as pd
 import pytest
@@ -19,15 +19,7 @@ from across_data_ingestion.tasks.schedules.hst.low_fidelity_planned import (
 from .mocks.low_fidelity_planned_mock_schedule_output import hst_planned_schedule
 
 
-class MockResponse:
-    @property
-    def text(self):
-        return "mock response text"
-
-
 class TestHSTLowFidelityPlannedScheduleIngestionTask:
-    mock_response = MockResponse()
-
     @pytest.fixture(autouse=True)
     def setup(
         self,
@@ -50,106 +42,64 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
 
     def test_should_generate_across_schedule(
         self,
-        mock_planned_exposure_catalog: pd.DataFrame,
-        mock_timeline_file_dataframe: pd.DataFrame,
+        mock_read_planned_exposure_catalog: AsyncMock,
+        mock_read_timeline_file: AsyncMock,
+        mock_get_latest_timeline_file: AsyncMock,
         mock_schedule_post: Mock,
     ) -> None:
         """Should generate ACROSS schedules"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.read_planned_exposure_catalog",
-            return_value=mock_planned_exposure_catalog,
-        ), patch(
-            "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.get_latest_timeline_file",
-            return_value="timeline_07_28_25",
-        ), patch(
-            "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.read_timeline_file",
-            return_value=mock_timeline_file_dataframe,
-        ):
-            ingest()
-            mock_schedule_post.assert_called_once_with(hst_planned_schedule)
+        ingest()
+        mock_schedule_post.assert_called_once_with(hst_planned_schedule)
 
     def test_should_log_when_ingestion_is_successful(
         self,
-        mock_planned_exposure_catalog: pd.DataFrame,
-        mock_timeline_file_dataframe: pd.DataFrame,
+        mock_read_planned_exposure_catalog: AsyncMock,
+        mock_read_timeline_file: AsyncMock,
+        mock_get_latest_timeline_file: AsyncMock,
         mock_log: Mock,
     ) -> None:
         """Should log info when ingestion is successful"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.read_planned_exposure_catalog",
-            return_value=mock_planned_exposure_catalog,
-        ), patch(
-            "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.get_latest_timeline_file",
-            return_value="timeline_07_28_25",
-        ), patch(
-            "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.read_timeline_file",
-            return_value=mock_timeline_file_dataframe,
-        ):
-            entrypoint()  # type: ignore
-            assert "ran successfully" in mock_log.info.call_args.args[0]
+        entrypoint()  # type: ignore
+        assert "ran successfully" in mock_log.info.call_args.args[0]
 
     def test_should_log_error_ingestion_fails(
         self,
-        mock_planned_exposure_catalog: pd.DataFrame,
-        mock_timeline_file_dataframe: pd.DataFrame,
+        mock_read_planned_exposure_catalog: AsyncMock,
+        mock_read_timeline_file: AsyncMock,
+        mock_get_latest_timeline_file: AsyncMock,
         mock_log: Mock,
         mock_schedule_post: Mock,
     ) -> None:
         """Should log error when ingestion encounters unexpected error"""
         mock_schedule_post.side_effect = Exception()
-        with patch(
-            "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.read_planned_exposure_catalog",
-            return_value=mock_planned_exposure_catalog,
-        ), patch(
-            "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.get_latest_timeline_file",
-            return_value="timeline_07_28_25",
-        ), patch(
-            "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.read_timeline_file",
-            return_value=mock_timeline_file_dataframe,
-        ):
-            entrypoint()  # type: ignore
-            assert "encountered an unexpected error" in mock_log.error.call_args.args[0]
+        entrypoint()  # type: ignore
+        assert "encountered an unexpected error" in mock_log.error.call_args.args[0]
 
     def test_should_read_planned_exposure_catalog_as_dataframe(
-        self, mock_planned_exposure_catalog: pd.DataFrame
+        self, mock_pandas_read_csv: MagicMock
     ) -> None:
         """Should read the planned exposure catalog file as a DataFrame"""
-        with patch("pandas.read_csv", return_value=mock_planned_exposure_catalog):
-            exposure_df = read_planned_exposure_catalog()
-            assert isinstance(exposure_df, pd.DataFrame)
+        exposure_df = read_planned_exposure_catalog()
+        assert isinstance(exposure_df, pd.DataFrame)
 
     def test_should_get_latest_timeline_filename(
-        self, mock_timeline_html_tags: list
+        self,
+        mock_soup: MagicMock,
+        mock_get: MagicMock,
     ) -> None:
         """Should return the timeline filename farthest in the future"""
-
-        mock_soup = Mock()
-        mock_soup.find_all.return_value = mock_timeline_html_tags
-
-        with patch("httpx.get", return_value=self.mock_response), patch(
-            "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.BeautifulSoup",
-            return_value=mock_soup,
-        ):
-            mock_latest_filename = get_latest_timeline_file()
-            assert mock_latest_filename == "timeline_07_28_25"
+        mock_latest_filename = get_latest_timeline_file()
+        assert mock_latest_filename == "timeline_07_28_25"
 
     def test_should_read_timeline_file_as_dataframe(
         self,
-        mock_timeline_file_raw_data: str,
         mock_timeline_file_dataframe: pd.DataFrame,
+        mock_soup: MagicMock,
+        mock_get: MagicMock,
     ) -> None:
         """Should read the timeline file as a DataFrame"""
-        mock_soup = Mock()
-        mock_soup.text = mock_timeline_file_raw_data
-
-        with patch("httpx.get", return_value=self.mock_response), patch(
-            "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.BeautifulSoup",
-            return_value=mock_soup,
-        ):
-            mock_timeline_data = read_timeline_file("mock-timeline-filename")
-            pd.testing.assert_frame_equal(
-                mock_timeline_data, mock_timeline_file_dataframe
-            )
+        mock_timeline_data = read_timeline_file("mock-timeline-filename")
+        pd.testing.assert_frame_equal(mock_timeline_data, mock_timeline_file_dataframe)
 
     def test_extract_coords_should_return_empty_dict_if_target_not_found(
         self,

@@ -15,6 +15,39 @@ def mock_log() -> Generator[MagicMock]:
 
 
 @pytest.fixture
+def mock_soup(
+    mock_timeline_html_tags: list, mock_timeline_file_raw_data: str
+) -> Generator[MagicMock]:
+    mock_soup = MagicMock()
+    mock_soup.find_all.return_value = mock_timeline_html_tags
+    mock_soup.text = mock_timeline_file_raw_data
+    with patch(
+        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.BeautifulSoup",
+        return_value=mock_soup,
+    ) as mock_soup:
+        yield mock_soup
+
+
+@pytest.fixture
+def mock_get() -> Generator[MagicMock]:
+    with patch(
+        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.httpx.get"
+    ) as mock_get:
+        mock_get.text = "mock response text"
+        yield mock_get
+
+
+@pytest.fixture
+def mock_pandas_read_csv(
+    mock_planned_exposure_catalog: pd.DataFrame,
+) -> Generator[MagicMock]:
+    with patch(
+        "pandas.read_csv", return_value=mock_planned_exposure_catalog
+    ) as mock_read_csv:
+        yield mock_read_csv
+
+
+@pytest.fixture
 def mock_telescope_id() -> str:
     return "hst-mock-telescope-id"
 
@@ -75,6 +108,35 @@ def mock_instrument_get(mock_telescope_id: str, mock_instrument_id: str) -> list
 @pytest.fixture
 def mock_schedule_post() -> Generator:
     yield Mock(return_value=None)
+
+
+@pytest.fixture
+def mock_read_planned_exposure_catalog(
+    mock_planned_exposure_catalog: pd.DataFrame,
+) -> Generator:
+    with patch(
+        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.read_planned_exposure_catalog",
+        return_value=mock_planned_exposure_catalog,
+    ) as mock_read_exposure_catalog:
+        yield mock_read_exposure_catalog
+
+
+@pytest.fixture
+def mock_read_timeline_file(mock_timeline_file_dataframe: pd.DataFrame) -> Generator:
+    with patch(
+        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.read_timeline_file",
+        return_value=mock_timeline_file_dataframe,
+    ) as mock_read_timeline:
+        yield mock_read_timeline
+
+
+@pytest.fixture
+def mock_get_latest_timeline_file() -> Generator:
+    with patch(
+        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.get_latest_timeline_file",
+        return_value="timeline_07_28_25",
+    ) as mock_latest_timeline_file:
+        yield mock_latest_timeline_file
 
 
 @pytest.fixture
