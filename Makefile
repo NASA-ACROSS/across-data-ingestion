@@ -1,18 +1,21 @@
 # Define env variables
 ENV ?= local
-ENVS = local test action prod
-IS_ENV_VALID := $(filter $(ENV), $(ENVS))
+RUNTIME_ENVS = local dev staging prod
+BUILD_ENV ?= local
+BUILD_ENVS = local action deploy
+IS_BUILD_ENV_VALID := $(filter $(BUILD_ENV), $(BUILD_ENVS))
 
 # Docker
-DOCKER_COMPOSE_FILE = containers/docker-compose.$(ENV).yml
+DOCKER_COMPOSE_FILE = docker/compose.$(BUILD_ENV).yml
 DOCKER_COMPOSE = docker compose -f ${DOCKER_COMPOSE_FILE} --env-file=.env
+TAG = $(shell git rev-parse --short HEAD)
 
 # define directories
 VENV_DIR = .venv
 VENV_BIN = $(VENV_DIR)/bin
 REQ_DIR = requirements
-REQ_IN = $(REQ_DIR)/$(ENV).in
-REQ_TXT = $(REQ_DIR)/$(ENV).txt
+REQ_IN = $(REQ_DIR)/$(BUILD_ENV).in
+REQ_TXT = $(REQ_DIR)/$(BUILD_ENV).txt
 UV_INSTALL_SCRIPT = https://astral.sh/uv/install.sh
 
 # Detect installed tools
@@ -51,7 +54,7 @@ define ask
 endef
 
 # Tasks
-.PHONY: list_targets help init install_uv install install_hooks lock configure venv_dir venv check_env install_deps start run stop build dev restart reset tail_logs temp_run test lint prod clean prune rm_imgs
+.PHONY: list_targets help init install_uv install install_hooks lock configure venv_dir venv check_env install_deps start run stop build dev restart reset tail_logs temp_run test lint rev seed migrate prod clean prune rm_imgs
 
 list_targets: ### Internal command used for getting a list of commands for .PHONY
 	@awk '/^[a-zA-Z_\-]+:/ {sub(/:/, ""); printf "%s ", $$1} END {print ""}' $(MAKEFILE_LIST)
@@ -76,7 +79,7 @@ help:
 
 
 # Group: Setup
-init: install configure run ## Initialize the project, dependencies, and start the server
+init: install configure run migrate seed ## Initialize the project, dependencies, and start the server
 
 install_uv: ## Install 'uv' if needed (this will install it globally)
 	@echo "Installing 'uv'...";
@@ -97,14 +100,19 @@ install: check_env venv ## Install dependencies from the lockfile for the specif
 install_hooks: ## Install 'pre-commit' git hooks, only for local.
 	@if [ $(ENV) == local ]; then \
 		echo "Installing pre-commit git hooks..."; \
-		pre-commit install; \
+		$(VENV_DIR)/pre-commit install; \
 	else \
 		echo "Not a git repository. Skipping pre-commit hooks installation."; \
 	fi
 
 lock: check_env venv ## Create or update the lockfile
 	@echo "Updating lockfile...";
-	@uv pip compile $(REQ_IN) -o $(REQ_TXT) --quiet;
+	@for env in $(BUILD_ENVS); do \
+		in_file=$(REQ_DIR)/$$env.in; \
+		out_file=$(REQ_DIR)/$$env.txt; \
+		echo "Compiling $$in_file -> $$out_file"; \
+		uv pip compile $$in_file -o $$out_file --quiet; \
+	done
 
 configure: ## Create a .env file for environment variables
 	@echo "Creating .env file..."
@@ -120,48 +128,53 @@ venv: venv_dir ### Create venv within specified env
 	fi;
 
 check_env: ### Check if the passed in ENV is valid
-	@if [ -z $(IS_ENV_VALID) ]; then \
-		echo "Invalid ENV: '$(ENV)'. Allowed values are: $(ENVS)"; \
+	@if [ -z $(IS_BUILD_ENV_VALID) ]; then \
+		echo "Invalid BUILD_ENV: '$(BUILD_ENV)'. Allowed values are: $(BUILD_ENVS)"; \
 		exit 1; \
 	fi
 
 check_prod: ### Check if the env is prod
 	@if [ $(ENV) == prod ]; then \
 		echo "This can only be run on non-production environments."; \
-		exit 0; \
+		exit 1; \
+	fi
+
+local_only: ### Check if the env is prod
+	@if [ $(ENV) != local ]; then \
+		echo "This can only be run on the local environment."; \
+		exit 1; \
 	fi
 
 install_deps: ### Install dependencies
 	@uv pip sync $(REQ_TXT);
 	@echo "Installed dependencies";
 
-
 # Group: Development
-start: check_prod run ## Start the application containers
+start: check_prod run migrate seed ## Start the application containers (includes migrating and seeding)
 
-dev: check_prod ## Start the server in the terminal
-	@$(VENV_BIN)/fastapi dev across_data_ingestion/main.py --host 0.0.0.0 --port 8001
+dev: local_only ## Start the server in the terminal
+	@$(VENV_BIN)/fastapi dev across_server/main.py
 
-stop: check_prod ## Stop the server container
+stop: local_only ## Stop the server container
 	@$(DOCKER_COMPOSE) down app
 
-stop_all: check_prod ## Stop all containers
+stop_all: local_only ## Stop all containers
 	@$(DOCKER_COMPOSE) down -v
 
-build: check_prod ## Build the containers (does not run)
-	@$(DOCKER_COMPOSE) build --no-cache
+build: ## Build the containers (does not run them)
+	@DOCKER_BUILDKIT=1 $(DOCKER_COMPOSE) build --build-arg BUILD_ENV=$(BUILD_ENV)
 
-restart: ## Restarts the app container
+restart: local_only ## Restarts the app container
 	@$(DOCKER_COMPOSE) restart
 
-reset: check_prod ## Resets the db containers and volumes
+reset: local_only ## Resets the db containers and volumes
 	@$(call ask,\
 		"Proceeding will reset the db and delete any existing data.", \
 		$(MAKE) stop_all && $(MAKE) start,\
 		"Reset aborted."\
 	);
 
-hard_reset: check_prod ## Hard reset and rebuild everything (basically `rm -rf` for the entire stack)
+hard_reset: local_only ## Hard reset and rebuild everything (basically `rm -rf` for the entire stack)
 	@$(call ask,\
 		"Proceeding will reset everything locally.", \
 		$(MAKE) stop_all && $(MAKE) rm_imgs && $(MAKE) start,\
@@ -171,24 +184,48 @@ hard_reset: check_prod ## Hard reset and rebuild everything (basically `rm -rf` 
 tail_logs: ## Output a tail of logs for the server
 	@$(DOCKER_COMPOSE) logs -ft app
 
-temp_run: check_prod ## Start a temporary container from an image with a bash shell for debugging
-	@docker run --rm -it --entrypoint=/bin/bash across-data-ingestion-app
+temp_run: ## Start a temporary container from an image with a bash shell for debugging
+	@docker run --rm -it --entrypoint=/bin/bash across-server-app
 
 
 # Group: Testing
 test: ## Run automated tests
-	@$(VENV_BIN)/pytest --cov=across_data_ingestion tests/
+	@$(VENV_BIN)/pytest --cov=across_server tests/**;
 
 lint: ## Run linting
-	@$(VENV_BIN)/pre-commit run;
+	@$(VENV_BIN)/pre-commit run --all-files;
 
 types: ## Run type checks
 	@$(VENV_BIN)/mypy;
 
 # Group: Running
 run: ## Run the containers
-	@$(DOCKER_COMPOSE) up -d
+	@$(DOCKER_COMPOSE) up -d --wait --wait-timeout 30
 
+# Group: Deployment
+push: ## Build, tag, and push an image to ECR
+	@aws ecr get-login-password \
+    	--region us-east-2 | \
+    	docker login \
+			--username AWS \
+			--password-stdin 905418122838.dkr.ecr.us-east-2.amazonaws.com
+
+	@$(MAKE) build_deploy TAG=$(TAG)
+
+	@docker tag \
+		data-ingestion:$(TAG) \
+		905418122838.dkr.ecr.us-east-2.amazonaws.com/data-ingestion:$(TAG)
+
+	@docker push 905418122838.dkr.ecr.us-east-2.amazonaws.com/data-ingestion:$(TAG)
+
+build_deploy: ## Build the containers for deployment -- does not use docker-compose
+	@DOCKER_BUILDKIT=1 docker build \
+		-t data-ingestion:$(TAG) \
+		--no-cache \
+		--platform linux/amd64 \
+		--ssh default \
+		--provenance false \
+		--build-arg BUILD_ENV=deploy .
 
 # Group: Cleaning
 clean: ## Clean virtual env
