@@ -8,12 +8,12 @@ from across_data_ingestion.tasks.schedules.hst.low_fidelity_planned import (
     entrypoint,
     extract_instrument_info_from_observation,
     extract_observation_pointing_coordinates,
-    format_across_observation,
     get_instrument_name_from_observation_data,
     get_latest_timeline_file,
     ingest,
     read_planned_exposure_catalog,
     read_timeline_file,
+    transform_to_across_observation,
 )
 
 from .mocks.low_fidelity_planned_mock_schedule_output import hst_planned_schedule
@@ -42,20 +42,24 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
 
     def test_should_generate_across_schedule(
         self,
-        mock_read_planned_exposure_catalog: AsyncMock,
-        mock_read_timeline_file: AsyncMock,
-        mock_get_latest_timeline_file: AsyncMock,
         mock_schedule_post: Mock,
     ) -> None:
         """Should generate ACROSS schedules"""
         ingest()
         mock_schedule_post.assert_called_once_with(hst_planned_schedule)
 
+    def test_ingest_should_return_if_cannot_read_timeline_file(
+        self,
+        mock_read_timeline_file: AsyncMock,
+        mock_schedule_post: Mock,
+    ) -> None:
+        """Should return if cannot read timeline file"""
+        mock_read_timeline_file.return_value = None
+        ingest()
+        mock_schedule_post.assert_not_called
+
     def test_should_log_when_ingestion_is_successful(
         self,
-        mock_read_planned_exposure_catalog: AsyncMock,
-        mock_read_timeline_file: AsyncMock,
-        mock_get_latest_timeline_file: AsyncMock,
         mock_log: Mock,
     ) -> None:
         """Should log info when ingestion is successful"""
@@ -64,9 +68,6 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
 
     def test_should_log_error_ingestion_fails(
         self,
-        mock_read_planned_exposure_catalog: AsyncMock,
-        mock_read_timeline_file: AsyncMock,
-        mock_get_latest_timeline_file: AsyncMock,
         mock_log: Mock,
         mock_schedule_post: Mock,
     ) -> None:
@@ -99,7 +100,22 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
     ) -> None:
         """Should read the timeline file as a DataFrame"""
         mock_timeline_data = read_timeline_file("mock-timeline-filename")
+        assert mock_timeline_data is not None
         pd.testing.assert_frame_equal(mock_timeline_data, mock_timeline_file_dataframe)
+
+    def test_should_log_warning_and_return_if_cannot_read_timeline_file(
+        self,
+        mock_soup: MagicMock,
+        mock_get: MagicMock,
+        mock_log: Mock,
+    ) -> None:
+        """Should log a warning and return if cannot read timeline file"""
+        mock_response = Mock()
+        mock_response.text = ""
+        mock_soup.return_value = mock_response
+        mock_timeline_data = read_timeline_file("mock-timeline-filename")
+        assert mock_timeline_data is None
+        assert "Could not scrape timeline file" in mock_log.warning.call_args.args[0]
 
     def test_extract_coords_should_return_empty_dict_if_target_not_found(
         self,
@@ -121,13 +137,45 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
             "target_name": mock_planned_exposure_catalog["object_name"].values[0],
             "mode": "ACQ",
         }
-        across_observation = format_across_observation(
-            mock_planned_exposure_catalog, mock_timeline_observation_data, {}
+        across_observation = transform_to_across_observation(
+            mock_planned_exposure_catalog, mock_timeline_observation_data, []
+        )
+        assert across_observation == {}
+
+    def test_format_across_observation_should_skip_calibration_obs(
+        self,
+        mock_planned_exposure_catalog: pd.DataFrame,
+    ) -> None:
+        """Should return an empty dict if the observation is a calibration observation"""
+        mock_timeline_observation_data = {
+            "target_name": "BIAS",
+            "mode": "ACCUM",
+            "obs_id": 123456,
+        }
+        across_observation = transform_to_across_observation(
+            mock_planned_exposure_catalog, mock_timeline_observation_data, []
+        )
+        assert across_observation == {}
+
+    def test_format_across_observation_should_return_if_cannot_find_instrument_name(
+        self,
+        mock_planned_exposure_catalog: pd.DataFrame,
+        mock_get_instrument_name_from_observation_data: MagicMock,
+    ) -> None:
+        """Should return an empty dict if cannot find instrument name for observation"""
+        mock_timeline_observation_data = {
+            "target_name": mock_planned_exposure_catalog["object_name"].values[0],
+            "mode": "ACCUM",
+        }
+        mock_get_instrument_name_from_observation_data.return_value = ""
+        across_observation = transform_to_across_observation(
+            mock_planned_exposure_catalog, mock_timeline_observation_data, []
         )
         assert across_observation == {}
 
     def test_format_across_observation_should_skip_obs_with_no_coords(
         self,
+        mock_get_instrument_name_from_observation_data: MagicMock,
         mock_planned_exposure_catalog: pd.DataFrame,
     ) -> None:
         """Should return an empty dict if cannot find coordinates for the observation"""
@@ -139,8 +187,39 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
             "end_time": "02:03:30",
         }
 
-        across_observation = format_across_observation(
-            mock_planned_exposure_catalog, mock_timeline_observation_data, {}
+        across_observation = transform_to_across_observation(
+            mock_planned_exposure_catalog, mock_timeline_observation_data, []
+        )
+        assert across_observation == {}
+
+    def test_format_across_observation_should_skip_obs_with_no_instrument_info(
+        self,
+        mock_get_instrument_name_from_observation_data: MagicMock,
+        mock_extract_observation_pointing_coordinate: MagicMock,
+        mock_extract_instrument_info_from_observation: MagicMock,
+        mock_planned_exposure_catalog: pd.DataFrame,
+    ) -> None:
+        """Should return an empty dict if cannot find instrument info for the observation"""
+        mock_get_instrument_name_from_observation_data.return_value = "mock_inst"
+        mock_extract_instrument_info_from_observation.return_value = {}
+        mock_timeline_observation_data = {
+            "target_name": "Mock Target Name",
+            "mode": "ACCUM",
+            "date": "2025.209",
+            "begin_time": "01:07:54",
+            "end_time": "02:03:30",
+        }
+
+        across_observation = transform_to_across_observation(
+            mock_planned_exposure_catalog,
+            mock_timeline_observation_data,
+            [
+                {
+                    "id": "mock-instrument-id",
+                    "short_name": "mock_inst",
+                    "filters": [{"name": "Mock Filter"}],
+                }
+            ],
         )
         assert across_observation == {}
 
@@ -191,7 +270,11 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
         "mock_observation_data, mock_instrument_data, obs_type",
         [
             (
-                {"name": "MockImaging", "element": "F100W"},
+                {
+                    "name": "MockImaging",
+                    "element": "F100W",
+                    "aperture": "mock-aperture",
+                },
                 {
                     "short_name": "mock_inst",
                     "filters": [
@@ -205,7 +288,11 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
                 "imaging",
             ),
             (
-                {"name": "MockSpectroscopy", "element": "G100"},
+                {
+                    "name": "MockSpectroscopy",
+                    "element": "G100",
+                    "aperture": "mock-aperture",
+                },
                 {
                     "short_name": "mock_inst",
                     "filters": [
@@ -219,7 +306,7 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
                 "spectroscopy",
             ),
             (
-                {"name": "MockCOS", "element": "F100W"},
+                {"name": "MockCOS", "element": "F100W", "aperture": "mock-aperture"},
                 {
                     "short_name": "mock_COS",
                     "filters": [

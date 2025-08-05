@@ -110,7 +110,7 @@ def mock_schedule_post() -> Generator:
     yield Mock(return_value=None)
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mock_read_planned_exposure_catalog(
     mock_planned_exposure_catalog: pd.DataFrame,
 ) -> Generator:
@@ -121,7 +121,7 @@ def mock_read_planned_exposure_catalog(
         yield mock_read_exposure_catalog
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mock_read_timeline_file(mock_timeline_file_dataframe: pd.DataFrame) -> Generator:
     with patch(
         "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.read_timeline_file",
@@ -130,13 +130,42 @@ def mock_read_timeline_file(mock_timeline_file_dataframe: pd.DataFrame) -> Gener
         yield mock_read_timeline
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mock_get_latest_timeline_file() -> Generator:
     with patch(
         "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.get_latest_timeline_file",
         return_value="timeline_07_28_25",
     ) as mock_latest_timeline_file:
         yield mock_latest_timeline_file
+
+
+@pytest.fixture
+def mock_get_instrument_name_from_observation_data() -> Generator:
+    with patch(
+        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.get_instrument_name_from_observation_data",
+        return_value="mock instrument name",
+    ) as mock_instrument_name:
+        yield mock_instrument_name
+
+
+@pytest.fixture
+def mock_extract_observation_pointing_coordinate() -> Generator:
+    with patch(
+        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.extract_observation_pointing_coordinates"
+    ) as mock_coordinate_info:
+        mock_coordinate_info.return_value = {
+            "ra": "00:00:00",
+            "dec": "12:34:56",
+        }
+        yield mock_coordinate_info
+
+
+@pytest.fixture
+def mock_extract_instrument_info_from_observation() -> Generator:
+    with patch(
+        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.extract_instrument_info_from_observation"
+    ) as mock_instrument_info:
+        yield mock_instrument_info
 
 
 @pytest.fixture
