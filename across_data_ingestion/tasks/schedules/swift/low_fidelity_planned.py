@@ -228,7 +228,9 @@ def create_observations(
 
 
 def create_uvot_observations(
-    instrument_id: str, observation_data: list[CustomSwiftObsEntry], *kwargs: Any
+    instrument_id: str,
+    observation_data: list[CustomSwiftObsEntry],
+    *kwargs: dict[str, Any],
 ):
     # Aggregate unique uvot modes
     uvot_modes = list(set([obs.uvot for obs in observation_data]))
