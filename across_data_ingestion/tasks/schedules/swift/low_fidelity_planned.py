@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from typing import Callable, Literal
+from typing import Any, Callable, Literal
 
 import structlog
 from astropy.time import Time  # type: ignore[import-untyped]
@@ -228,10 +228,7 @@ def create_observations(
 
 
 def create_uvot_observations(
-    instrument_id: str,
-    observation_data: list[CustomSwiftObsEntry],
-    bandpass: dict = {},
-    observation_type: Literal["imaging", "spectroscopy", "timing"] = "imaging",
+    instrument_id: str, observation_data: list[CustomSwiftObsEntry], *kwargs: Any
 ):
     # Aggregate unique uvot modes
     uvot_modes = list(set([obs.uvot for obs in observation_data]))
