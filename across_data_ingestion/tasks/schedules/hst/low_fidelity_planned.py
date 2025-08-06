@@ -10,7 +10,7 @@ from fastapi_utils.tasks import repeat_every
 
 from ....core.constants import SECONDS_IN_A_WEEK
 from ....util import across_api
-from ..types import AcrossObservation, AcrossSchedule
+from ..types import AcrossObservation, AcrossSchedule, Position
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
@@ -35,6 +35,43 @@ EXPOSURE_CATALOG_COLUMN_NAMES = [
     "cy",
     "dataset",
     "release",
+]
+
+TIMELINE_FILE_COLUMN_NAMES = [
+    "date",
+    "begin_time",
+    "end_time",
+    "obs_id",
+    "PI",
+    "exposure",
+    "target_name",
+    "instrument",
+    "mode",
+    "aperture",
+    "element",
+    "exp_time",
+    "ob",
+    "al",
+    "ex",
+]
+
+# Fixed widths of columns in timeline file
+TIMELINE_FILE_COLUMN_SPACING = [
+    (0, 8),
+    (8, 17),
+    (17, 27),
+    (27, 35),
+    (35, 47),
+    (47, 54),
+    (55, 84),
+    (84, 94),
+    (94, 101),
+    (101, 114),
+    (114, 127),
+    (127, 137),
+    (137, 140),
+    (140, 143),
+    (143, 146),
 ]
 
 # List of target names found in observations to ignore
@@ -96,56 +133,23 @@ def get_latest_timeline_file() -> str:
     return newest_link
 
 
-def read_timeline_file(filename: str) -> pd.DataFrame | None:
+def read_timeline_file(filename: str) -> pd.DataFrame:
     """
     Method to read an HST timeline file as a pandas DataFrame.
     Scapes the HTML using BeautifulSoup, separates columns based on
     fixed number of characters, and returns the data as a DataFrame object.
     """
     timeline_url = BASE_TIMELINE_URL + filename
-    timeline_response = httpx.get(timeline_url)
-    timeline_file = timeline_response.text
-
-    soup = BeautifulSoup(timeline_file, "html.parser")
-
-    if not len(soup.text):
-        logger.warning("Could not scrape timeline file")
-        return None
-
-    raw_observations = []
-    lines = soup.text.split("\n")
-    for line in lines:
-        if line.startswith("20"):  # Observation lines start with the year
-            date = line[:8]
-            begin = line[9:17].strip()
-            end = line[18:27].strip()
-            obs_id = line[28:35].strip()
-            pi = line[36:47].strip()
-            exposure = line[48:54].strip()
-            target = line[55:84].strip()
-            instrument = line[85:94].strip()
-            mode = line[95:101].strip()
-            aperture = line[102:114].strip()
-            element = line[115:127].strip()
-            exp_time = line[128:137].strip()
-            raw_observations.append(
-                {
-                    "date": date,
-                    "begin_time": begin,
-                    "end_time": end,
-                    "obs_id": obs_id,
-                    "PI": pi,
-                    "exposure": exposure,
-                    "target_name": target,
-                    "instrument": instrument,
-                    "mode": mode,
-                    "aperture": aperture,
-                    "element": element,
-                    "exp_time": exp_time,
-                }
-            )
-
-    schedules = pd.DataFrame(raw_observations)
+    timeline_df = pd.read_fwf(
+        timeline_url,
+        skiprows=14,
+        colspecs=TIMELINE_FILE_COLUMN_SPACING,
+        names=TIMELINE_FILE_COLUMN_NAMES,
+    )
+    # Drop rows that are not observations by filtering the date field
+    # for NAs or values not starting with a year, i.e. "20**"
+    mask = timeline_df["date"].str.startswith("20") & timeline_df["date"].notna()
+    schedules = timeline_df[mask]
     return schedules
 
 
@@ -154,15 +158,17 @@ def transform_to_across_schedule(filename: str, telescope_id: str) -> AcrossSche
     start_datetime = datetime.strptime(filename.replace("timeline_", ""), "%m_%d_%y")
     end_datetime = start_datetime + timedelta(days=7)
     return AcrossSchedule(
-        name=f"HST_planned_{filename}",
-        telescope_id=telescope_id,
-        status="planned",
-        fidelity="low",
-        date_range={
-            "begin": start_datetime.isoformat(),
-            "end": end_datetime.isoformat(),
-        },
-        observations=[],
+        **{
+            "name": f"HST_planned_{filename}",
+            "telescope_id": telescope_id,
+            "status": "planned",
+            "fidelity": "low",
+            "date_range": {
+                "begin": start_datetime.isoformat(),
+                "end": end_datetime.isoformat(),
+            },
+            "observations": [],
+        }
     )
 
 
@@ -174,7 +180,7 @@ def is_calibration(observation_data: dict) -> bool:
 def extract_observation_pointing_coordinates(
     planned_exposures: pd.DataFrame,
     observation_data: dict,
-) -> dict:
+) -> Position | dict:
     """
     Extract the coordinates from the planned exposures catalog and
     add them to the observation data payload.
@@ -206,17 +212,48 @@ def extract_observation_pointing_coordinates(
         f"{planned_observation_data["dec_s"].values[0]}"
     )
 
-    return {"ra": ra, "dec": dec}
+    return Position(**{"ra": ra, "dec": dec})
 
 
-def extract_instrument_info_from_observation(
+def extract_instrument_info(
     observation_data: dict,
-    across_instrument: dict,
+    instruments: list,
 ) -> dict:
     """
-    Extract the correct bandpass and corresponding observation type
-    from the observation parameters
+    Extract the ACROSS instrument model, correct bandpass,
+    and corresponding observation type from the observation parameters
     """
+    # Extract instrument name
+    if "ACS" in observation_data["instrument"]:
+        short_name = "HST_ACS"
+    elif "COS" in observation_data["instrument"]:
+        short_name = "HST_COS"
+    elif "STIS" in observation_data["instrument"]:
+        short_name = "HST_STIS"
+    elif (
+        "WFC3" in observation_data["instrument"]
+        and "UV" in observation_data["instrument"]
+    ):
+        short_name = "HST_WFC3_UVIS"
+    elif (
+        "WFC3" in observation_data["instrument"]
+        and "IR" in observation_data["instrument"]
+    ):
+        short_name = "HST_WFC3_IR"
+    else:
+        logger.warning(
+            f"Could not find across-server instrument for {observation_data["instrument"]}"
+        )
+        return {}
+
+    # Get the correct instrument model given the correct name
+    across_instrument = [
+        instrument
+        for instrument in instruments
+        if instrument["short_name"] == short_name
+    ][0]
+
+    # Get the correct filter from the list of filter models
     matching_filter = None
     for filter_info in across_instrument["filters"]:
         element = observation_data["element"]
@@ -244,9 +281,9 @@ def extract_instrument_info_from_observation(
         "unit": "angstrom",
     }
 
-    filter_name = matching_filter["name"].split(" ")[
-        -1
-    ]  # Just get the filter name without HST or instrument name
+    # Get the observation type
+    # Parse from filter name without HST or instrument name
+    filter_name = matching_filter["name"].split(" ")[-1]
     if "COS" in across_instrument["short_name"]:
         obs_type = "spectroscopy"  # All COS observations are spectroscopic
     elif filter_name[0] in ["G", "E", "P"] or filter_name[:2] == "FR":
@@ -257,7 +294,11 @@ def extract_instrument_info_from_observation(
         # All the rest are imaging elements
         obs_type = "imaging"
 
-    return {"type": obs_type, "bandpass": bandpass_parameters}
+    return {
+        "id": across_instrument["id"],
+        "bandpass": bandpass_parameters,
+        "type": obs_type,
+    }
 
 
 def transform_to_across_observation(
@@ -270,45 +311,20 @@ def transform_to_across_observation(
     Runs methods to extract pointing coordinates and
     instrument info from the raw observation data.
     """
-    if "ACQ" in observation_data["mode"]:
-        # Ignoring acquisition exposures, so skip
-        return {}
-
-    if is_calibration(observation_data):
-        logger.debug(
-            "Calibration observation", observation_id=observation_data["obs_id"]
-        )
-        return {}
-
-    # Get instrument short name from observation parameters
-    across_instrument_name = get_instrument_name_from_observation_data(
-        dict(observation_data)
-    )
-    if not len(across_instrument_name):
-        return {}
-
     pointing_coord_dict = extract_observation_pointing_coordinates(
-        planned_exposures, dict(observation_data)
+        planned_exposures, observation_data
     )
     if not len(pointing_coord_dict):
         # Ignoring observations without matching coordinates
         return {}
+
+    instrument_info = extract_instrument_info(observation_data, instruments)
+    if not len(instrument_info):
+        return {}
+
     pointing_coord = SkyCoord(
         pointing_coord_dict["ra"], pointing_coord_dict["dec"], unit=(u.hourangle, u.deg)
     )
-
-    # Get the correct instrument model given the correct name
-    across_instrument = [
-        instrument
-        for instrument in instruments
-        if instrument["short_name"] == across_instrument_name
-    ][0]
-
-    instrument_info = extract_instrument_info_from_observation(
-        observation_data, across_instrument
-    )
-    if not len(instrument_info):
-        return {}
 
     begin_at = datetime.strptime(
         observation_data["date"] + " " + observation_data["begin_time"],
@@ -321,7 +337,7 @@ def transform_to_across_observation(
 
     return AcrossObservation(
         **{
-            "instrument_id": across_instrument["id"],
+            "instrument_id": instrument_info["id"],
             "object_name": observation_data["target_name"],
             "external_observation_id": observation_data["obs_id"],
             "pointing_position": {
@@ -340,33 +356,6 @@ def transform_to_across_observation(
             "bandpass": instrument_info["bandpass"],
         }
     )
-
-
-def get_instrument_name_from_observation_data(observation_data: dict) -> str:
-    """Method to extract the correct HST instrument info dict given raw observation data"""
-    if "ACS" in observation_data["instrument"]:
-        short_name = "HST_ACS"
-    elif "COS" in observation_data["instrument"]:
-        short_name = "HST_COS"
-    elif "STIS" in observation_data["instrument"]:
-        short_name = "HST_STIS"
-    elif (
-        "WFC3" in observation_data["instrument"]
-        and "UV" in observation_data["instrument"]
-    ):
-        short_name = "HST_WFC3_UVIS"
-    elif (
-        "WFC3" in observation_data["instrument"]
-        and "IR" in observation_data["instrument"]
-    ):
-        short_name = "HST_WFC3_IR"
-    else:
-        logger.warning(
-            f"Could not find across-server instrument for {observation_data["instrument"]}"
-        )
-        return ""
-
-    return short_name
 
 
 def ingest() -> None:
@@ -394,7 +383,14 @@ def ingest() -> None:
     # Format schedule metadata
     across_schedule = transform_to_across_schedule(timeline_file, telescope_id)
 
-    for _, observation_data in timeline_df.iterrows():
+    filtered_observation_data = [
+        observation_data
+        for _, observation_data in timeline_df.iterrows()
+        if not is_calibration(dict(observation_data))
+        and "ACQ" not in observation_data["mode"]
+    ]
+
+    for observation_data in filtered_observation_data:
         # Format observation data in ACROSS format
         across_observation = transform_to_across_observation(
             planned_exposures, dict(observation_data), instruments

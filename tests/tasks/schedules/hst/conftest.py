@@ -38,13 +38,16 @@ def mock_get() -> Generator[MagicMock]:
 
 
 @pytest.fixture
-def mock_pandas_read_csv(
+def mock_pandas(
     mock_planned_exposure_catalog: pd.DataFrame,
+    mock_timeline_file_dataframe: pd.DataFrame,
 ) -> Generator[MagicMock]:
     with patch(
-        "pandas.read_csv", return_value=mock_planned_exposure_catalog
-    ) as mock_read_csv:
-        yield mock_read_csv
+        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.pd"
+    ) as mock_pandas:
+        mock_pandas.read_csv.return_value = mock_planned_exposure_catalog
+        mock_pandas.read_fwf.return_value = mock_timeline_file_dataframe
+        yield mock_pandas
 
 
 @pytest.fixture
@@ -140,15 +143,6 @@ def mock_get_latest_timeline_file() -> Generator:
 
 
 @pytest.fixture
-def mock_get_instrument_name_from_observation_data() -> Generator:
-    with patch(
-        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.get_instrument_name_from_observation_data",
-        return_value="mock instrument name",
-    ) as mock_instrument_name:
-        yield mock_instrument_name
-
-
-@pytest.fixture
 def mock_extract_observation_pointing_coordinate() -> Generator:
     with patch(
         "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.extract_observation_pointing_coordinates"
@@ -163,7 +157,7 @@ def mock_extract_observation_pointing_coordinate() -> Generator:
 @pytest.fixture
 def mock_extract_instrument_info_from_observation() -> Generator:
     with patch(
-        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.extract_instrument_info_from_observation"
+        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.extract_instrument_info"
     ) as mock_instrument_info:
         yield mock_instrument_info
 
@@ -204,6 +198,48 @@ def mock_timeline_file_raw_data() -> str:
         "2025.209 01:07:54 02:03:30  1791807  Loriga     07-002 FSR2007-0584                   WFC3/IR  MULTIA IR-FIX       F160W           41.17  07 01 02  \n"
         "2025.209 01:07:54 02:03:30  1791807  Loriga     07-003 FSR2007-0584                   WFC3/IR  MULTIA IR-FIX       F110W           44.11  07 03 01  \n"
     )
+
+
+@pytest.fixture
+def mock_schedule_data() -> dict:
+    return {
+        "name": "mock-schedule",
+        "telescope_id": "mock-telescope-id",
+        "status": "planned",
+        "fidelity": "low",
+        "date_range": {
+            "begin": "2025-08-01 00:00:00",
+            "end": "2025-08-08 00:00:00",
+        },
+        "observations": [],
+    }
+
+
+@pytest.fixture
+def mock_transform_to_across_schedule(mock_schedule_data: dict) -> Generator:
+    with patch(
+        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.transform_to_across_schedule",
+        return_value=mock_schedule_data,
+    ) as mock_across_schedule:
+        yield mock_across_schedule
+
+
+@pytest.fixture
+def mock_timeline_file_invalid_obs_dataframe() -> pd.DataFrame:
+    raw_observations = [
+        {
+            "date": "2025.209",
+            "target_name": "FSR2007-0584",
+            "mode": "ACQ",
+        },
+        {
+            "date": "2025.209",
+            "target_name": "BIAS",
+            "mode": "MULTIA",
+        },
+    ]
+    schedules = pd.DataFrame(raw_observations)
+    return schedules
 
 
 @pytest.fixture
