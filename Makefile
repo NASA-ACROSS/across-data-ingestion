@@ -100,7 +100,7 @@ install: check_env venv ## Install dependencies from the lockfile for the specif
 install_hooks: ## Install 'pre-commit' git hooks, only for local.
 	@if [ $(ENV) == local ]; then \
 		echo "Installing pre-commit git hooks..."; \
-		$(VENV_DIR)/pre-commit install; \
+		$(VENV_BIN)/pre-commit install; \
 	else \
 		echo "Not a git repository. Skipping pre-commit hooks installation."; \
 	fi
@@ -153,7 +153,7 @@ install_deps: ### Install dependencies
 start: check_prod run migrate seed ## Start the application containers (includes migrating and seeding)
 
 dev: local_only ## Start the server in the terminal
-	@$(VENV_BIN)/fastapi dev across_server/main.py
+	@$(VENV_BIN)/fastapi dev across_data_ingestion/main.py --host 0.0.0.0 --port 8001
 
 stop: local_only ## Stop the server container
 	@$(DOCKER_COMPOSE) down app
@@ -185,12 +185,12 @@ tail_logs: ## Output a tail of logs for the server
 	@$(DOCKER_COMPOSE) logs -ft app
 
 temp_run: ## Start a temporary container from an image with a bash shell for debugging
-	@docker run --rm -it --entrypoint=/bin/bash across-server-app
+	@docker run --rm -it --entrypoint=/bin/bash across-data-ingestion-app
 
 
 # Group: Testing
 test: ## Run automated tests
-	@$(VENV_BIN)/pytest --cov=across_server tests/**;
+	@$(VENV_BIN)/pytest --cov=across_data_ingestion tests/**;
 
 lint: ## Run linting
 	@$(VENV_BIN)/pre-commit run --all-files;
