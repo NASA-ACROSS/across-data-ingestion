@@ -83,6 +83,7 @@ def get_instrument_info_from_observation(
     instrument_dict = {
         instrument["short_name"]: instrument["id"] for instrument in instruments
     }
+    instrument_name = None
     if "ACIS" in tap_row["instrument"]:
         if tap_row["grating"] == "NONE" and tap_row["exposure_mode"] != "CC":
             instrument_name = "ACIS"
@@ -90,11 +91,7 @@ def get_instrument_info_from_observation(
             instrument_name = f"ACIS-{tap_row["grating"]}"
         elif tap_row["exposure_mode"] == "CC":
             instrument_name = "ACIS-CC"
-        else:
-            logger.error(
-                "Could not parse observation parameters for correct instrument"
-            )
-            return "", ""
+
     elif "HRC" in tap_row["instrument"]:
         if tap_row["exposure_mode"] != "":
             instrument_name = "HRC-Timing"
@@ -102,40 +99,42 @@ def get_instrument_info_from_observation(
             instrument_name = "HRC"
         elif tap_row["grating"] in ["HETG", "LETG"]:
             instrument_name = f"HRC-{tap_row["grating"]}"
-        else:
-            logger.error(
-                "Could not parse observation parameters for correct instrument"
-            )
-            return "", ""
-    else:
-        logger.error("Could not parse observation parameters for correct instrument")
+
+    if not instrument_name:
+        logger.warn(
+            "Could not parse observation parameters for correct instrument",
+            tap_observation=tap_row,
+        )
         return "", ""
 
     instrument_id = instrument_dict[instrument_name]
     return instrument_name, instrument_id
 
 
-def create_schedule(telescope_id: str, observations: dict) -> AcrossSchedule | dict:
+def create_schedule(telescope_id: str, observations: dict) -> AcrossSchedule:
     begin = f"{min([data["start_date"] for data in observations.values()])}"
     end = f"{max([data["start_date"] for data in observations.values()])}"
-    return {
-        "telescope_id": telescope_id,
-        "name": f"chandra_high_fidelity_planned_{begin.split('T')[0]}_{end.split('T')[0]}",
-        "date_range": {
-            "begin": begin,
-            "end": end,
-        },
-        "status": "scheduled",
-        "fidelity": "high",
-    }
+    return AcrossSchedule(
+        **{
+            "telescope_id": telescope_id,
+            "name": f"chandra_high_fidelity_planned_{begin.split('T')[0]}_{end.split('T')[0]}",
+            "date_range": {
+                "begin": begin,
+                "end": end,
+            },
+            "status": "scheduled",
+            "fidelity": "high",
+            "observations": [],
+        }
+    )
 
 
 async def get_observation_parameters_from_tap(instruments: list[dict]) -> dict:
     """Query Chandra TAP service to get most of the observation parameters"""
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-    query = "select o.obsid, o.start_date, o.ra, o.dec, o.instrument, "
-    query += f"o.grating, o.exposure_mode from cxc.observation o where o.start_date > '{now}' "
-    query += "and o.status='scheduled' order by o.start_date desc"
+    query = "SELECT o.obsid, o.start_date, o.ra, o.dec, o.instrument, "
+    query += f"o.grating, o.exposure_mode FROM cxc.observation o WHERE o.start_date > '{now}' "
+    query += "AND o.status='scheduled' ORDER BY o.start_date DESC"
 
     voservice = VOService(CHANDRA_TAP_URL)
     observations_table = await voservice.query(query)
@@ -151,7 +150,7 @@ async def get_observation_parameters_from_tap(instruments: list[dict]) -> dict:
             instruments, row_dict
         )
         if not instrument_name:
-            logger.error("Cannot parse observations with unknown instrument")
+            logger.warn("Cannot parse observations with unknown instrument")
             return {}
         observation_data = dict(row)
         observation_data["instrument_id"] = instrument_id
@@ -166,8 +165,8 @@ async def get_observation_parameters_from_tap(instruments: list[dict]) -> dict:
 
 async def update_exposure_time_from_tap(observations: dict) -> dict:
     """Query TAP again to get planned exposure time for observation IDs"""
-    exposure_time_query = "select obs_id, target_name, t_plan_exptime from ivoa.obsplan"
-    exposure_time_query += f" where obs_id in ('{"', '".join(str(obsid) for obsid in observations.keys())}')"
+    exposure_time_query = "SELECT obs_id, target_name, t_plan_exptime FROM ivoa.obsplan"
+    exposure_time_query += f" WHERE obs_id in ('{"', '".join(str(obsid) for obsid in observations.keys())}')"
     voservice = VOService(CHANDRA_TAP_URL)
     exposure_time_table = await voservice.query(exposure_time_query)
     if not exposure_time_table:
@@ -193,28 +192,30 @@ def transform_to_observation(
         + timedelta(seconds=observation_data["t_plan_exptime"])
     ).isot
 
-    return {
-        "instrument_id": instrument_id,
-        "object_name": observation_data["target_name"],
-        "pointing_position": {
-            "ra": f"{observation_data["ra"]}",
-            "dec": f"{observation_data["dec"]}",
-        },
-        "object_position": {
-            "ra": f"{observation_data["ra"]}",
-            "dec": f"{observation_data["dec"]}",
-        },
-        "date_range": {
-            "begin": f"{begin}",
-            "end": f"{end}",
-        },
-        "external_observation_id": observation_id,
-        "type": CHANDRA_OBSERVATION_TYPES[instrument_name],
-        "status": "scheduled",
-        "pointing_angle": 0.0,
-        "exposure_time": float(observation_data["t_plan_exptime"]),
-        "bandpass": CHANDRA_BANDPASSES[instrument_name],
-    }
+    return AcrossObservation(
+        **{
+            "instrument_id": instrument_id,
+            "object_name": observation_data["target_name"],
+            "pointing_position": {
+                "ra": f"{observation_data["ra"]}",
+                "dec": f"{observation_data["dec"]}",
+            },
+            "object_position": {
+                "ra": f"{observation_data["ra"]}",
+                "dec": f"{observation_data["dec"]}",
+            },
+            "date_range": {
+                "begin": f"{begin}",
+                "end": f"{end}",
+            },
+            "external_observation_id": observation_id,
+            "type": CHANDRA_OBSERVATION_TYPES[instrument_name],
+            "status": "scheduled",
+            "pointing_angle": 0.0,
+            "exposure_time": float(observation_data["t_plan_exptime"]),
+            "bandpass": CHANDRA_BANDPASSES[instrument_name],
+        }
+    )
 
 
 async def ingest() -> None:
@@ -230,10 +231,6 @@ async def ingest() -> None:
     # GET Telescope by name
     chandra_telescope_info = across_api.telescope.get({"name": "chandra"})[0]
     telescope_id = chandra_telescope_info["id"]
-
-    schedules: list[AcrossSchedule | dict] = []
-
-    logger.info(chandra_telescope_info["instruments"])
 
     chandra_observation_data = await get_observation_parameters_from_tap(
         chandra_telescope_info["instruments"]
@@ -254,11 +251,8 @@ async def ingest() -> None:
     ]
 
     schedule["observations"] = across_observations
-    schedules.append(schedule)
 
     across_api.schedule.post(schedule)
-
-    return
 
 
 @repeat_every(seconds=SECONDS_IN_A_DAY)  # Daily

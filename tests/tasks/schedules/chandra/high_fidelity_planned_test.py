@@ -54,7 +54,7 @@ class TestChandraHighFidelityPlannedScheduleIngestionTask:
         assert "No exposure time" in mock_logger.warn.call_args.args[0]
 
     @pytest.mark.asyncio
-    async def test_should_log_error_when_unable_to_parse_instrument(
+    async def test_should_log_warning_when_unable_to_parse_instrument(
         mock_observation_table: Table,
         mock_telescope_get: AsyncMock,
         mock_schedule_post: AsyncMock,
@@ -62,10 +62,10 @@ class TestChandraHighFidelityPlannedScheduleIngestionTask:
         mock_get_instrument_info_from_obs: AsyncMock,
         mock_logger: MagicMock,
     ):
-        """Should log error when unable to parse instrument from observation"""
+        """Should log warning when unable to parse instrument from observation"""
         mock_get_instrument_info_from_obs.return_value = ("", "")
         await ingest()
-        assert "Cannot parse observations" in mock_logger.error.call_args.args[0]
+        assert "Cannot parse observations" in mock_logger.warn.call_args.args[0]
 
     @pytest.mark.asyncio
     async def test_should_log_info_when_success(
