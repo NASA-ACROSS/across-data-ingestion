@@ -5,12 +5,12 @@ import httpx
 from ....core.config import config  # type: ignore[import-untyped]
 from ....core.exceptions import AcrossHTTPException  # type: ignore[import-untyped]
 
-TELESCOPE_URL: str = f"{config.across_server_url()}/telescope/"
+OBSERVATORY_URL: str = f"{config.across_server_url()}/observatory/"
 
 
 def get(params: dict = {}) -> list[dict]:
     """
-    Method to utilize the ACROSS web api to access many telescopes
+    Method to utilize the ACROSS web api to access many observatories
 
     Parameters
     -----------
@@ -25,7 +25,7 @@ def get(params: dict = {}) -> list[dict]:
     """
     query_string = urlencode(params)
 
-    query_url = f"{TELESCOPE_URL}?{query_string}"
+    query_url = f"{OBSERVATORY_URL}?{query_string}"
 
     response = httpx.request("GET", url=query_url)
 

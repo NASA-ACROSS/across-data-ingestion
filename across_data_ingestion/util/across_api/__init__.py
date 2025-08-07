@@ -1,3 +1,3 @@
-from . import schedule, telescope
+from . import observatory, schedule, telescope, tle
 
-__all__ = ["telescope", "schedule"]
+__all__ = ["observatory", "telescope", "tle", "schedule"]

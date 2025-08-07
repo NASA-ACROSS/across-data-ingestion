@@ -11,6 +11,9 @@ from .schedules.nustar.as_flown import (
 from .schedules.tess.low_fidelity_planned import (
     entrypoint as TESS_low_fidelity_schedule_ingestion_task,
 )
+from .tles.tle_ingestion import (
+    entrypoint as tle_ingestion_task,
+)
 
 
 async def init_tasks():
@@ -24,3 +27,4 @@ async def init_tasks():
     await fermi_planned_schedule_ingestion_task()
     await nustar_as_flown_schedule_ingestion_task()
     await nicer_low_fidelity_schedule_ingestion_task()
+    await tle_ingestion_task()

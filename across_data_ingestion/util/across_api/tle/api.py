@@ -1,23 +1,23 @@
-import logging
-
 import httpx
+import structlog
 
 from ....core.config import config  # type: ignore[import-untyped]
 from ....core.exceptions import AcrossHTTPException  # type: ignore[import-untyped]
 
-logger = logging.getLogger("uvicorn.error")
+logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
-SCHEDULE_URL: str = f"{config.across_server_url()}/schedule/"
+
+TLE_URL: str = f"{config.across_server_url()}/tle/"
 
 
 def post(data: dict = {}) -> None:
     """
-    Method to utilize the ACROSS web api to post a schedule
+    Method to utilize the ACROSS web API to post a TLE
 
     Parameters
     -----------
     data: dict
-        Dictionary of valid schedule information to be posted to the ACROSS Server.
+        Dictionary of valid TLE information to be posted to the ACROSS Server.
 
     -----------
     Raises
@@ -25,18 +25,17 @@ def post(data: dict = {}) -> None:
     AcrossHTTPException
         If the return status code is not a 201 or 409
     """
-
     headers = {
         "accept": "application/json",
         "Authorization": f"Bearer {config.ACROSS_INGESTION_SERVICE_ACCOUNT_KEY}",
         "Content-Type": "application/json",
     }
 
-    response = httpx.request("POST", url=SCHEDULE_URL, json=data, headers=headers)
+    response = httpx.request("POST", url=TLE_URL, json=data, headers=headers)
 
     if response.status_code == 201:
-        logger.info(f"Schedule Created with id: {response.text}")
+        return
     elif response.status_code == 409:
-        logger.info(response.text)
+        logger.warn(f"409: {response.text}")
     else:
         raise AcrossHTTPException(response.status_code, response.text, {})
