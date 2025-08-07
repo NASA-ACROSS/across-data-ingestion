@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Uvicorn: FastAPI",
+            "name": "local: Start Data Ingestion",
             "type": "debugpy",
             "request": "launch",
             "envFile": "${workspaceFolder}/.env",
@@ -22,7 +22,30 @@
                 "--port",
                 "8001"
             ],
-            "jinja": true
+        },
+        {
+            "name": "dev: Start Data Ingestion",
+            "type": "debugpy",
+            "request": "launch",
+            "envFile": "${workspaceFolder}/.env",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "pythonArgs": [
+                "-Xfrozen_modules=off"
+            ],
+            "env": {
+                "APP_ENV": "across-plat-ue2-dev",
+                "RUNTIME_ENV": "dev",
+                "AWS_PROFILE": "Project-Admin",
+            },
+            "module": "uvicorn",
+            "args": [
+                "across_data_ingestion.main:app",
+                "--reload",
+                "--host",
+                "127.0.0.1",
+                "--port",
+                "8000"
+            ],
         },
     ]
 }

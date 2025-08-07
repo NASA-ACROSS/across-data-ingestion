@@ -8,7 +8,8 @@ class BaseConfig(BaseSettings):
 
 
 class Config(BaseConfig):
-    APP_ENV: Environments = Environments.LOCAL
+    APP_ENV: str = "across-plat-lcl-local"
+    RUNTIME_ENV: Environments = Environments.LOCAL
     HOST: str = "localhost"
     PORT: int = 8001
     ROOT_PATH: str = "/api"
@@ -20,13 +21,16 @@ class Config(BaseConfig):
 
     ACROSS_INGESTION_SERVICE_ACCOUNT_KEY: str = "local-data-ingestion-service-account"
 
+    SPACETRACK_USER: str = "spacetrack-username"
+    SPACETRACK_PWD: str = "spacetrack-pwd"
+
     # Logging
     LOG_LEVEL: str = "DEBUG"
     # Adjusts the output being rendered as JSON (False for dev with pretty-print).
     LOG_JSON_FORMAT: bool = False
 
     def is_local(self):
-        return self.APP_ENV == Environments.LOCAL
+        return self.RUNTIME_ENV == Environments.LOCAL
 
     def base_url(self):
         return f"{self.HOST}:{self.PORT}{self.ROOT_PATH}"

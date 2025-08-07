@@ -4,7 +4,7 @@ services:
   app:
     build:
       context: ..
-      dockerfile: containers/Dockerfile
+      dockerfile: Dockerfile
       target: local
     volumes:
       - ../across_data_ingestion/main.py:/app/across_data_ingestion/main.py
