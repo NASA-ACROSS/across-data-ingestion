@@ -1,8 +1,9 @@
 import json
 import os
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import pandas as pd
+import pytest
 
 from across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned import (
     entrypoint,
@@ -17,7 +18,10 @@ class TestNicerLowFidelityScheduleIngestionTask:
     mock_observation_table = "nicer_first_10_rows.csv"
     mock_schedule_output = "nicer_first_10_rows_schedule.json"
 
-    def test_should_generate_across_schedules(self):
+    @pytest.mark.asyncio
+    async def test_should_generate_across_schedules(
+        self, mock_schedule_post: AsyncMock
+    ):
         """Should generate ACROSS schedules"""
         mock_output_schedule_file = self.mock_file_base_path + self.mock_schedule_output
 
@@ -35,37 +39,12 @@ class TestNicerLowFidelityScheduleIngestionTask:
                 }
             ],
         ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ), patch(
             "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.logger"
         ):
-            schedules = ingest()
             with open(mock_output_schedule_file) as expected_output_file:
                 expected = json.load(expected_output_file)
-                assert schedules == expected
-
-    def test_should_generate_observations_with_schedule(self):
-        """Should generate list of observations with an ACROSS schedule"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.query_nicer_catalog",
-            return_value=pd.read_csv(
-                self.mock_file_base_path + self.mock_observation_table
-            ),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "nicer_telescope_id",
-                    "instruments": [{"id": "xti_instrument_id"}],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ), patch(
-            "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.logger"
-        ):
-            schedules = ingest()
-            assert len(schedules["observations"]) > 0
+                await ingest()
+                mock_schedule_post.assert_called_once_with(expected)
 
     def test_query_nicer_catalog_should_return_dataframe_when_successful(self):
         """Should return a DataFrame if querying NICER catalog is successful"""
@@ -105,7 +84,8 @@ class TestNicerLowFidelityScheduleIngestionTask:
         }
         assert schedule == expected_schedule
 
-    def test_should_log_error_when_query_nicer_catalog_returns_none(self):
+    @pytest.mark.asyncio
+    async def test_should_log_error_when_query_nicer_catalog_returns_none(self):
         """Should log an error when NICER query returns None"""
         with patch(
             "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.logger"
@@ -113,12 +93,15 @@ class TestNicerLowFidelityScheduleIngestionTask:
             "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.query_nicer_catalog",
             return_value=None,
         ):
-            ingest()
+            await ingest()
             assert (
                 "Failed to read NICER timeline file" in log_mock.warn.call_args.args[0]
             )
 
-    def test_should_return_empty_dict_when_no_schedule_modes(self):
+    @pytest.mark.asyncio
+    async def test_should_return_empty_dict_when_no_schedule_modes(
+        self, mock_schedule_post: AsyncMock
+    ):
         """Should return an empty dictionary when no schedule modes are provided"""
 
         with patch(
@@ -127,10 +110,11 @@ class TestNicerLowFidelityScheduleIngestionTask:
                 self.mock_file_base_path + self.mock_observation_table
             ),
         ):
-            schedules = ingest(schedule_modes=["InvalidMode"])
-            assert schedules == {}
+            await ingest(schedule_modes=["InvalidMode"])
+            mock_schedule_post.assert_not_called()
 
-    def test_should_log_info_when_success(self):
+    @pytest.mark.asyncio
+    async def test_should_log_info_when_success(self):
         """Should log info with ran at when success"""
         with patch(
             "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.query_nicer_catalog",
@@ -150,10 +134,11 @@ class TestNicerLowFidelityScheduleIngestionTask:
         ), patch(
             "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.logger"
         ) as log_mock:
-            entrypoint()
+            await entrypoint()
             assert "ingestion completed" in log_mock.info.call_args.args[0]
 
-    def test_should_log_error_when_schedule_ingestion_fails(self):
+    @pytest.mark.asyncio
+    async def test_should_log_error_when_schedule_ingestion_fails(self):
         """Should log an error when schedule ingestion fails"""
         with patch(
             "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.logger"
@@ -172,7 +157,7 @@ class TestNicerLowFidelityScheduleIngestionTask:
         ), patch(
             "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ):
-            entrypoint()
+            await entrypoint()
             assert (
                 "Schedule ingestion encountered an unknown error"
                 in log_mock.error.call_args.args[0]

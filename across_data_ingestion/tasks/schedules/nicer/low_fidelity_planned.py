@@ -83,7 +83,7 @@ def nicer_observation(instrument_id: str, row: dict) -> AcrossObservation:
     }
 
 
-def ingest(schedule_modes: list[str] = ["Scheduled"]) -> AcrossSchedule | dict:
+async def ingest(schedule_modes: list[str] = ["Scheduled"]) -> None:
     """
     Method that posts NICER low fidelity observing schedules via the known webfile:
         https://heasarc.gsfc.nasa.gov/docs/nicer/schedule/obs_pred_timeline_detail.csv
@@ -95,13 +95,13 @@ def ingest(schedule_modes: list[str] = ["Scheduled"]) -> AcrossSchedule | dict:
     nicer_df = query_nicer_catalog()
     if nicer_df is None:
         logger.warn("Failed to read NICER timeline file")
-        return {}
+        return
 
     # Only get planned observations
     nicer_planned = nicer_df.loc[nicer_df["Mode"].isin(schedule_modes)]
     if nicer_planned.empty:
         logger.warn(f"No {schedule_modes} observations found in NICER timeline file.")
-        return {}
+        return
 
     # GET Telescope by name
     nicer_telescope_info = across_api.telescope.get({"name": "nicer"})[0]
@@ -127,13 +127,11 @@ def ingest(schedule_modes: list[str] = ["Scheduled"]) -> AcrossSchedule | dict:
     # Post schedule
     across_api.schedule.post(dict(schedule))
 
-    return schedule
-
 
 @repeat_every(seconds=2 * SECONDS_IN_A_WEEK)  # BiWeekly
-def entrypoint():
+async def entrypoint():
     try:
-        ingest()
+        await ingest()
         logger.info("Schedule ingestion completed.")
     except Exception as e:
         # Surface the error through logging, if we do not catch everything and log, the errors get voided
