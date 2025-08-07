@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pandas as pd
 
@@ -26,7 +26,7 @@ class mock_response:
 
 
 class TestNicerLowFidelityScheduleIngestionTask:
-    def test_should_generate_across_schedules(self):
+    def test_should_generate_across_schedules(self, mock_schedule_post: Mock):
         """Should generate ACROSS schedules"""
         with patch(
             "across_data_ingestion.tasks.schedules.ixpe.low_fidelity_planned.query_ixpe_schedule",
@@ -39,30 +39,9 @@ class TestNicerLowFidelityScheduleIngestionTask:
                     "instruments": [{"id": "ixpe_instrument_id"}],
                 }
             ],
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ):
-            schedules = ingest()
-            assert schedules == ixpe_across_schedule
-
-    def test_should_generate_observations_with_schedule(self):
-        """Should generate list of observations with an ACROSS schedule"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.ixpe.low_fidelity_planned.query_ixpe_schedule",
-            return_value=pd.DataFrame(mock_ixpe_query),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "ixpe_telescope_id",
-                    "instruments": [{"id": "ixpe_instrument_id"}],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ):
-            schedules = ingest()
-            assert len(schedules["observations"]) > 0
+            ingest()
+            mock_schedule_post.assert_called_with(ixpe_across_schedule)
 
     def test_query_nicer_catalog_should_return_dataframe_when_successful(self):
         """Should return a DataFrame if querying IXPE catalog is successful"""

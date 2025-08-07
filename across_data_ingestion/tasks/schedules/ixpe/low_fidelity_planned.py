@@ -14,7 +14,7 @@ logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
 IXPE_LTP_URL = "https://ixpe.msfc.nasa.gov/for_scientists/ltp.html"
 
-IXPE_BANDPASS = {"min": 2.0, "max": 12.0, "unit": "keV", "filter_name": "NICER XTI"}
+IXPE_BANDPASS = {"min": 2.0, "max": 12.0, "unit": "keV", "filter_name": "IXPE"}
 
 
 def query_ixpe_schedule(url) -> pd.DataFrame | None:
@@ -116,14 +116,14 @@ def ixpe_observation(instrument_id: str, row: dict) -> AcrossObservation:
     }
 
 
-def ingest() -> AcrossSchedule | dict:
+def ingest() -> None:
     """
     Fetches the IXPE schedule from the specified URL and returns the parsed data.
     """
     ixpe_df = query_ixpe_schedule(IXPE_LTP_URL)
     if ixpe_df is None:
         logger.warn("Failed to read IXPE timeline file")
-        return {}
+        return
 
     # GET Telescope by name
     tess_telescope_info = across_api.telescope.get({"name": "ixpe"})[0]
@@ -145,8 +145,6 @@ def ingest() -> AcrossSchedule | dict:
 
     # Post schedule
     across_api.schedule.post(dict(schedule))
-
-    return schedule
 
 
 @repeat_every(seconds=SECONDS_IN_A_WEEK)  # Weekly
