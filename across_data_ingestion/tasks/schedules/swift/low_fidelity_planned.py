@@ -313,7 +313,7 @@ def create_swift_across_schedule(
     return schedule
 
 
-def ingest(days_in_future: int = 4) -> list[AcrossSchedule | dict]:
+def ingest(days_in_future: int = 4) -> None:
     """
     Method that POSTs Swift low fidelity planned observing schedules to the ACROSS server
     For the Swift Observatory, this includes the XRT, BAT, and UVOT Telescopes.
@@ -328,7 +328,7 @@ def ingest(days_in_future: int = 4) -> list[AcrossSchedule | dict]:
     swift_observation_data = query_swift_plan(days_in_future)
     if swift_observation_data is None:
         logger.warn("Failed to query Swift planned observations.")
-        return [{}]
+        return
 
     # XRT
     swift_xrt_schedule = create_swift_across_schedule(
@@ -360,8 +360,6 @@ def ingest(days_in_future: int = 4) -> list[AcrossSchedule | dict]:
     across_api.schedule.post(swift_xrt_schedule)
     across_api.schedule.post(swift_bat_schedule)
     across_api.schedule.post(swift_uvot_schedule)
-
-    return [swift_xrt_schedule, swift_bat_schedule, swift_uvot_schedule]
 
 
 @repeat_every(seconds=1 * SECONDS_IN_A_DAY)  # daily

@@ -1,5 +1,5 @@
 from datetime import timedelta
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from across_data_ingestion.tasks.schedules.swift.low_fidelity_planned import (
     CustomSwiftObsEntry,
@@ -57,7 +57,7 @@ def mock_swift_uvot_modes() -> dict[str, list[CustomUVOTModeEntry]]:
 
 
 class TestSwiftLowFidelityScheduleIngestionTask:
-    def test_should_generate_across_schedules(self):
+    def test_should_generate_across_schedules(self, mock_schedule_post: Mock):
         """Should generate ACROSS schedules"""
 
         with patch(
@@ -74,33 +74,12 @@ class TestSwiftLowFidelityScheduleIngestionTask:
         ), patch(
             "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.swift_uvot_mode_dict",
             return_value=mock_swift_uvot_modes(),
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
         ):
-            schedules = ingest()
-            assert schedules == swift_low_fidelity_planned_schedule
-
-    def test_should_generate_observations_with_schedule(self):
-        """Should generate list of observations with an ACROSS schedule"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.query_swift_plan",
-            return_value=mock_swift_data(),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "swift_telescope_id",
-                    "instruments": [{"id": "swift_instrument_id"}],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.tasks.schedules.swift.low_fidelity_planned.swift_uvot_mode_dict",
-            return_value=mock_swift_uvot_modes(),
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ):
-            schedules = ingest()
-            assert len(schedules[0]["observations"]) > 0
+            ingest()
+            # asserts that the last call was made with the specific value
+            mock_schedule_post.assert_called_with(
+                swift_low_fidelity_planned_schedule[2]
+            )
 
     def test_query_swift_plan_should_return_list_entries_when_successful(self):
         """Should return a list of custom entries if querying Swift catalog is successful"""
