@@ -6,7 +6,7 @@ BUILD_ENVS = local action deploy
 IS_BUILD_ENV_VALID := $(filter $(BUILD_ENV), $(BUILD_ENVS))
 
 # Docker
-DOCKER_COMPOSE_FILE = docker/compose.$(BUILD_ENV).yml
+DOCKER_COMPOSE_FILE = containers/compose.$(BUILD_ENV).yml
 DOCKER_COMPOSE = docker compose -f ${DOCKER_COMPOSE_FILE} --env-file=.env
 TAG = $(shell git rev-parse --short HEAD)
 
