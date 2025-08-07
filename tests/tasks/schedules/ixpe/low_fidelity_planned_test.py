@@ -5,7 +5,7 @@ import pandas as pd
 from across_data_ingestion.tasks.schedules.ixpe.low_fidelity_planned import (
     entrypoint,
     ingest,
-    ixpe_schedule,
+    ixpe_to_across_schedule,
     query_ixpe_schedule,
 )
 
@@ -65,7 +65,9 @@ class TestNicerLowFidelityScheduleIngestionTask:
         """Should return an empty dictionary when the input table is empty"""
         # Ingest a table with no rows
         mock_data = pd.DataFrame(mock_ixpe_query)
-        schedule = ixpe_schedule("ixpe_telescope_id", mock_data, "planned", "low")
+        schedule = ixpe_to_across_schedule(
+            "ixpe_telescope_id", mock_data, "planned", "low"
+        )
         expected_schedule = {
             "date_range": {
                 "begin": "2025-04-08T06:00:00.000",

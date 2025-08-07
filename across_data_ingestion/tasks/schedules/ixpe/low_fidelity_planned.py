@@ -57,7 +57,7 @@ def query_ixpe_schedule(url) -> pd.DataFrame | None:
         return None
 
 
-def ixpe_schedule(
+def ixpe_to_across_schedule(
     telescope_id: str, data: pd.DataFrame, status: str, fidelity: str
 ) -> AcrossSchedule | dict:
     """
@@ -79,7 +79,7 @@ def ixpe_schedule(
     }
 
 
-def ixpe_observation(instrument_id: str, row: dict) -> AcrossObservation:
+def ixpe_to_across_observation(instrument_id: str, row: dict) -> AcrossObservation:
     """
     Creates a IXPE observation from the provided row of data.
     Calculates the exposure time from the End - Start
@@ -90,7 +90,7 @@ def ixpe_observation(instrument_id: str, row: dict) -> AcrossObservation:
 
     exposure_time = obs_end_at - obs_start_at
 
-    external_id = f"ixpe_{str.replace(row["P S"], " ", "_")}_obs_{row['Pnum']}"
+    external_id = f"{str.replace(row["P S"], " ", "_")}_obs_{row['Pnum']}"
 
     return {
         "instrument_id": instrument_id,
@@ -131,7 +131,7 @@ def ingest() -> None:
     instrument_id = tess_telescope_info["instruments"][0]["id"]
 
     # Initialize schedule
-    schedule = ixpe_schedule(
+    schedule = ixpe_to_across_schedule(
         telescope_id=telescope_id, data=ixpe_df, status="planned", fidelity="low"
     )
 
@@ -140,7 +140,7 @@ def ingest() -> None:
 
     # Transform observations
     schedule["observations"] = [
-        ixpe_observation(instrument_id, row) for row in schedule_observations
+        ixpe_to_across_observation(instrument_id, row) for row in schedule_observations
     ]
 
     # Post schedule
