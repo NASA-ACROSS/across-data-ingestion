@@ -34,7 +34,7 @@ SWIFT_UVOT_BANDPASS_DICT = {
     "uvw1": {"filter_name": "Swift UVOT uvw1", "min": 226, "max": 294, "unit": "nm"},
     "uvw2": {"filter_name": "Swift UVOT uvw2", "min": 160, "max": 225, "unit": "nm"},
     "uvm2": {"filter_name": "Swift UVOT uvm2", "min": 200, "max": 249, "unit": "nm"},
-    "White": {"filter_name": "Swift UVOT white", "min": 160, "max": 800, "unit": "nm"},
+    "white": {"filter_name": "Swift UVOT white", "min": 160, "max": 800, "unit": "nm"},
 }
 
 
@@ -65,7 +65,7 @@ class CustomUVOTModeEntry:
         """
         Converts a UVOTModeEntry to a CustomUVOTModeEntry.
         """
-        return cls(filter_name=entry.filter_name, weight=entry.weight)
+        return cls(filter_name=str.lower(entry.filter_name), weight=entry.weight)
 
 
 class CustomSwiftObsEntry:
