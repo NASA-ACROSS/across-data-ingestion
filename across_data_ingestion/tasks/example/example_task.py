@@ -1,12 +1,9 @@
-import logging
-import time
+import structlog
+from fastapi_utilities import repeat_at  # type: ignore[import-untyped]
 
-from fastapi_utils.tasks import repeat_every
-
-logger = logging.getLogger("uvicorn.error")
+logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
 
-@repeat_every(seconds=1, max_repetitions=1)
+@repeat_at(cron="* * * * *", logger=logger)
 async def example_task():
-    current_time = time.time()
-    logger.info(f"{__name__} ran successfully at {current_time}")
+    logger.info("Task ran successfully.")
