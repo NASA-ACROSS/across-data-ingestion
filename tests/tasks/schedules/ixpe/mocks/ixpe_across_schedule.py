@@ -23,7 +23,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 928800,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -44,7 +44,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 475200,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -65,7 +65,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 1382400,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -86,7 +86,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 280800,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -107,7 +107,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 1274400,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -128,7 +128,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 172800,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -149,7 +149,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 1555200,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -170,7 +170,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 885600,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -191,7 +191,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 496800,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -212,7 +212,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 237600,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -233,7 +233,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 237600,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -254,7 +254,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 453600,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -275,7 +275,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 864000,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -296,7 +296,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 280800,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -317,7 +317,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 475200,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -338,7 +338,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 237600,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -359,7 +359,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 410400,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -380,7 +380,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 280800,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -401,7 +401,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 151200,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -422,7 +422,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 885600,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -443,7 +443,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 216000,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -464,7 +464,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 885600,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -485,7 +485,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 151200,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },
@@ -506,7 +506,7 @@ ixpe_across_schedule: dict = {
             "exposure_time": 0,
             "bandpass": {
                 "min": 2.0,
-                "max": 12.0,
+                "max": 8.0,
                 "unit": "keV",
                 "filter_name": "IXPE",
             },

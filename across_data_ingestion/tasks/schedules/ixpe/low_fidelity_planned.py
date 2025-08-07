@@ -14,7 +14,7 @@ logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
 IXPE_LTP_URL = "https://ixpe.msfc.nasa.gov/for_scientists/ltp.html"
 
-IXPE_BANDPASS = {"min": 2.0, "max": 12.0, "unit": "keV", "filter_name": "IXPE"}
+IXPE_BANDPASS = {"min": 2.0, "max": 8.0, "unit": "keV", "filter_name": "IXPE"}
 
 
 def query_ixpe_schedule(url) -> pd.DataFrame | None:
