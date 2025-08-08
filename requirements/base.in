@@ -29,3 +29,4 @@ pandas-stubs >= 2.2.3.241126
 structlog >= 25.1.0
 beautifulsoup4 >=4.12.2
 across-tools @ git+ssh://git@github.com/ACROSS-Team/across-tools.git@main
+fastapi-utilities >= 0.3.1
