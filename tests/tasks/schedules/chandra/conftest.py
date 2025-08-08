@@ -36,14 +36,6 @@ def mock_telescope_get(mock_telescope_id, mock_instrument_id) -> Generator[Async
 
 
 @pytest.fixture
-def mock_schedule_post() -> Generator[AsyncMock]:
-    with patch(
-        "across_data_ingestion.util.across_api.schedule.post", return_value=None
-    ) as mock_schedule_post:
-        yield mock_schedule_post
-
-
-@pytest.fixture
 def mock_logger() -> Generator[MagicMock]:
     with patch(
         "across_data_ingestion.tasks.schedules.chandra.high_fidelity_planned.logger"
