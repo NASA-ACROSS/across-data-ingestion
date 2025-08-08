@@ -1,0 +1,39 @@
+# %ECSV 1.0
+# ---
+# datatype:
+# - {name: intentType, datatype: string}
+# - {name: obs_collection, datatype: string}
+# - {name: provenance_name, datatype: string}
+# - {name: instrument_name, datatype: string}
+# - {name: project, datatype: string}
+# - {name: filters, datatype: string}
+# - {name: wavelength_region, datatype: string}
+# - {name: target_name, datatype: string}
+# - {name: target_classification, datatype: string}
+# - {name: obs_id, datatype: string}
+# - {name: s_ra, datatype: float64}
+# - {name: s_dec, datatype: float64}
+# - {name: dataproduct_type, datatype: string}
+# - {name: proposal_pi, datatype: string}
+# - {name: calib_level, datatype: int64}
+# - {name: t_min, datatype: float64}
+# - {name: t_max, datatype: float64}
+# - {name: t_exptime, datatype: float64}
+# - {name: em_min, datatype: float64}
+# - {name: em_max, datatype: float64}
+# - {name: obs_title, datatype: string}
+# - {name: t_obs_release, datatype: float64}
+# - {name: proposal_id, datatype: string}
+# - {name: proposal_type, datatype: string}
+# - {name: sequence_number, datatype: int64}
+# - {name: s_region, datatype: string}
+# - {name: jpegURL, datatype: string}
+# - {name: dataURL, datatype: string}
+# - {name: dataRights, datatype: string}
+# - {name: mtFlag, datatype: bool}
+# - {name: srcDen, datatype: float64}
+# - {name: obsid, datatype: string}
+# - {name: objID, datatype: string}
+# schema: astropy-2.0
+intentType obs_collection provenance_name instrument_name project filters wavelength_region target_name target_classification obs_id s_ra s_dec dataproduct_type proposal_pi calib_level t_min t_max t_exptime em_min em_max obs_title t_obs_release proposal_id proposal_type sequence_number s_region jpegURL dataURL dataRights mtFlag srcDen obsid objID
+science JWST APT NIRISS/IMAGE JWST CLEAR;GR700XD INFRARED HAT-P-11 "" jw05924001001_xx102_00001_niriss 297.70936375 48.0808611111 spectrum "Sing, David K." -1 nan nan 2.214 600.0 2800.0 "JWSTs Exoplanet Grand Tour Spectroscopic Survey" nan 5924 GO 2 "POLYGON 297.655414535 48.07750526975 297.71097592466 48.08592480957 297.71285203324 48.08027137827 297.65729609973 48.07184609161" "" "" PUBLIC False nan 212741499 557804917

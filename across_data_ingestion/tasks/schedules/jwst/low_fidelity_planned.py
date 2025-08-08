@@ -4,6 +4,7 @@ import astroquery.mast  # type: ignore[import-untyped]
 import httpx
 import pandas as pd
 import structlog
+from astropy.table import Table as ATable  # type: ignore[import-untyped]
 from astropy.time import Time  # type: ignore[import-untyped]
 from bs4 import BeautifulSoup  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
@@ -41,9 +42,13 @@ def find_missing_params_from_mast_result(
     """
 
     try:
-        mast_observation = mast_observations.loc[
-            mast_observations["target_name"] == row["TARGET_NAME"]
-        ].iloc[0]
+        mast_observation: pd.Series = (
+            mast_observations.loc[
+                mast_observations["target_name"] == row["TARGET_NAME"]
+            ]
+            .iloc[0]
+            .fillna(0)
+        )
 
         split_observation_instrument = mast_observation["instrument_name"].split("/")
 
@@ -57,6 +62,10 @@ def find_missing_params_from_mast_result(
             observation_type = "spectroscopy"
         else:
             observation_type = "imaging"
+
+        # I have seen somtimes the bandpass information is nulled for planned information, ignore
+        if all([mast_observation[col] == 0 for col in ["em_min", "em_max"]]):
+            raise IndexError
 
         return pd.Series(
             {
@@ -100,16 +109,19 @@ def get_most_recent_jwst_planned_url() -> str:
     # Extract schedule information (adjust selectors based on the webpage structure)
     link_contains = "jwst/science-execution/observing-schedules/_documents"
     links = [
-        link["href"] for link in soup.find_all("a") if link_contains in link["href"]
-    ]  # type: ignore
+        link["href"]
+        for link in soup.find_all("a")
+        if link_contains in link["href"]  # type: ignore
+    ]
     return str(links[0])
 
 
 def read_mast_observations(mast_proposal_ids: list[str]) -> pd.DataFrame:
     """Fetches JWST planned observations from MAST based on proposal IDs."""
-    jwst_planned_obs = astroquery.mast.Observations.query_criteria(
+    jwst_planned_obs: ATable = astroquery.mast.Observations.query_criteria(
         obs_collection=["JWST"], proposal_id=mast_proposal_ids, calib_level=["-1"]
     )
+
     columns = [
         "instrument_name",
         "filters",
@@ -121,24 +133,22 @@ def read_mast_observations(mast_proposal_ids: list[str]) -> pd.DataFrame:
         "em_max",
     ]
 
-    df = jwst_planned_obs[columns].to_pandas()
-    return df
+    return jwst_planned_obs[columns].to_pandas()
 
 
 def query_jwst_planned_execution_schedule(
     instruments_info: dict,
-) -> tuple[pd.DataFrame, str]:
+) -> pd.DataFrame:
     """Fetches the JWST planned execution schedule, processes it, and returns a DataFrame."""
     try:
         schedule_link = get_most_recent_jwst_planned_url()
         file_url = f"https://www.stsci.edu{schedule_link}"
 
         # Read the schedule file
-        schedule_file_response = httpx.request("GET", file_url)
+        schedule_file_response = httpx.get(file_url)
         schedule_file_response.raise_for_status()
 
         lines = schedule_file_response.text.splitlines()
-        schedule_name = lines[0]
         # Step 1: Find header and underline line
         for i, line in enumerate(lines):
             if line.strip().startswith("VISIT ID"):
@@ -146,8 +156,6 @@ def query_jwst_planned_execution_schedule(
                 underline_line_index = i + 1
                 data_start_index = i + 2
                 break
-        else:
-            raise ValueError("Header line not found")
 
         underline = lines[underline_line_index]
 
@@ -221,16 +229,15 @@ def query_jwst_planned_execution_schedule(
             ),
         )
         filtered_ddf = ddf[ddf["VALID"]]
-        return filtered_ddf, schedule_name
+        return filtered_ddf
 
     except Exception:
-        return pd.DataFrame({}), ""
+        return pd.DataFrame({})
 
 
 def jwst_to_across_schedule(
     telescope_id: str,
     data: pd.DataFrame,
-    schedule_name: str,
     status: str,
     fidelity: str,
 ) -> AcrossSchedule | dict:
@@ -243,7 +250,7 @@ def jwst_to_across_schedule(
 
     return {
         "telescope_id": telescope_id,
-        "name": schedule_name,
+        "name": f"jwst_low_fidelity_planned_{begin.split('T')[0]}_{end.split('T')[0]}",
         "date_range": {
             "begin": begin,
             "end": end,
@@ -273,12 +280,12 @@ def jwst_to_across_observation(row: dict) -> AcrossObservation:
         "instrument_id": row["INSTRUMENT_ID"],
         "object_name": f"{row["TARGET_NAME"]}",
         "pointing_position": {
-            "ra": f"{row["RA"]}",
-            "dec": f"{row["DEC"]}",
+            "ra": f"{round(row["RA"], 8)}",
+            "dec": f"{round(row["DEC"], 8)}",
         },
         "object_position": {
-            "ra": f"{row["RA"]}",
-            "dec": f"{row["DEC"]}",
+            "ra": f"{round(row["RA"], 8)}",
+            "dec": f"{round(row["DEC"], )}",
         },
         "date_range": {
             "begin": obs_start_at,
@@ -293,7 +300,7 @@ def jwst_to_across_observation(row: dict) -> AcrossObservation:
     }
 
 
-def ingest() -> AcrossSchedule | dict:
+def ingest() -> None:
     """
     Fetches the JWST schedule from the specified URL and returns the parsed data.
     """
@@ -305,17 +312,15 @@ def ingest() -> AcrossSchedule | dict:
         instruments_info[inst["short_name"]] = inst["id"]
 
     # Query the JWST planned execution schedule
-    latest_jwst_plan, schedule_name = query_jwst_planned_execution_schedule(
-        instruments_info
-    )
+    latest_jwst_plan = query_jwst_planned_execution_schedule(instruments_info)
+
     if latest_jwst_plan.empty:
         logger.warn("Failed to read JWST observation data")
-        return {}
+        return
 
     # Initialize schedule
     schedule = jwst_to_across_schedule(
         telescope_id=telescope_id,
-        schedule_name=schedule_name,
         data=latest_jwst_plan,
         status="planned",
         fidelity="low",
@@ -329,13 +334,7 @@ def ingest() -> AcrossSchedule | dict:
         jwst_to_across_observation(row) for row in schedule_observations
     ]
 
-    # Post schedule
-    import json
-
-    print(json.dumps(schedule, indent=2))
-    # across_api.schedule.post(dict(schedule))
-
-    return schedule
+    across_api.schedule.post(dict(schedule))
 
 
 @repeat_every(seconds=SECONDS_IN_A_WEEK)  # Weekly
