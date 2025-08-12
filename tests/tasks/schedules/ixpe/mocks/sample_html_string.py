@@ -1,4 +1,4 @@
-sample_respone: str = """<!DOCTYPE html>
+html: str = """<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 
 <head>
@@ -133,28 +133,6 @@ we keep the usage below 4000 MB.
 </TR>
 <TR><td>A 0</td><td>2103  </td><td>KES 75      </td><td> 281.604</td><td>  -2.975</td><td>2025-04-08T06</td><td>     0.0</td></TR>
 <TR><td>A 0</td><td>2022  </td><td>SS 433 WEST </td><td> 287.672</td><td>   5.032</td><td>2025-04-19T00</td><td>     0.0</td></TR>
-<TR><td>A 0</td><td>2003  </td><td>MCG-5-23-16 </td><td> 146.917</td><td> -30.949</td><td>2025-04-24T12</td><td>     0.0</td></TR>
-<TR><td>A 0</td><td>2184  </td><td>GRS 1915+105</td><td> 288.798</td><td>  10.946</td><td>2025-05-10T12</td><td>     0.0</td></TR>
-<TR><td>C 0</td><td>2152  </td><td>NGC 3227    </td><td> 155.877</td><td>  19.865</td><td>2025-05-13T18</td><td>     0.0</td></TR>
-<TR><td>D 0</td><td>0000  </td><td>Cyg X-2     </td><td> 326.171</td><td>  38.321</td><td>2025-05-28T12</td><td>  1669.8</td></TR>
-<TR><td>A 0</td><td>2014  </td><td>LIGHTHOUSE N</td><td> 165.359</td><td> -61.015</td><td>2025-05-30T12</td><td>     0.0</td></TR>
-<TR><td>C 0</td><td>2095  </td><td>1ES 1927+654</td><td> 291.831</td><td>  65.565</td><td>2025-06-17T12</td><td>     0.0</td></TR>
-<TR><td>D 0</td><td>0000  </td><td>H 1417-624  </td><td> 215.300</td><td> -62.699</td><td>2025-06-27T18</td><td>     0.0</td></TR>
-<TR><td>D 0</td><td>0000  </td><td>Cyg X-2     </td><td> 326.171</td><td>  38.321</td><td>2025-07-03T12</td><td>  2337.7</td></TR>
-<TR><td>A 0</td><td>2067  </td><td>PG 1553+113 </td><td> 238.929</td><td>  11.190</td><td>2025-07-06T06</td><td>  1636.4</td></TR>
-<TR><td>C 0</td><td>2093  </td><td>UW CRB      </td><td> 241.441</td><td>  25.863</td><td>2025-07-09T00</td><td>   167.6</td></TR>
-<TR><td>A 1</td><td>2037  </td><td>NGC 5506    </td><td> 213.312</td><td>  -3.207</td><td>2025-07-14T06</td><td>     0.0</td></TR>
-<TR><td>A 1</td><td>2111  </td><td>CIR X-1     </td><td> 230.170</td><td> -57.167</td><td>2025-07-24T06</td><td>     0.0</td></TR>
-<TR><td>A 2</td><td>2037  </td><td>NGC 5506    </td><td> 213.312</td><td>  -3.207</td><td>2025-07-27T12</td><td>     0.0</td></TR>
-<TR><td>A 0</td><td>2111  </td><td>CIR X-1     </td><td> 230.170</td><td> -57.167</td><td>2025-08-02T00</td><td>  1232.3</td></TR>
-<TR><td>A 3</td><td>2037  </td><td>NGC 5506    </td><td> 213.312</td><td>  -3.207</td><td>2025-08-04T18</td><td>     0.0</td></TR>
-<TR><td>A 2</td><td>2111  </td><td>CIR X-1     </td><td> 230.170</td><td> -57.167</td><td>2025-08-09T12</td><td>     0.0</td></TR>
-<TR><td>A 4</td><td>2037  </td><td>NGC 5506    </td><td> 213.312</td><td>  -3.207</td><td>2025-08-12T18</td><td>     0.0</td></TR>
-<TR><td>C 1</td><td>2114  </td><td>RX J1713.7-3</td><td> 257.963</td><td> -39.952</td><td>2025-08-14T12</td><td>     0.0</td></TR>
-<TR><td>A 0</td><td>2067  </td><td>PG 1553+113 </td><td> 238.929</td><td>  11.190</td><td>2025-08-24T18</td><td>     0.0</td></TR>
-<TR><td>C 2</td><td>2114  </td><td>RX J1713.7-3</td><td> 257.963</td><td> -39.952</td><td>2025-08-27T06</td><td>     0.0</td></TR>
-<TR><td>C 1</td><td>2013  </td><td>CRAB PULSAR </td><td>  83.633</td><td>  22.014</td><td>2025-09-06T12</td><td>  2629.6</td></TR>
-<TR><td>A 1</td><td>2081  </td><td>4U 1812-12  </td><td> 273.776</td><td> -12.096</td><td>2025-09-08T06</td><td>     0.0</td></TR>
 
 </TABLE>
 

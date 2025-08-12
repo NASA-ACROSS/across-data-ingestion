@@ -79,7 +79,7 @@ help:
 
 
 # Group: Setup
-init: install configure run migrate seed ## Initialize the project, dependencies, and start the server
+init: install configure run ## Initialize the project, dependencies, and start the server
 
 install_uv: ## Install 'uv' if needed (this will install it globally)
 	@echo "Installing 'uv'...";

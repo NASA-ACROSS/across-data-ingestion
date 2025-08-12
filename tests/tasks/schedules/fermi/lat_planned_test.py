@@ -1,354 +1,312 @@
-import json
-import os
-from datetime import datetime
-from unittest.mock import patch
+from collections.abc import Generator
+from email.message import Message
+from unittest.mock import MagicMock, patch
 from urllib.error import HTTPError
 
+import pytest
 from astropy.io import fits  # type: ignore[import-untyped]
 from astropy.table import Table  # type: ignore[import-untyped]
 from httpx import Response
 
-from across_data_ingestion.tasks.schedules.fermi.lat_planned import (
-    calculate_date_from_fermi_week,
-    entrypoint,
-    ingest,
-    retrieve_lat_pointing_file,
-)
+import across_data_ingestion.tasks.schedules.fermi.lat_planned as lat_planned
+from across_data_ingestion.util.across_server import sdk
+
+from .conftest import BuildPathProto
+
+MOCK_PRELIM_POINTING_FILE = "FERMI_POINTING_PRELIM_878_2025086_2025093_00.fits"
+MOCK_FINAL_POINTING_FILE = "FERMI_POINTING_FINAL_875_2025065_2025072_00.fits"
 
 
 class TestFermiLATPlannedScheduleIngestionTask:
-    mock_lat_pointing_file_base_path = os.path.join(os.path.dirname(__file__), "mocks/")
-    mock_prelim_pointing_file = "FERMI_POINTING_PRELIM_875_2025065_2025072_00.fits"
-    mock_final_pointing_file = "FERMI_POINTING_FINAL_875_2025065_2025072_00.fits"
-
-    def create_mock_output_schedule(self, filetype: str):
-        mock_filepath = self.mock_lat_pointing_file_base_path
-        return mock_filepath + f"mock_{filetype}_schedule_output.json"
-
-    def test_should_calculate_date_from_fermi_week(self):
-        """Should correctly calculate start date for a given Fermi week"""
-        fermi_week_start_date = calculate_date_from_fermi_week(875)
+    def test_should_calculate_date_from_fermi_week_to_YYYYDDD(self):
+        """Should calculate start date for a given Fermi week returned in YYYYDDD format"""
+        fermi_week_start_date = lat_planned.calculate_date_from_fermi_week(875)
         assert fermi_week_start_date == "2025065"
 
-    def test_should_generate_across_schedules_with_prelim_pointing_file(self):
-        """Should generate ACROSS schedules with prelim pointing file"""
-        mock_output_schedule_file = self.create_mock_output_schedule("prelim")
+    class TestGetPointingFilesHtmlLines:
+        def test_should_get_html_of_file_list(self, mock_httpx: MagicMock):
+            """Should make an HTTP get to pull the HTML page to scrape filenames"""
+            lat_planned.get_pointing_files_html_lines()
 
-        with patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.retrieve_lat_pointing_file",
-            return_value=Table(
-                fits.open(
-                    self.mock_lat_pointing_file_base_path
-                    + self.mock_prelim_pointing_file
-                )[1].data
-            ),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "fermi_lat_telescope_uuid",
-                    "instruments": [
-                        {
-                            "id": "fermi_lat_instrument_uuid",
-                            "name": "Large Area Telescope",
-                        }
-                    ],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ), patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.FERMI_FILETYPE_DICTIONARY",
-            new={0: "PRELIM"},
-        ), patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.get_current_time",
-            return_value=datetime(2025, 3, 28, 0, 0, 0).isoformat(),
+            mock_httpx.assert_called_once()
+
+        def test_should_return_html_lines_from_fermi_web_page(self):
+            """Should return a list of html lines from the Fermi web page."""
+            data = lat_planned.get_pointing_files_html_lines()
+            assert len(data) > 0
+
+        def test_should_log_an_error_when_status_code_is_gte_300(
+            self, mock_httpx: MagicMock, mock_logger: MagicMock
         ):
-            schedules = ingest()
-            with open(mock_output_schedule_file) as expected_output_file:
-                expected = json.load(expected_output_file)
-                assert json.dumps(schedules) == json.dumps(expected)
-
-    def test_should_generate_across_schedules_with_final_pointing_file(self):
-        """Should generate ACROSS schedules with final pointing file"""
-        mock_output_schedule_file = self.create_mock_output_schedule("final")
-
-        with patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.retrieve_lat_pointing_file",
-            return_value=Table(
-                fits.open(
-                    self.mock_lat_pointing_file_base_path
-                    + self.mock_final_pointing_file
-                )[1].data
-            ),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "fermi_lat_telescope_uuid",
-                    "instruments": [
-                        {
-                            "id": "fermi_lat_instrument_uuid",
-                            "name": "Large Area Telescope",
-                        }
-                    ],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ), patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.FERMI_FILETYPE_DICTIONARY",
-            new={0: "FINAL"},
-        ), patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.get_current_time",
-            return_value=datetime(2025, 3, 28, 0, 0, 0).isoformat(),
-        ):
-            schedules = ingest()
-            with open(mock_output_schedule_file) as expected_output_file:
-                expected = json.load(expected_output_file)
-                assert json.dumps(schedules) == json.dumps(expected)
-
-    def test_should_generate_observations_with_schedule(self):
-        """Should generate list of observations with an ACROSS schedule"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.retrieve_lat_pointing_file",
-            return_value=Table(
-                fits.open(
-                    self.mock_lat_pointing_file_base_path
-                    + self.mock_final_pointing_file
-                )[1].data
-            ),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "fermi_lat_telescope_uuid",
-                    "instruments": [
-                        {
-                            "id": "fermi_lat_instrument_uuid",
-                            "name": "Large Area Telescope",
-                        }
-                    ],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ), patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.FERMI_FILETYPE_DICTIONARY",
-            new={0: "FINAL"},
-        ):
-            schedules = ingest()
-            assert len(schedules[0]["observations"]) > 0
-
-    def test_retrieve_lat_pointing_file_should_return_astropy_table(self):
-        """Should return an astropy Table for a retrieved LAT pointing file"""
-        with patch(
-            "httpx.get",
-            return_value=Response(
-                status_code=200,
-                text="FERMI_POINTING_PRELIM_881_2025107_2025114_00.fits 27-Mar-2025 15:37  1.4M ",
-            ),
-        ):
-            data = retrieve_lat_pointing_file("PRELIM", 881, "2025107", "2025114")
-            assert isinstance(data, Table)
-
-    def test_retrieve_lat_pointing_file_should_log_warning_if_get_request_status_not_200(
-        self,
-    ):
-        """Should log a warning if GET request for LAT pointing files returns anything but a 200"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.logger"
-        ) as log_mock, patch(
-            "httpx.get",
-            return_value=Response(
+            """Should log an error if GET request for LAT pointing files returns >= 300"""
+            mock_httpx.return_value = Response(
                 status_code=404,
                 text=" ",
-            ),
+            )
+            lat_planned.get_pointing_files_html_lines()
+
+            assert "Failed to GET" in mock_logger.error.call_args.args[0]
+
+        def test_should_return_an_empty_array_when_status_code_is_gte_300(
+            self, mock_httpx: MagicMock, mock_logger: MagicMock
         ):
-            retrieve_lat_pointing_file("PRELIM", 881, "2025107", "2025114")
-            assert "Could not query" in log_mock.warning.call_args.args[0]
+            """Should return an empty array when GET request for LAT pointing files returns >= 300"""
+            mock_httpx.return_value = Response(
+                status_code=404,
+                text=" ",
+            )
+            lines = lat_planned.get_pointing_files_html_lines()
 
-    def test_retrieve_lat_pointing_file_should_return_none_if_no_file_found(self):
-        """Should return None if no LAT pointing file was found"""
-        with patch("httpx.get", return_value=Response(status_code=200, text="")):
-            data = retrieve_lat_pointing_file("PRELIM", 881, "2025107", "2025114")
-            assert data is None
+            assert len(lines) == 0
 
-    def test_should_log_error_when_retrieving_file_returns_unexpected_status_code(self):
-        """Should log error when retrieving a file returns an unexpected status code"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.logger"
-        ) as log_mock, patch(
-            "astropy.io.fits.open",
-            return_value=None,
-            side_effect=HTTPError(url="", code=500, msg="", hdrs=None, fp=None),
-        ), patch(
-            "httpx.get",
-            return_value=Response(
-                status_code=200,
-                text="FERMI_POINTING_PRELIM_881_2025107_2025114_00.fits 27-Mar-2025 15:37  1.4M ",
-            ),
+    class TestGetPointingFilenames:
+        def test_should_return_schedule_files_from_html(
+            self, fake_fermi_html: str, fake_fermi_week: int
         ):
-            retrieve_lat_pointing_file("PRELIM", 881, "2025107", "2025114")
-            assert "unexpectedly failed" in log_mock.error.call_args.args[0]
+            files = lat_planned.get_pointing_filenames(
+                fake_fermi_html.splitlines(), fake_fermi_week
+            )
 
-    def test_should_log_warning_when_retrieving_file_returns_404(self):
-        """Should log warning when retrieving a file returns a 404"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.logger"
-        ) as log_mock, patch(
-            "astropy.io.fits.open",
-            return_value=None,
-            side_effect=HTTPError(url="", code=404, msg="", hdrs=None, fp=None),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "fermi_lat_telescope_uuid",
-                    "instruments": [
-                        {
-                            "id": "fermi_lat_instrument_uuid",
-                            "name": "Large Area Telescope",
-                        }
-                    ],
-                }
-            ],
-        ), patch(
-            "httpx.get",
-            return_value=Response(
-                status_code=200,
-                text="FERMI_POINTING_PRELIM_881_2025107_2025114_00.fits 27-Mar-2025 15:37  1.4M ",
-            ),
-        ), patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.FERMI_FILETYPE_DICTIONARY",
-            new={0: "FINAL"},
+            assert len(files) > 0
+
+        def test_should_return_instances_of_schedule_files(
+            self, fake_fermi_html: str, fake_fermi_week
         ):
-            retrieve_lat_pointing_file("PRELIM", 881, "2025107", "2025114")
-            assert "skipping" in log_mock.warning.call_args.args[0]
+            files = lat_planned.get_pointing_filenames(
+                html_lines=fake_fermi_html.splitlines(),
+                current_fermi_week=fake_fermi_week,
+            )
 
-    def test_should_log_error_when_data_processing_fails(self):
-        """Should log error when processing a pointing file raises an exception"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.logger"
-        ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.retrieve_lat_pointing_file",
-            return_value=None,
-            side_effect=Exception(),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "fermi_lat_telescope_uuid",
-                    "instruments": [
-                        {
-                            "id": "fermi_lat_instrument_uuid",
-                            "name": "Large Area Telescope",
-                        }
-                    ],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.FERMI_FILETYPE_DICTIONARY",
-            new={0: "FINAL"},
+            assert isinstance(files[0], lat_planned.ScheduleFile)
+
+        def test_should_log_warning_when_no_filenames_match(
+            self, fake_fermi_html: str, mock_logger: MagicMock
         ):
-            entrypoint()
-            assert "unexpectedly failed" in log_mock.error.call_args.args[0]
+            lat_planned.get_pointing_filenames(
+                html_lines=fake_fermi_html.splitlines(),
+                current_fermi_week=0,
+            )
 
-    def test_should_log_error_when_no_files_found(self):
-        """Should log an error when no LAT pointing files are found for a given set of params"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.logger"
-        ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.retrieve_lat_pointing_file",
-            return_value=None,
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "fermi_lat_telescope_uuid",
-                    "instruments": [
-                        {
-                            "id": "fermi_lat_instrument_uuid",
-                            "name": "Large Area Telescope",
-                        }
-                    ],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.FERMI_FILETYPE_DICTIONARY",
-            new={0: "FINAL"},
+            assert mock_logger.warning.call_count == 3
+
+    class TestGetScheduleFileData:
+        @pytest.fixture(autouse=True)
+        def patch_base_url(self, mock_base_path):
+            with patch(
+                "across_data_ingestion.tasks.schedules.fermi.lat_planned.FERMI_LAT_POINTING_FILE_BASE_PATH",
+                mock_base_path,
+            ):
+                yield
+
+        def test_should_return_file_data(
+            self,
+            fake_schedule_files: list[lat_planned.ScheduleFile],
         ):
-            entrypoint()
-            assert "Could not read any" in log_mock.error.call_args.args[0]
+            file = lat_planned.get_schedule_file_data(fake_schedule_files)
 
-    def test_should_log_info_when_success(self):
-        """Should log info with ran at when success"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.logger"
-        ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.retrieve_lat_pointing_file",
-            return_value=Table(
-                fits.open(
-                    self.mock_lat_pointing_file_base_path
-                    + self.mock_final_pointing_file
-                )[1].data
-            ),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "fermi_lat_telescope_uuid",
-                    "instruments": [
-                        {
-                            "id": "fermi_lat_instrument_uuid",
-                            "name": "Large Area Telescope",
-                        }
-                    ],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ), patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.FERMI_FILETYPE_DICTIONARY",
-            new={0: "FINAL"},
+            assert isinstance(file, lat_planned.FileData)
+
+        def test_should_return_file_data_with_data(
+            self,
+            fake_schedule_files: list[lat_planned.ScheduleFile],
         ):
-            entrypoint()
-            assert "ran at" in log_mock.info.call_args.args[0]
+            file = lat_planned.get_schedule_file_data(fake_schedule_files)
 
-    def test_should_log_error_when_schedule_ingestion_fails(self):
-        """Should log an error when schedule ingestion fails"""
+            assert len(file.table) > 0
 
-        # Ingest a pointing file with no columns
-        mock_data = Table(
-            fits.open(
-                self.mock_lat_pointing_file_base_path + self.mock_final_pointing_file
-            )[1].data
-        )
-        mock_data.keep_columns([])
+        class TestErrors:
+            @pytest.fixture
+            def fake_http_error(self) -> HTTPError:
+                return HTTPError(
+                    url="test",
+                    code=400,
+                    msg="Error",
+                    hdrs=Message(),
+                    fp=None,
+                )
 
-        with patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.logger"
-        ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.retrieve_lat_pointing_file",
-            return_value=mock_data,
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "fermi_lat_telescope_uuid",
-                    "instruments": [
-                        {
-                            "id": "fermi_lat_instrument_uuid",
-                            "name": "Large Area Telescope",
-                        }
-                    ],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ), patch(
-            "across_data_ingestion.tasks.schedules.fermi.lat_planned.FERMI_FILETYPE_DICTIONARY",
-            new={0: "FINAL"},
+            @pytest.fixture(autouse=True)
+            def mock_fits(self, fake_http_error: HTTPError):
+                with patch(
+                    "across_data_ingestion.tasks.schedules.fermi.lat_planned.fits"
+                ) as mock_fits:
+                    mock_fits.open.side_effect = fake_http_error
+                    yield mock_fits
+
+            def test_should_only_log_warning_when_file_not_found(
+                self,
+                fake_schedule_files: list[lat_planned.ScheduleFile],
+                mock_logger: MagicMock,
+                fake_http_error: HTTPError,
+            ):
+                fake_http_error.code = 404
+
+                lat_planned.get_schedule_file_data(fake_schedule_files)
+
+                # error will raise for each file when trying to open it
+                assert mock_logger.warning.call_count == len(fake_schedule_files)
+
+            def test_should_log_error_when_file_cannot_be_opened(
+                self,
+                fake_schedule_files: list[lat_planned.ScheduleFile],
+                mock_logger: MagicMock,
+            ):
+                lat_planned.get_schedule_file_data(fake_schedule_files)
+
+                # error will raise for each file when trying to open it
+                assert mock_logger.error.call_count == len(fake_schedule_files)
+
+            def test_should_log_error_when_generic_exception(
+                self,
+                fake_schedule_files: list[lat_planned.ScheduleFile],
+                mock_fits: MagicMock,
+            ):
+                mock_fits.open.side_effect = Exception("boom")
+
+                with pytest.raises(Exception) as exc:
+                    lat_planned.get_schedule_file_data(fake_schedule_files)
+
+                assert "boom" in str(exc.value)
+
+            def test_should_return_empty_file_data_when_no_data_exists(
+                self,
+                fake_schedule_files: list[lat_planned.ScheduleFile],
+            ):
+                file = lat_planned.get_schedule_file_data(fake_schedule_files)
+
+                assert len(file.table) == 0
+
+    class TestGetPlannedScheduleData:
+        @pytest.fixture(autouse=True)
+        def mock_get_schedule_file_data(self) -> Generator[MagicMock]:
+            with (
+                patch(
+                    "across_data_ingestion.tasks.schedules.fermi.lat_planned.get_pointing_files_html_lines"
+                ),
+                patch(
+                    "across_data_ingestion.tasks.schedules.fermi.lat_planned.get_pointing_filenames"
+                ),
+                patch(
+                    "across_data_ingestion.tasks.schedules.fermi.lat_planned.get_schedule_file_data"
+                ) as mock,
+            ):
+                yield mock
+
+        def test_should_return_file_data(
+            self, mock_get_schedule_file_data: MagicMock, fake_fermi_week: int
         ):
-            entrypoint()
-            assert "encountered an error" in log_mock.error.call_args.args[0]
+            fake_table = Table(
+                names=("a", "b", "IN_SAA"),
+                rows=[(1, 2, True), (3, 4, False)],
+            )
+            mock_get_schedule_file_data.return_value = lat_planned.FileData(
+                table=fake_table, file=lat_planned.ScheduleFile()
+            )
+
+            data = lat_planned.get_planned_schedule_data(fake_fermi_week)
+
+            assert isinstance(data, lat_planned.FileData)
+
+        def test_should_filter_saa_data(
+            self, mock_get_schedule_file_data: MagicMock, fake_fermi_week: int
+        ):
+            fake_table = Table(
+                names=("a", "b", "IN_SAA"),
+                rows=[(1, 2, True), (3, 4, False)],
+            )
+
+            mock_get_schedule_file_data.return_value = lat_planned.FileData(
+                table=fake_table, file=lat_planned.ScheduleFile()
+            )
+
+            data = lat_planned.get_planned_schedule_data(fake_fermi_week)
+
+            # data.table["IN_SAA"] is array-like
+            # True if no row is inside SAA
+            assert not data.table["IN_SAA"].any()
+
+    class TestIngest:
+        @pytest.fixture(autouse=True)
+        def mock_get_schedule_file_data(
+            self, build_path: BuildPathProto
+        ) -> Generator[MagicMock]:
+            with (
+                patch(
+                    "across_data_ingestion.tasks.schedules.fermi.lat_planned.get_pointing_files_html_lines"
+                ),
+                patch(
+                    "across_data_ingestion.tasks.schedules.fermi.lat_planned.get_pointing_filenames"
+                ),
+                patch(
+                    "across_data_ingestion.tasks.schedules.fermi.lat_planned.get_schedule_file_data"
+                ) as mock_get_data,
+            ):
+                hdu = fits.open(build_path(MOCK_PRELIM_POINTING_FILE))
+                data = Table(hdu[1].data)
+
+                mock_get_data.return_value = lat_planned.FileData(table=data)
+                yield mock_get_data
+
+        def test_should_log_warning_when_no_schedule_data(
+            self,
+            mock_logger: MagicMock,
+            mock_get_schedule_file_data: MagicMock,
+        ):
+            mock_get_schedule_file_data.return_value = lat_planned.FileData()
+
+            lat_planned.ingest()
+
+            mock_logger.warning.assert_called_once_with(
+                "No schedule data to transform."
+            )
+
+        def test_should_return_not_call_across_when_no_schedule_data(
+            self,
+            mock_get_schedule_file_data: MagicMock,
+            mock_telescope_api_cls: MagicMock,
+        ):
+            mock_get_schedule_file_data.return_value = lat_planned.FileData()
+
+            lat_planned.ingest()
+
+            mock_telescope_api_cls.assert_not_called()
+
+        def test_should_get_telescope_info_from_across(
+            self,
+            mock_telescope_api: MagicMock,
+        ):
+            lat_planned.ingest()
+
+            mock_telescope_api.get_telescopes.assert_called_once()
+
+        def test_should_create_schedule_in_across(
+            self,
+            mock_schedule_api: MagicMock,
+        ):
+            lat_planned.ingest()
+
+            mock_schedule_api.create_schedule.assert_called_once()
+
+        def test_should_log_info_when_across_returns_409_conflict(
+            self,
+            mock_logger: MagicMock,
+            mock_schedule_api: MagicMock,
+        ):
+            mock_schedule_api.create_schedule.side_effect = sdk.ApiException(
+                status=409, reason="Conflict"
+            )
+
+            lat_planned.ingest()
+
+            mock_logger.info.assert_called_once()
+
+        def test_should_raise_exc_when_any_other_exception(
+            self,
+            mock_telescope_api: MagicMock,
+        ):
+            mock_telescope_api.get_telescopes.side_effect = Exception("oh no")
+
+            with pytest.raises(Exception) as exc:
+                lat_planned.ingest()
+
+            assert "oh no" in str(exc.value)

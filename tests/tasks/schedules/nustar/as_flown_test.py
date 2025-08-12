@@ -1,215 +1,86 @@
-import json
-import os
-from unittest.mock import patch
+from unittest.mock import MagicMock
 
-from astropy.io import ascii  # type: ignore[import-untyped]
+import pytest
 from astropy.table import Table  # type: ignore[import-untyped]
 
+import across_data_ingestion.tasks.schedules.nustar.as_flown as task
 from across_data_ingestion.tasks.schedules.nustar.as_flown import (
-    create_schedule,
-    entrypoint,
     ingest,
     query_nustar_catalog,
 )
+from across_data_ingestion.util.across_server import sdk
+
+FAKE_START_TIME = 123456  # Mock start time in MJD
 
 
 class TestNustarAsFlownScheduleIngestionTask:
-    mock_file_base_path = os.path.join(os.path.dirname(__file__), "mocks/")
-    mock_observation_table = "NUMASTER_mock_table.ascii"
-    mock_schedule_output = "nustar_as_flown_mock_schedule_output.json"
-    mock_start_time = 123456  # Mock start time in MJD
+    class TestIngest:
+        @pytest.fixture(autouse=True)
+        def patch_query_catalog(
+            self, monkeypatch: pytest.MonkeyPatch, fake_observation_table: Table
+        ) -> MagicMock:
+            mock_query_catalog = MagicMock(return_value=fake_observation_table)
+            monkeypatch.setattr(task, "query_nustar_catalog", mock_query_catalog)
 
-    def test_should_generate_across_schedules(self):
-        """Should generate ACROSS schedules"""
-        mock_output_schedule_file = self.mock_file_base_path + self.mock_schedule_output
+            return mock_query_catalog
 
-        with patch(
-            "across_data_ingestion.tasks.schedules.nustar.as_flown.query_nustar_catalog",
-            return_value=Table(
-                ascii.read(self.mock_file_base_path + self.mock_observation_table)
-            ),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "nustar_telescope_uuid",
-                    "instruments": [{"id": "nustar_instrument_uuid"}],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ), patch(
-            "across_data_ingestion.tasks.schedules.nustar.as_flown.logger"
-        ) as log_mock:
+        def test_should_create_across_schedules(self, mock_schedule_api: MagicMock):
+            """Should create ACROSS schedules"""
             ingest()
-            schedules = log_mock.info.call_args.args[0]
-            with open(mock_output_schedule_file) as expected_output_file:
-                expected = json.load(expected_output_file)
-                assert [json.loads(schedules)] == expected
+            mock_schedule_api.create_schedule.assert_called_once()
 
-    def test_should_generate_observations_with_schedule(self):
-        """Should generate list of observations with an ACROSS schedule"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.nustar.as_flown.query_nustar_catalog",
-            return_value=Table(
-                ascii.read(self.mock_file_base_path + self.mock_observation_table)
-            ),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "nustar_telescope_uuid",
-                    "instruments": [{"id": "nustar_instrument_uuid"}],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ), patch(
-            "across_data_ingestion.tasks.schedules.nustar.as_flown.logger"
-        ) as log_mock:
+        def test_should_create_across_schedule_with_schedule_create(
+            self, mock_schedule_api: MagicMock
+        ):
+            """Should create ACROSS schedules with ScheduleCreate"""
             ingest()
-            schedules = log_mock.info.call_args.args[0]
-            assert len(json.loads(schedules)["observations"]) > 0
+            args = mock_schedule_api.create_schedule.call_args[0]
+            assert isinstance(args[0], sdk.ScheduleCreate)
 
-    def test_query_nustar_catalog_should_return_astropy_table_when_successful(self):
-        """Should return an astropy Table when successfully querying NuSTAR catalog"""
-        mock_data = Table(
-            ascii.read(self.mock_file_base_path + self.mock_observation_table)
-        )
+        def test_should_create_across_schedule_with_observation_create(
+            self, mock_schedule_api: MagicMock
+        ):
+            """Should create ACROSS schedules with observations"""
+            ingest()
+            args = mock_schedule_api.create_schedule.call_args[0]
+            assert isinstance(args[0].observations[0], sdk.ObservationCreate)
 
-        class MockResult:
-            def __init__(self):
-                self.table = mock_data
+        def test_should_log_info_when_catalog_query_returns_empty_table(
+            self, mock_logger: MagicMock, patch_query_catalog: MagicMock
+        ):
+            """Should log warning when the NUMASTER query returns an empty table"""
+            patch_query_catalog.return_value = Table()
+            ingest()
+            assert "No new observations found." in mock_logger.info.call_args[0]
 
-            def to_table(self):
-                return self.table
+    class TestQueryNustarCatalog:
+        def test_should_return_astropy_table_when_successful(self):
+            """Should return an astropy Table when successfully querying NuSTAR catalog"""
 
-        with patch("astroquery.heasarc.Heasarc.query_tap", return_value=MockResult()):
-            data = query_nustar_catalog(self.mock_start_time)
+            data = query_nustar_catalog(FAKE_START_TIME)
             assert isinstance(data, Table)
 
-    def test_query_nustar_catalog_should_log_error_if_catalog_not_found(
-        self,
-    ):
-        """Should log an error if the NUMASTER catalog is not available to query"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.nustar.as_flown.logger"
-        ) as log_mock, patch(
-            "astroquery.heasarc.Heasarc.query_tap",
-            return_value=None,
-            side_effect=ValueError(),
+        def test_should_log_error_if_catalog_not_found(
+            self, mock_heasarc_query_tap: MagicMock, mock_logger: MagicMock
         ):
-            query_nustar_catalog(self.mock_start_time)
-            assert "Could not query" in log_mock.warn.call_args.args[0]
+            """Should log an error if the NUMASTER catalog is not available to query"""
 
-    def test_query_nustar_catalog_should_log_error_when_unexpected_error_raised(self):
-        """Should log error when querying the NUMASTER catalog raises an unexpected error"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.nustar.as_flown.logger"
-        ) as log_mock, patch(
-            "astroquery.heasarc.Heasarc.query_tap",
-            return_value=None,
-            side_effect=Exception(),
+            mock_heasarc_query_tap.side_effect = ValueError()
+            query_nustar_catalog(FAKE_START_TIME)
+            assert "Could not query" in mock_logger.warning.call_args.args[0]
+
+        def test_should_raise_when_unexpected_error_raised(
+            self, mock_heasarc_query_tap: MagicMock
         ):
-            query_nustar_catalog(self.mock_start_time)
-            assert "unexpectedly failed" in log_mock.error.call_args.args[0]
+            """Should log error when querying the NUMASTER catalog raises an unexpected error"""
+            mock_heasarc_query_tap.side_effect = Exception("boom")
+            with pytest.raises(Exception):
+                query_nustar_catalog(FAKE_START_TIME)
 
-    def test_query_nustar_catalog_should_return_none_if_query_fails(self):
-        """Should return None if querying NUMASTER catalog fails"""
-        with patch(
-            "astroquery.heasarc.Heasarc.query_tap",
-            return_value=None,
-            side_effect=Exception(),
+        def test_should_return_empty_table_if_query_fails_from_value_error(
+            self, mock_heasarc_query_tap: MagicMock
         ):
-            data = query_nustar_catalog(self.mock_start_time)
-            assert data is None
-
-    def test_create_schedule_should_return_empty_dict_when_given_empty_table(self):
-        """Should return an empty dictionary when the input table is empty"""
-        # Ingest a table with no rows
-        mock_data = Table(
-            ascii.read(self.mock_file_base_path + self.mock_observation_table)
-        )
-        mock_data.keep_columns([])
-        schedule = create_schedule("nustar_telescope_id", mock_data)
-        assert schedule == {}
-
-    def test_should_log_warning_when_catalog_query_returns_empty_table(self):
-        """Should log warning when the NUMASTER query returns an empty table"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.nustar.as_flown.logger"
-        ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.nustar.as_flown.query_nustar_catalog",
-            return_value=Table(
-                ascii.read(self.mock_file_base_path + self.mock_observation_table)
-            ),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "nustar_telescope_uuid",
-                    "instruments": [{"id": "nustar_instrument_uuid"}],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.tasks.schedules.nustar.as_flown.create_schedule",
-            return_value={},
-        ):
-            ingest()
-            assert "Empty table" in log_mock.warn.call_args.args[0]
-
-    def test_should_log_error_when_query_nustar_catalog_returns_none(self):
-        """Should log an error when NUMASTER query returns None"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.nustar.as_flown.logger"
-        ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.nustar.as_flown.query_nustar_catalog",
-            return_value=None,
-        ):
-            ingest()
-            assert "Could not query" in log_mock.error.call_args.args[0]
-
-    def test_should_log_info_when_success(self):
-        """Should log info with ran at when success"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.nustar.as_flown.logger"
-        ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.nustar.as_flown.query_nustar_catalog",
-            return_value=Table(
-                ascii.read(self.mock_file_base_path + self.mock_observation_table)
-            ),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "nustar_telescope_uuid",
-                    "instruments": [{"id": "nustar_instrument_uuid"}],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ):
-            entrypoint()
-            assert "ingestion completed" in log_mock.info.call_args.args[0]
-
-    def test_should_log_error_when_schedule_ingestion_fails(self):
-        """Should log an error when schedule ingestion fails"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.nustar.as_flown.logger"
-        ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.nustar.as_flown.ingest",
-            return_value=None,
-            side_effect=Exception(),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "nustar_telescope_uuid",
-                    "instruments": [{"id": "nustar_instrument_uuid"}],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ):
-            entrypoint()
-            assert "encountered an error" in log_mock.error.call_args.args[0]
+            """Should return empty table if querying NUMASTER catalog fails"""
+            mock_heasarc_query_tap.side_effect = ValueError()
+            data = query_nustar_catalog(FAKE_START_TIME)
+            assert isinstance(data, Table)

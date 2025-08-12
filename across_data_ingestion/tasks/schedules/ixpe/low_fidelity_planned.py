@@ -1,30 +1,35 @@
 import astropy.units as u  # type: ignore[import-untyped]
+import bs4
 import httpx
 import pandas as pd
 import structlog
 from astropy.time import Time  # type: ignore[import-untyped]
-from bs4 import BeautifulSoup  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
+from across_data_ingestion.util.across_server import client, sdk
+
 from ....core.constants import SECONDS_IN_A_WEEK
-from ....util import across_api
-from ..types import AcrossObservation, AcrossSchedule
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
 IXPE_LTP_URL = "https://ixpe.msfc.nasa.gov/for_scientists/ltp.html"
 
-IXPE_BANDPASS = {"min": 2.0, "max": 8.0, "unit": "keV", "filter_name": "IXPE"}
+IXPE_BANDPASS = sdk.EnergyBandpass(
+    min=2.0,
+    max=8.0,
+    unit=sdk.EnergyUnit.KEV,
+    filter_name="IXPE",
+)
 
 
-def query_ixpe_schedule(url) -> pd.DataFrame | None:
+def query_ixpe_schedule() -> pd.DataFrame:
+    # Send a GET request to the webpage
+    response = httpx.get(IXPE_LTP_URL)
+    response.raise_for_status()
+
     try:
-        # Send a GET request to the webpage
-        response = httpx.get(url)
-        response.raise_for_status()  # Raise an error for bad status codes
-
         # Parse the webpage content with BeautifulSoup
-        soup = BeautifulSoup(response.text, "html.parser")
+        soup = bs4.BeautifulSoup(response.text, "html.parser")
 
         # Extract schedule information (adjust selectors based on the webpage structure)
         schedule_table = soup.find("table")  # Assuming the schedule is in a table
@@ -51,15 +56,22 @@ def query_ixpe_schedule(url) -> pd.DataFrame | None:
 
             return ixpe_df
 
-        return None
+    except Exception as e:
+        logger.error(
+            "Unknown error occurred while converting from HTML to pd.DataFrame",
+            err=e,
+            exc_info=True,
+        )
 
-    except Exception:
-        return None
+    return pd.DataFrame()
 
 
 def ixpe_to_across_schedule(
-    telescope_id: str, data: pd.DataFrame, status: str, fidelity: str
-) -> AcrossSchedule | dict:
+    telescope_id: str,
+    data: pd.DataFrame,
+    status: sdk.ScheduleStatus,
+    fidelity: sdk.ScheduleFidelity,
+) -> sdk.ScheduleCreate:
     """
     Creates a IXPE schedule from the provided data.
     """
@@ -67,19 +79,20 @@ def ixpe_to_across_schedule(
     begin = Time(f"{min(data["Start"])}", format="iso").isot
     end = Time(f"{max(data["Stop"])}", format="iso").isot
 
-    return {
-        "telescope_id": telescope_id,
-        "name": f"ixpe_ltp_{begin.split('T')[0]}_{end.split('T')[0]}",
-        "date_range": {
-            "begin": begin,
-            "end": end,
-        },
-        "status": status,
-        "fidelity": fidelity,
-    }
+    return sdk.ScheduleCreate(
+        telescope_id=telescope_id,
+        name=f"ixpe_ltp_{begin.split('T')[0]}_{end.split('T')[0]}",
+        date_range=sdk.DateRange(
+            begin=begin,
+            end=end,
+        ),
+        status=status,
+        fidelity=fidelity,
+        observations=[],
+    )
 
 
-def ixpe_to_across_observation(instrument_id: str, row: dict) -> AcrossObservation:
+def ixpe_to_across_observation(instrument_id: str, row: dict) -> sdk.ObservationCreate:
     """
     Creates a IXPE observation from the provided row of data.
     Calculates the exposure time from the End - Start
@@ -92,59 +105,70 @@ def ixpe_to_across_observation(instrument_id: str, row: dict) -> AcrossObservati
 
     external_id = f"{str.replace(row["P S"], " ", "_")}_obs_{row['Pnum']}"
 
-    return {
-        "instrument_id": instrument_id,
-        "object_name": f"{row["Name"]}",
-        "pointing_position": {
-            "ra": f"{row["RA"]}",
-            "dec": f"{row["Dec"]}",
-        },
-        "object_position": {
-            "ra": f"{row["RA"]}",
-            "dec": f"{row["Dec"]}",
-        },
-        "date_range": {
-            "begin": obs_start_at.isot,
-            "end": obs_end_at.isot,
-        },
-        "external_observation_id": external_id,
-        "type": "imaging",
-        "status": "planned",
-        "exposure_time": int(exposure_time.to(u.second).value),
-        "bandpass": IXPE_BANDPASS,
-        "pointing_angle": 0.0,  # No Value for position angle -_-
-    }
+    return sdk.ObservationCreate(
+        instrument_id=instrument_id,
+        object_name=f"{row["Name"]}",
+        pointing_position=sdk.Coordinate(
+            ra=float(row["RA"]),
+            dec=float(row["Dec"]),
+        ),
+        object_position=sdk.Coordinate(
+            ra=float(row["RA"]),
+            dec=float(row["Dec"]),
+        ),
+        date_range=sdk.DateRange(
+            begin=obs_start_at.isot,
+            end=obs_end_at.isot,
+        ),
+        external_observation_id=external_id,
+        type=sdk.ObservationType.IMAGING,
+        status=sdk.ObservationStatus.PLANNED,
+        exposure_time=int(exposure_time.to(u.second).value),
+        bandpass=sdk.Bandpass(IXPE_BANDPASS),
+        pointing_angle=0.0,  # No Value for position angle -_-
+    )
 
 
 def ingest() -> None:
     """
     Fetches the IXPE schedule from the specified URL and returns the parsed data.
     """
-    ixpe_df = query_ixpe_schedule(IXPE_LTP_URL)
-    if ixpe_df is None:
-        logger.warn("Failed to read IXPE timeline file")
+    ixpe_df = query_ixpe_schedule()
+    if len(ixpe_df) == 0:
+        logger.warning("Failed to read IXPE timeline file")
         return
 
     # GET Telescope by name
-    tess_telescope_info = across_api.telescope.get({"name": "ixpe"})[0]
-    telescope_id = tess_telescope_info["id"]
-    instrument_id = tess_telescope_info["instruments"][0]["id"]
+    telescope = sdk.TelescopeApi(client).get_telescopes(name="ixpe")[0]
+
+    if not telescope.instruments:
+        logger.error("Telescope has no instruments")
+        return
+
+    instrument_id = telescope.instruments[0].id
 
     # Initialize schedule
     schedule = ixpe_to_across_schedule(
-        telescope_id=telescope_id, data=ixpe_df, status="planned", fidelity="low"
+        telescope_id=telescope.id,
+        data=ixpe_df,
+        status=sdk.ScheduleStatus.PLANNED,
+        fidelity=sdk.ScheduleFidelity.LOW,
     )
 
     # Transform dataframe to list of dictionaries
-    schedule_observations = ixpe_df.to_dict(orient="records")
+    observation_rows = ixpe_df.to_dict(orient="records")
 
     # Transform observations
-    schedule["observations"] = [
-        ixpe_to_across_observation(instrument_id, row) for row in schedule_observations
+    schedule.observations = [
+        ixpe_to_across_observation(instrument_id, row) for row in observation_rows
     ]
 
     # Post schedule
-    across_api.schedule.post(dict(schedule))
+    try:
+        sdk.ScheduleApi(client).create_schedule(schedule)
+    except sdk.ApiException as err:
+        if err.status == 409:
+            logger.info("Schedule already exists.", schedule_name=schedule.name)
 
 
 @repeat_every(seconds=SECONDS_IN_A_WEEK)  # Weekly

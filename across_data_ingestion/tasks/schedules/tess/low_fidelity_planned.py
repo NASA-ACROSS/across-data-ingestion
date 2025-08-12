@@ -1,73 +1,86 @@
-import logging
+from datetime import datetime
+from typing import Any
 
-import astropy.units as u  # type: ignore[import-untyped]
 import pandas as pd
+import structlog
 from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
 from ....core.constants import SECONDS_IN_A_WEEK
-from ....util import across_api
+from ....util.across_server import client, sdk
 
-logger = logging.getLogger("uvicorn.error")
+logger: structlog.stdlib.BoundLogger = structlog.getLogger()
 
-TESS_BANDPASS = {
-    "min": 6000,
-    "max": 10000,
-    "peak_wavelength": 7865,
-    "unit": "angstrom",
-    "filter_name": "TESS_red",
-}
+TESS_BANDPASS = sdk.WavelengthBandpass.model_validate(
+    {
+        "min": 6000,
+        "max": 10000,
+        "peak_wavelength": 7865,
+        "unit": sdk.WavelengthUnit.ANGSTROM,
+        "filter_name": "TESS_red",
+    }
+)
 
 # When running locally and debugging, it is recommended to save the results of these files and load them from a local path to reduce external thrashing
 TESS_POINTINGS_FILE = "https://raw.githubusercontent.com/tessgi/tesswcs/main/src/tesswcs/data/pointings.csv"
 TESS_ORBIT_TIMES_FILE = "https://tess.mit.edu/public/files/TESS_orbit_times.csv"
 
 
-def create_orbit_observation(
-    sector, ra, dec, roll, i, orbit, obs_start, obs_end, instrument_id
-):
+def transform_to_across_orbit_observation(
+    idx: int,
+    obs: Any,  # Pandas namedtuple; no good typing for it
+    pointing: Any,
+    instrument_id,
+) -> sdk.ObservationCreate:
     # orbit start/end times are strings (non isot)
-    obs_start_str = str.replace(obs_start, " ", "T")
-    obs_end_str = str.replace(obs_end, " ", "T")
-    obs_start_at = Time(obs_start_str, format="isot")
-    obs_end_at = Time(obs_end_str, format="isot")
-    exposure_time = obs_end_at - obs_start_at
+    obs_start_str = str.replace(obs.start_of_orbit, " ", "T")
+    obs_end_str = str.replace(obs.end_of_orbit, " ", "T")
+    begin: datetime = Time(obs_start_str, format="isot").to_datetime()
+    end: datetime = Time(obs_end_str, format="isot").to_datetime()
 
-    return {
-        "instrument_id": instrument_id,
-        "object_name": f"TESS_sector_{int(sector)}_obs_{i}_orbit_{int(orbit)}",
-        "external_observation_id": f"TESS_sector_{int(sector)}_obs_{i}_orbit_{int(orbit)}",
-        "pointing_position": {"ra": ra, "dec": dec},
-        "pointing_angle": roll,
-        "date_range": {"begin": obs_start_str, "end": obs_end_str},
-        "exposure_time": int(exposure_time.to(u.second).value),
-        "status": "planned",
-        "type": "imaging",
-        "bandpass": TESS_BANDPASS,
-    }
+    exposure_time = end - begin
+
+    object_name = f"TESS_sector_{int(obs.sector)}_obs_{idx}_orbit_{int(obs.orbit)}"
+
+    return sdk.ObservationCreate(
+        instrument_id=instrument_id,
+        object_name=object_name,
+        external_observation_id=object_name,
+        pointing_position=sdk.Coordinate(ra=pointing.ra, dec=pointing.dec),
+        pointing_angle=pointing.roll,
+        date_range=sdk.DateRange(begin=begin, end=end),
+        exposure_time=exposure_time.total_seconds(),
+        status=sdk.ObservationStatus.PLANNED,
+        type=sdk.ObservationType.IMAGING,
+        bandpass=sdk.Bandpass(TESS_BANDPASS),
+    )
 
 
-def create_placeholder_observation(
-    schedule, sector, ra, dec, roll, sched_start_at, sched_end_at, instrument_id
+def transform_to_across_placeholder_observation(
+    pointing: Any,
+    date_range: sdk.DateRange,
+    instrument_id: str,
 ):
-    exposure_time = sched_end_at - sched_start_at
-    return {
-        "instrument_id": instrument_id,
-        "object_name": f"TESS_sector_{int(sector)}_placeholder",
-        "external_observation_id": f"TESS_sector_{int(sector)}_placeholder",
-        "pointing_position": {"ra": ra, "dec": dec},
-        "pointing_angle": roll,
-        "date_range": schedule["date_range"],
-        "exposure_time": int(exposure_time.to(u.second).value),
-        "status": "planned",
-        "type": "imaging",
-        "bandpass": TESS_BANDPASS,
-    }
+    exposure_time = date_range.end - date_range.begin
+    object_name = f"TESS_sector_{pointing.sector}_placeholder"
+
+    return sdk.ObservationCreate(
+        instrument_id=instrument_id,
+        object_name=object_name,
+        external_observation_id=object_name,
+        pointing_position=sdk.Coordinate(ra=pointing.ra, dec=pointing.dec),
+        pointing_angle=pointing.roll,
+        date_range=date_range,
+        exposure_time=exposure_time.total_seconds(),
+        status=sdk.ObservationStatus.PLANNED,
+        type=sdk.ObservationType.IMAGING,
+        bandpass=sdk.Bandpass(TESS_BANDPASS),
+    )
 
 
 def ingest():
     """
-    Method that posts TESS low fidelity observing schedules via two known webfiles:
+    Method that posts TESS low fidelity observing schedules via two known web files:
         sector_pointings_file:
             https://raw.githubusercontent.com/tessgi/tesswcs/main/src/tesswcs/data/pointings.csv
         -> Contains information about sectors and their pointing times.
@@ -81,90 +94,111 @@ def ingest():
     schedule with a single observation with the date range being for the entire sector.
     """
 
-    # Pointings file is used to determine the sector schedules and contains the schedule start/end and RA/DEC values
-    sector_pointings_df = pd.read_csv(TESS_POINTINGS_FILE)
+    logger.info("Gathering schedule data")
 
-    # TESS_orbit_times.csv is used to discretize each orbit as an observation for a given sector from the schedule above
-    orbit_observations_df = pd.read_csv(TESS_ORBIT_TIMES_FILE)
+    files = [
+        # Pointings file is used to determine the sector schedules
+        # and contains the schedule start/end and RA/DEC values
+        TESS_POINTINGS_FILE,
+        # TESS_orbit_times.csv is used to discretize each orbit as
+        # an observation for a given sector from the schedule above
+        TESS_ORBIT_TIMES_FILE,
+    ]
 
-    columns = ["Sector", "RA", "Dec", "Roll", "Start", "End"]
-    sector_schedules = list(zip(*(sector_pointings_df[col] for col in columns)))
+    sector_pointings_df, orbit_observations_df = [
+        pd.read_csv(file, comment="#").rename(
+            # rename to add underscores and lowercase for more pythonic field naming.
+            columns=lambda c: c.replace(" ", "_").lower()
+        )
+        for file in files
+    ]
 
     # GET Telescope by name
-    tess_telescope_info = across_api.telescope.get({"name": "tess"})[0]
-    telescope_id = tess_telescope_info["id"]
-    instrument_id = tess_telescope_info["instruments"][0]["id"]
+    (tess_telescope,) = sdk.TelescopeApi(client).get_telescopes(name="tess")
+    telescope_id = tess_telescope.id
+    instrument_id = tess_telescope.instruments[0].id
 
     # Initialize List of Schedules to append
     schedules = []
 
-    # Iterate pointings file by row
-    for sector, ra, dec, roll, sector_start_date, sector_end_date in sector_schedules:
-        # Create base schedule from  each pointings file row and set date range
-        schedule = {
-            "name": f"TESS_sector_{int(sector)}",
-            "telescope_id": telescope_id,
-            "status": "planned",
-            "fidelity": "low",
-        }
-        sched_start_at = Time(sector_start_date, format="jd")
-        sched_end_at = Time(sector_end_date, format="jd")
-        schedule["date_range"] = {
-            "begin": str(sched_start_at.to_datetime()),
-            "end": str(sched_end_at.to_datetime()),
-        }
+    logger.info("Transforming schedules...")
 
-        # Find planned orbits from TESS_orbit_times.csv for current sector from pointings row
-        orbit_observations = orbit_observations_df.loc[
-            orbit_observations_df["Sector"] == str(int(sector))
-        ]
-        observation_columns = ["Orbit", "Start of Orbit", "End of Orbit"]
-        sector_orbit_observations = list(
-            zip(*(orbit_observations[col] for col in observation_columns))
+    # Iterate pointings file by row
+    for pointing in sector_pointings_df.itertuples(index=False):
+        # Create base schedule from  each pointings file row and set date range
+        sched_start_at = Time(pointing.start, format="jd")
+        sched_end_at = Time(pointing.end, format="jd")
+        schedule_name = f"TESS_sector_{pointing.sector}"
+
+        logger.debug("Transforming schedule", name=schedule_name)
+
+        schedule = sdk.ScheduleCreate(
+            name=schedule_name,
+            telescope_id=telescope_id,
+            status=sdk.ScheduleStatus.PLANNED,
+            fidelity=sdk.ScheduleFidelity.LOW,
+            date_range=sdk.DateRange(
+                begin=sched_start_at.to_datetime(),
+                end=sched_end_at.to_datetime(),
+            ),
+            observations=[],
         )
 
-        # Initialize list of observations to append
-        observations = []
+        # Find planned orbits from TESS_orbit_times.csv for current sector from pointings row
+        matched_orbit_observations_df = orbit_observations_df.loc[
+            orbit_observations_df.sector == pointing.sector
+        ]
+
+        orbit_observations = list(matched_orbit_observations_df.itertuples(index=False))
+
         # When TESS_orbit_times.csv has planned orbits for current sector
-        if len(sector_orbit_observations):
+        logger.debug(
+            "Transforming observations...", orbit_observations=len(orbit_observations)
+        )
+        if len(orbit_observations):
             # Iterate and add orbits as observations
-            for i, (orbit, obs_start, obs_end) in enumerate(sector_orbit_observations):
-                observation = create_orbit_observation(
-                    sector, ra, dec, roll, i, orbit, obs_start, obs_end, instrument_id
+            for idx, orbit_data in enumerate(orbit_observations):
+                observation = transform_to_across_orbit_observation(
+                    idx, orbit_data, pointing, instrument_id
                 )
-                observations.append(observation)
+                schedule.observations.append(observation)
         else:
             # Create one placeholder observation from low fidelity sector pointing file when no orbit times exist
-            # The pointings file contains a location and can be treated as one observation within the schedule when no orbits are yet planned
-            placeholder_observation = create_placeholder_observation(
-                schedule,
-                sector,
-                ra,
-                dec,
-                roll,
-                sched_start_at,
-                sched_end_at,
+            # The pointings file contains a location and can be treated as one observation within the schedule
+            # when no orbits are yet planned
+            placeholder_observation = transform_to_across_placeholder_observation(
+                pointing,
+                schedule.date_range,
                 instrument_id,
             )
-            observations.append(placeholder_observation)
 
-        schedule["observations"] = observations
+            schedule.observations.append(placeholder_observation)
+
         schedules.append(schedule)
 
-        across_api.schedule.post(schedule)
+    try:
+        logger.debug("Posting Schedules")
+        create_many = sdk.ScheduleCreateMany(
+            schedules=schedules,
+            telescope_id=telescope_id,
+        )
+        sdk.ScheduleApi(client).create_many_schedules(create_many)
+    except sdk.ApiException as err:
+        if err.status == 409:
+            logger.warning("A schedule already exists", extra=err.__dict__)
+        else:
+            raise err
 
     return schedules
 
 
 @repeat_every(seconds=SECONDS_IN_A_WEEK)  # Weekly
 def entrypoint():
-    current_time = Time.now()
-
     try:
+        logger.info("Schedule ingestion started.")
         schedules = ingest()
-        logger.info(f"{__name__} ran at {current_time}")
+        logger.info("Schedule ingestion completed.")
         return schedules
     except Exception as e:
-        # Surface the error through logging, if we do not catch everything and log, the errors get voided
-        logger.error(f"{__name__} encountered an error {e} at {current_time}")
+        logger.error("Encountered an unknown error", err=e, exc_info=True)
         return

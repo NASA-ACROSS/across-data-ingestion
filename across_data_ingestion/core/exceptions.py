@@ -1,13 +1,15 @@
-import logging
 import uuid
 
+import structlog
 from fastapi import HTTPException, status
+
+logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
 
 class AcrossHTTPException(HTTPException):
     def __init__(self, status_code: int, message: str, log_data: dict):
-        logging.error(
-            message,
+        logger.error(
+            f"{message}",
             log_data,
             exc_info=True,
         )

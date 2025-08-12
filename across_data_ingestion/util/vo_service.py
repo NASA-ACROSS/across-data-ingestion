@@ -1,3 +1,5 @@
+import asyncio
+import contextlib
 import xml.etree.ElementTree as ET
 from io import BytesIO
 
@@ -9,26 +11,38 @@ from astropy.table import Table  # type: ignore[import-untyped]
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
 
-class VOService:
+class VOService(contextlib.AbstractAsyncContextManager):
     """
-    Class to handle TAP queries to a VO service.
+    Class to handle TAP queries to a VO service used within a context manager.
     Currently implemented for the Chandra VO service.
+
+    Usage:
+    ```
+    with VOService() as vo_service:
+        # query 1
+        res1 = await vo_service.query(...)
+        # another query 2
+        res2 = await vo_service.query(...)
+    ```
     """
 
-    url: str
+    _url: str
 
     def __init__(self, url: str) -> None:
-        self.url = url
-        self.client = httpx.AsyncClient()
+        self._url = url
+        self._lock = asyncio.Lock()
+        self._client = httpx.AsyncClient()
 
     async def query(self, query: str) -> Table | None:
         """Wrapper to initialize, run, and fetch results from query"""
         await self._initialize_query(query)
         query_ran = await self._run_query()
+
         if query_ran:
             results = self._get_results()
             if results:
                 return self._to_astropy_table(results)
+
         return None
 
     async def _initialize_query(self, query: str) -> None:
@@ -39,9 +53,9 @@ class VOService:
             "LANG": "ADQL",
             "QUERY": query,
         }
-        response = await self.client.request(
+        response = await self._client.request(
             method="POST",
-            url=self.url,
+            url=self._url,
             follow_redirects=True,
             data=data,
         )
@@ -49,17 +63,16 @@ class VOService:
 
     async def _run_query(self) -> bool:
         """Runs the queued query"""
-        response = await self.client.request(
+        response = await self._client.request(
             method="POST",
             url=self.job_url + "/phase",
             data={"PHASE": "RUN"},
             follow_redirects=True,
         )
 
-        await self.client.aclose()
-
         if not response.text:
-            logger.warn("Chandra TAP query never ran, exiting")
+            logger.warning("Chandra TAP query never ran, exiting")
+
         return bool(response.text)
 
     def _get_results(self) -> str:
@@ -72,8 +85,10 @@ class VOService:
         block_query_response = httpx.get(self.job_url + "?WAIT=10")
         root = ET.fromstring(block_query_response.text)
         phase = root.find("{http://www.ivoa.net/xml/UWS/v1.0}phase")
+
         if phase is None or phase.text != "COMPLETED":
             return ""
+
         response = httpx.get(self.job_url + "/results/result")
         return response.text
 
@@ -82,3 +97,23 @@ class VOService:
         tabledata = votable.parse(BytesIO(response_text.encode()))
         table = tabledata.get_first_table().to_table()
         return table
+
+    def _require_client(self):
+        if not self._entered or self._client is None or self._client.is_closed:
+            raise RuntimeError("MyHttpxService must be used inside an async with block")
+
+    async def __aenter__(self):
+        """initialize the httpx client upon entering the context manager"""
+        async with self._lock:
+            if self._client is None:
+                self._client = httpx.AsyncClient()
+
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        """close the httpx client upon exiting the context manager"""
+        async with self._lock:
+            if self._client:
+                await self._client.aclose()
+
+            self._client = None
