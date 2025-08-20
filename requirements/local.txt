@@ -58,8 +58,12 @@ click==8.1.7
     # via
     #   typer
     #   uvicorn
+click-spinner==0.1.10
+    # via fastapi-utilities
 coverage==7.6.8
     # via pytest-cov
+croniter==1.4.1
+    # via fastapi-utilities
 distlib==0.3.9
     # via virtualenv
 dnspython==2.7.0
@@ -72,10 +76,13 @@ fastapi==0.112.0
     # via
     #   -r requirements/base.in
     #   -r requirements/local.in
+    #   fastapi-utilities
     #   fastapi-utils
     #   pytest-fastapi-deps
 fastapi-cli==0.0.5
     # via fastapi
+fastapi-utilities==0.3.1
+    # via -r requirements/base.in
 fastapi-utils==0.8.0
     # via -r requirements/base.in
 filelock==3.16.1
@@ -188,6 +195,7 @@ pydantic==2.10.2
     # via
     #   across-tools
     #   fastapi
+    #   fastapi-utilities
     #   fastapi-utils
     #   pydantic-settings
 pydantic-core==2.27.1
@@ -219,6 +227,7 @@ pytest-fastapi-deps==0.2.3
 python-dateutil==2.9.0.post0
     # via
     #   botocore
+    #   croniter
     #   pandas
 python-dotenv==1.0.1
     # via
@@ -281,6 +290,7 @@ sqlalchemy==2.0.36
     # via
     #   -r requirements/base.in
     #   alembic
+    #   fastapi-utilities
     #   geoalchemy2
 starlette==0.37.2
     # via fastapi

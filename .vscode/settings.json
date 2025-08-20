@@ -3,5 +3,14 @@
     "tests"
   ],
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true
+  "python.testing.pytestEnabled": true,
+  "cSpell.words": [
+    "BUILDKIT",
+    "fastapi",
+    "gsub",
+    "imgs",
+    "mypy",
+    "pytest",
+    "VENV"
+  ]
 }
