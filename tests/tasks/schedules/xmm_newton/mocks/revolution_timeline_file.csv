@@ -1,0 +1,261 @@
+,S,Date & Time,Event,OM,EMOS1,EMOS2,EPN,RGS1,RGS2
+0,,2025-09-04 | 03:32:53,PSF_START,PSF version: 4714_06.PSF,PSF version: 4714_06.PSF,Covers: 47h 51m 34s,Covers: 47h 51m 34s,DoY = 247,DoY = 247
+1,M,2025-09-04 | 04:02:53,SOPS_OPEN,Dur: 0h 25m 0s,Dur: 0h 25m 0s,Dur: 0h 25m 0s,Dur: 0h 25m 0s,Dur: 0h 25m 0s,Dur: 0h 25m 0s
+2,M,2025-09-04 | 04:27:53,SOPS_CLOSE,,,,,,
+3,M,2025-09-04 | 04:27:53,SOPS_OPEN,Dur: 0h 1m 0s,Dur: 0h 1m 0s,Dur: 0h 1m 0s,Dur: 0h 1m 0s,Dur: 0h 1m 0s,Dur: 0h 1m 0s
+4,M,2025-09-04 | 04:28:53,SOPS_CLOSE,,,,,,
+5,M,2025-09-04 | 04:28:53,PERIGEE_EXIT,RA: 21:18:16.80,RA: 21:18:16.80,DEC: +62:29:24.0,DEC: +62:29:24.0,PA: 335:33:01.3,PA: 335:33:01.3
+6,M,2025-09-04 | 06:45:00,Handover_Start,,,,,,
+7,K,2025-09-04 | 07:00:00,Handover_Stop,,,,,,
+8,K,2025-09-04 | 07:18:51,SLEW_START,RA: 05:34:32.00,RA: 05:34:32.00,DEC: +22:00:52.0,DEC: +22:00:52.0,PA: 085:29:39.8,PA: 085:29:39.8
+9,K,2025-09-04 | 07:18:51,ID: 9471400001,Slew: 3841 secs,Slew: 3841 secs,Ac/Rt: 0450.0/090.000,Ac/Rt: 0450.0/090.000,Sci/CLoop: Y/N,Sci/CLoop: Y/N
+10,K,2025-09-04 | 07:24:57,40000 km,,,,,,
+11,K,2025-09-04 | 07:40:22,ACTIVE_OPEN,Dur: 1h 0m 0s,Dur: 1h 0m 0s,Dur: 1h 0m 0s,Dur: 1h 0m 0s,Dur: 1h 0m 0s,Dur: 1h 0m 0s
+12,K,2025-09-04 | 08:22:52,SLEW_END,,,,,,
+13,K,2025-09-04 | 08:29:22,RadMon SLOW,,,,,,
+14,K,2025-09-04 | 08:40:22,ACTIVE_CLOSE,,,,,,
+15,K,2025-09-04 | 08:40:22,INSTRUMENT_OPEN,Dur: 37h 36m 38s,Dur: 37h 36m 38s,Dur: 37h 36m 38s,Dur: 37h 36m 38s,Dur: 37h 36m 38s,Dur: 37h 36m 38s
+16,K,2025-09-04 | 08:40:22,OBS_START,RA: 05:34:32.00,RA: 05:34:32.00,DEC: +22:00:52.0,DEC: +22:00:52.0,Prime: E3,Prime: E3
+17,K,2025-09-04 | 08:40:22,ID: 0811026601,Crab,Crab,Crab,Obs_dur: 17790 secs,Obs_dur: 17790 secs,Obs_dur: 17790 secs
+18,K,2025-09-04 | 08:44:01,,,,,CALCLOSED,,
+19,K,2025-09-04 | 08:56:52,,,CALCLOSED,,,,
+20,K,2025-09-04 | 08:57:13,,,,CALCLOSED,,,
+21,K,2025-09-04 | 08:58:03,,,Full Frame 001: 16642 sec,,,,
+22,K,2025-09-04 | 08:58:24,,,Full Frame 001: 16642 sec,Full Frame 002: 16621 sec,,,
+23,K,2025-09-04 | 09:24:07,,,Full Frame 001: 16642 sec,Full Frame 002: 16621 sec,Full Frame 003: 15093 sec,,
+24,K,2025-09-04 | 13:30:07,,,Full Frame 001: 16642 sec,Full Frame 002: 16621 sec,Full Frame 003: 15093 sec,,
+25,K,2025-09-04 | 13:35:25,,,Full Frame 001: 16642 sec,Full Frame 002: 16621 sec,Full Frame 003: 15093 sec,,
+26,K,2025-09-04 | 13:35:25,,,CLOSED,CLOSED,Full Frame 003: 15093 sec,,
+27,K,2025-09-04 | 13:35:40,,,,,Full Frame 003: 15093 sec,,
+28,K,2025-09-04 | 13:35:40,,,,,CLOSED,,
+29,K,2025-09-04 | 13:36:52,OBS_END,,,,,,
+30,K,2025-09-04 | 13:36:52,OBS_START,RA: 05:34:32.00,RA: 05:34:32.00,DEC: +22:00:52.0,DEC: +22:00:52.0,Prime: E3,Prime: E3
+31,K,2025-09-04 | 13:36:52,ID: 0811026501,Crab,Crab,Crab,Obs_dur: 12000 secs,Obs_dur: 12000 secs,Obs_dur: 12000 secs
+32,K,2025-09-04 | 13:40:31,,,,,CLOSED,,
+33,K,2025-09-04 | 13:53:17,,,THICK,,,,
+34,K,2025-09-04 | 13:53:30,,,,,,HER + SES 004: 10985 sec,
+35,K,2025-09-04 | 13:53:35,,,,,,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+36,K,2025-09-04 | 13:53:38,,,,THICK,,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+37,K,2025-09-04 | 13:54:28,,,Timing 002: 10613 sec,,,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+38,K,2025-09-04 | 13:54:49,,,Timing 002: 10613 sec,Timing 003: 10582 sec,,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+39,K,2025-09-04 | 13:55:04,,Full Low 006: 7868 sec,Timing 002: 10613 sec,Timing 003: 10582 sec,,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+40,K,2025-09-04 | 13:55:25,,Full Low 006: 7868 sec,Timing 002: 10613 sec,Timing 003: 10582 sec,,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+41,K,2025-09-04 | 13:55:25,,UVM2,Timing 002: 10613 sec,Timing 003: 10582 sec,,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+42,K,2025-09-04 | 13:55:25,,... exp continues,Timing 002: 10613 sec,Timing 003: 10582 sec,,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+43,K,2025-09-04 | 14:16:08,,... exp continues,Timing 002: 10613 sec,Timing 003: 10582 sec,THICK,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+44,K,2025-09-04 | 14:32:33,,... exp continues,Timing 002: 10613 sec,Timing 003: 10582 sec,Timing 001: 8587 sec,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+45,K,2025-09-04 | 16:06:12,,... exp continues,Timing 002: 10613 sec,Timing 003: 10582 sec,Timing 001: 8587 sec,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+46,K,2025-09-04 | 16:06:12,,Blocked,Timing 002: 10613 sec,Timing 003: 10582 sec,Timing 001: 8587 sec,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+47,K,2025-09-04 | 16:51:11,,,Timing 002: 10613 sec,Timing 003: 10582 sec,Timing 001: 8587 sec,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+48,K,2025-09-04 | 16:51:21,,,Timing 002: 10613 sec,,Timing 001: 8587 sec,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+49,K,2025-09-04 | 16:55:25,,,CLOSED,CLOSED,Timing 001: 8587 sec,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+50,K,2025-09-04 | 16:55:40,,,,,Timing 001: 8587 sec,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+51,K,2025-09-04 | 16:55:40,,,,,CLOSED,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+52,K,2025-09-04 | 16:56:35,,,,,,HER + SES 004: 10985 sec,HER + SES 005: 10980 sec
+53,K,2025-09-04 | 16:56:52,OBS_END,,,,,,
+54,K,2025-09-04 | 16:56:52,SLEW_START,RA: 13:58:09.70,RA: 13:58:09.70,DEC: -64:44:05.8,DEC: -64:44:05.8,PA: 311:56:24.4,PA: 311:56:24.4
+55,K,2025-09-04 | 16:56:52,ID: 9471400002,Slew: 5621 secs,Slew: 5621 secs,Ac/Rt: 0450.0/090.000,Ac/Rt: 0450.0/090.000,Sci/CLoop: Y/N,Sci/CLoop: Y/N
+56,K,2025-09-04 | 17:19:14,Handover_Start,,,,,,
+57,C,2025-09-04 | 17:34:14,Handover_Stop,,,,,,
+58,C,2025-09-04 | 18:30:33,SLEW_END,,,,,,
+59,C,2025-09-04 | 18:48:03,OBS_START,RA: 13:58:09.70,RA: 13:58:09.70,DEC: -64:44:05.8,DEC: -64:44:05.8,Prime: E3,Prime: E3
+60,C,2025-09-04 | 18:48:03,ID: 0960860801,BW Cir,BW Cir,BW Cir,Obs_dur: 22999 secs,Obs_dur: 22999 secs,Obs_dur: 22999 secs
+61,C,2025-09-04 | 18:51:42,,,,,THIN1,,
+62,C,2025-09-04 | 19:04:33,,,MEDIUM,,,,
+63,C,2025-09-04 | 19:04:40,,,,,,Spectro + Q 004: 21985 sec,
+64,C,2025-09-04 | 19:04:45,,,,,,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+65,C,2025-09-04 | 19:04:54,,,,MEDIUM,,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+66,C,2025-09-04 | 19:05:33,,OM START 400: 288 sec,,,,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+67,C,2025-09-04 | 19:05:44,,OM START 400: 288 sec,Full Frame 001: 21851 sec,,,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+68,C,2025-09-04 | 19:06:05,,OM START 400: 288 sec,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+69,C,2025-09-04 | 19:06:29,,OM START 400: 288 sec,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+70,C,2025-09-04 | 19:06:29,,V,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+71,C,2025-09-04 | 19:06:29,,... exp continues,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+72,C,2025-09-04 | 19:10:21,,... exp continues,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+73,C,2025-09-04 | 19:10:52,,V,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+74,C,2025-09-04 | 19:11:25,,Image 006: 4006 sec,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+75,C,2025-09-04 | 19:31:48,,Image 006: 4006 sec,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+76,C,2025-09-04 | 20:18:11,,Image 006: 4006 sec,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+77,C,2025-09-04 | 20:18:13,,Image 401: 4070 sec,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+78,C,2025-09-04 | 20:18:46,,Image 401: 4070 sec,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+79,C,2025-09-04 | 20:18:46,,V,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+80,C,2025-09-04 | 20:18:46,,... exp continues,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+81,C,2025-09-04 | 21:26:03,,... exp continues,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+82,C,2025-09-04 | 21:26:05,,Image 402: 4070 sec,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+83,C,2025-09-04 | 21:26:38,,Image 402: 4070 sec,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+84,C,2025-09-04 | 21:26:38,,V,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+85,C,2025-09-04 | 21:26:38,,... exp continues,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+86,C,2025-09-04 | 22:09:52,Handover_Start,... exp continues,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+87,Y,2025-09-04 | 22:24:52,Handover_Stop,... exp continues,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+88,Y,2025-09-04 | 22:33:55,,... exp continues,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+89,Y,2025-09-04 | 22:33:57,,Image 403: 4070 sec,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+90,Y,2025-09-04 | 22:34:30,,Image 403: 4070 sec,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+91,Y,2025-09-04 | 22:34:30,,V,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+92,Y,2025-09-04 | 22:34:30,,... exp continues,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+93,Y,2025-09-04 | 23:41:47,,... exp continues,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+94,Y,2025-09-04 | 23:41:49,,Image 404: 4070 sec,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+95,Y,2025-09-04 | 23:42:22,,Image 404: 4070 sec,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+96,Y,2025-09-04 | 23:42:22,,V,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+97,Y,2025-09-04 | 23:42:22,,... exp continues,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+98,Y,2025-09-05 | 00:49:39,,... exp continues,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+99,Y,2025-09-05 | 00:49:39,,Blocked,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+100,Y,2025-09-05 | 01:04:37,,,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+101,Y,2025-09-05 | 01:09:55,,,Full Frame 001: 21851 sec,Full Frame 002: 21830 sec,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+102,Y,2025-09-05 | 01:09:55,,,CLOSED,CLOSED,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+103,Y,2025-09-05 | 01:10:10,,,,,Full Frame 003: 20302 sec,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+104,Y,2025-09-05 | 01:10:10,,,,,CLOSED,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+105,Y,2025-09-05 | 01:11:05,,,,,,Spectro + Q 004: 21985 sec,Spectro + Q SN 005: 21980 sec
+106,Y,2025-09-05 | 01:11:22,OBS_END,,,,,,
+107,Y,2025-09-05 | 01:11:22,SLEW_START,RA: 05:34:32.00,RA: 05:34:32.00,DEC: +22:00:52.0,DEC: +22:00:52.0,PA: 085:29:39.8,PA: 085:29:39.8
+108,Y,2025-09-05 | 01:11:22,ID: 9471400003,Slew: 5621 secs,Slew: 5621 secs,Ac/Rt: 0450.0/090.000,Ac/Rt: 0450.0/090.000,Sci/CLoop: Y/N,Sci/CLoop: Y/N
+109,Y,2025-09-05 | 01:13:07,,,,,MEDIUM,,
+110,Y,2025-09-05 | 01:13:27,,,CALCLOSED,,,,
+111,Y,2025-09-05 | 01:13:28,,,,CALCLOSED,,,
+112,Y,2025-09-05 | 01:14:18,,,,,Full Frame 003: 5044 sec,,
+113,Y,2025-09-05 | 01:18:34,,,Full Frame 001: 5048 sec,,Full Frame 003: 5044 sec,,
+114,Y,2025-09-05 | 01:18:45,,,Full Frame 001: 5048 sec,Full Frame 002: 5037 sec,Full Frame 003: 5044 sec,,
+115,Y,2025-09-05 | 02:38:22,,,Full Frame 001: 5048 sec,Full Frame 002: 5037 sec,Full Frame 003: 5044 sec,,
+116,Y,2025-09-05 | 02:38:26,,,Full Frame 001: 5048 sec,Full Frame 002: 5037 sec,CLOSED,,
+117,Y,2025-09-05 | 02:42:42,,,Full Frame 001: 5048 sec,Full Frame 002: 5037 sec,,,
+118,Y,2025-09-05 | 02:42:43,,,CLOSED,CLOSED,,,
+119,Y,2025-09-05 | 02:45:03,SLEW_END,,,,,,
+120,Y,2025-09-05 | 03:02:33,OBS_START,RA: 05:34:32.00,RA: 05:34:32.00,DEC: +22:00:52.0,DEC: +22:00:52.0,Prime: E3,Prime: E3
+121,Y,2025-09-05 | 03:02:33,ID: 0811026701,Crab,Crab,Crab,Obs_dur: 10000 secs,Obs_dur: 10000 secs,Obs_dur: 10000 secs
+122,Y,2025-09-05 | 03:06:12,,,,,CLOSED,,
+123,Y,2025-09-05 | 03:18:58,,,THICK,,,,
+124,Y,2025-09-05 | 03:19:11,,,,,,HER + SES 004: 8985 sec,
+125,Y,2025-09-05 | 03:19:16,,,,,,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+126,Y,2025-09-05 | 03:19:19,,,,THICK,,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+127,Y,2025-09-05 | 03:20:09,,,Timing 002: 8613 sec,,,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+128,Y,2025-09-05 | 03:20:30,,,Timing 002: 8613 sec,Timing 003: 8582 sec,,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+129,Y,2025-09-05 | 03:20:45,,Full Low 006: 7868 sec,Timing 002: 8613 sec,Timing 003: 8582 sec,,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+130,Y,2025-09-05 | 03:21:06,,Full Low 006: 7868 sec,Timing 002: 8613 sec,Timing 003: 8582 sec,,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+131,Y,2025-09-05 | 03:21:06,,UVW1,Timing 002: 8613 sec,Timing 003: 8582 sec,,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+132,Y,2025-09-05 | 03:21:06,,... exp continues,Timing 002: 8613 sec,Timing 003: 8582 sec,,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+133,Y,2025-09-05 | 03:32:29,,... exp continues,Timing 002: 8613 sec,Timing 003: 8582 sec,THICK,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+134,Y,2025-09-05 | 03:48:54,,... exp continues,Timing 002: 8613 sec,Timing 003: 8582 sec,Burst 001: 7147 sec,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+135,Y,2025-09-05 | 05:31:53,,... exp continues,Timing 002: 8613 sec,Timing 003: 8582 sec,Burst 001: 7147 sec,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+136,Y,2025-09-05 | 05:31:53,,Blocked,Timing 002: 8613 sec,Timing 003: 8582 sec,Burst 001: 7147 sec,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+137,Y,2025-09-05 | 05:43:32,,,Timing 002: 8613 sec,Timing 003: 8582 sec,Burst 001: 7147 sec,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+138,Y,2025-09-05 | 05:43:42,,,Timing 002: 8613 sec,,Burst 001: 7147 sec,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+139,Y,2025-09-05 | 05:47:46,,,CLOSED,CLOSED,Burst 001: 7147 sec,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+140,Y,2025-09-05 | 05:48:01,,,,,Burst 001: 7147 sec,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+141,Y,2025-09-05 | 05:48:01,,,,,CLOSED,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+142,Y,2025-09-05 | 05:48:56,,,,,,HER + SES 004: 8985 sec,HER + SES 005: 8980 sec
+143,Y,2025-09-05 | 05:49:13,OBS_END,,,,,,
+144,Y,2025-09-05 | 05:49:13,SLEW_START,RA: 17:45:40.04,RA: 17:45:40.04,DEC: -29:00:28.2,DEC: -29:00:28.2,PA: 268:16:28.3,PA: 268:16:28.3
+145,Y,2025-09-05 | 05:49:13,ID: 9471400004,Slew: 7373 secs,Slew: 7373 secs,Ac/Rt: 0450.0/090.000,Ac/Rt: 0450.0/090.000,Sci/CLoop: Y/N,Sci/CLoop: Y/N
+146,Y,2025-09-05 | 05:50:58,,,,,CLOSED,,
+147,Y,2025-09-05 | 05:51:18,,,CALCLOSED,,,,
+148,Y,2025-09-05 | 05:51:19,,,,CALCLOSED,,,
+149,Y,2025-09-05 | 05:52:09,,,,,Burst 003: 6796 sec,,
+150,Y,2025-09-05 | 05:53:14,,Flat Field 004: 4149 sec,,,Burst 003: 6796 sec,,
+151,Y,2025-09-05 | 05:53:14,,Flat Field 004: 4149 sec,,,Burst 003: 6796 sec,,
+152,Y,2025-09-05 | 05:53:14,,Blocked,,,Burst 003: 6796 sec,,
+153,Y,2025-09-05 | 05:53:14,,... exp continues,,,Burst 003: 6796 sec,,
+154,Y,2025-09-05 | 05:56:25,,... exp continues,Full Frame 001: 6800 sec,,Burst 003: 6796 sec,,
+155,Y,2025-09-05 | 05:56:36,,... exp continues,Full Frame 001: 6800 sec,Full Frame 002: 6789 sec,Burst 003: 6796 sec,,
+156,Y,2025-09-05 | 07:02:23,,... exp continues,Full Frame 001: 6800 sec,Full Frame 002: 6789 sec,Burst 003: 6796 sec,,
+157,Y,2025-09-05 | 07:45:25,,,Full Frame 001: 6800 sec,Full Frame 002: 6789 sec,Burst 003: 6796 sec,,
+158,Y,2025-09-05 | 07:45:29,,,Full Frame 001: 6800 sec,Full Frame 002: 6789 sec,CLOSED,,
+159,Y,2025-09-05 | 07:49:45,,,Full Frame 001: 6800 sec,Full Frame 002: 6789 sec,,,
+160,Y,2025-09-05 | 07:49:46,,,CLOSED,CLOSED,,,
+161,Y,2025-09-05 | 07:52:06,SLEW_END,,,,,,
+162,Y,2025-09-05 | 08:09:36,OBS_START,RA: 17:45:40.04,RA: 17:45:40.04,DEC: -29:00:28.2,DEC: -29:00:28.2,Prime: E3,Prime: E3
+163,Y,2025-09-05 | 08:09:36,ID: 0963230101,Sgr A*,Sgr A*,Sgr A*,Obs_dur: 49000 secs,Obs_dur: 49000 secs,Obs_dur: 49000 secs
+164,Y,2025-09-05 | 08:13:15,,,,,MEDIUM,,
+165,Y,2025-09-05 | 08:26:06,,,MEDIUM,,,,
+166,Y,2025-09-05 | 08:26:13,,,,,,Spectro + Q 004: 47986 sec,
+167,Y,2025-09-05 | 08:26:18,,,,,,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+168,Y,2025-09-05 | 08:26:27,,,,MEDIUM,,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+169,Y,2025-09-05 | 08:27:06,,OM START 400: 288 sec,,,,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+170,Y,2025-09-05 | 08:27:17,,OM START 400: 288 sec,Full Frame 001: 47852 sec,,,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+171,Y,2025-09-05 | 08:27:38,,OM START 400: 288 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+172,Y,2025-09-05 | 08:28:02,,OM START 400: 288 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+173,Y,2025-09-05 | 08:28:02,,V,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+174,Y,2025-09-05 | 08:28:02,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+175,Y,2025-09-05 | 08:31:54,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+176,Y,2025-09-05 | 08:31:55,,Sci User Def IF 006: 4706 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+177,Y,2025-09-05 | 08:32:18,,Sci User Def IF 006: 4706 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+178,Y,2025-09-05 | 08:32:18,,U - No Bar,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+179,Y,2025-09-05 | 08:32:18,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+180,Y,2025-09-05 | 08:53:21,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+181,Y,2025-09-05 | 09:50:21,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+182,Y,2025-09-05 | 09:50:22,,Sci User Def IF 007: 5606 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+183,Y,2025-09-05 | 09:50:45,,Sci User Def IF 007: 5606 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+184,Y,2025-09-05 | 09:50:45,,U - No Bar,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+185,Y,2025-09-05 | 09:50:45,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+186,Y,2025-09-05 | 10:57:36,Handover_Start,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+187,N,2025-09-05 | 11:12:36,Handover_Stop,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+188,N,2025-09-05 | 11:23:48,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+189,N,2025-09-05 | 11:23:49,,Sci User Def IF 008: 4706 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+190,N,2025-09-05 | 11:24:12,,Sci User Def IF 008: 4706 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+191,N,2025-09-05 | 11:24:12,,UVW1,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+192,N,2025-09-05 | 11:24:12,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+193,N,2025-09-05 | 12:42:15,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+194,N,2025-09-05 | 12:42:16,,Sci User Def IF 009: 4706 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+195,N,2025-09-05 | 12:42:39,,Sci User Def IF 009: 4706 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+196,N,2025-09-05 | 12:42:39,,UVW1,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+197,N,2025-09-05 | 12:42:39,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+198,N,2025-09-05 | 14:00:42,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+199,N,2025-09-05 | 14:00:43,,Sci User Def IF 010: 4706 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+200,N,2025-09-05 | 14:01:06,,Sci User Def IF 010: 4706 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+201,N,2025-09-05 | 14:01:06,,UVM2,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+202,N,2025-09-05 | 14:01:06,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+203,N,2025-09-05 | 15:19:09,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+204,N,2025-09-05 | 15:19:10,,Sci User Def IF 011: 4706 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+205,N,2025-09-05 | 15:19:33,,Sci User Def IF 011: 4706 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+206,N,2025-09-05 | 15:19:33,,UVM2,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+207,N,2025-09-05 | 15:19:33,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+208,N,2025-09-05 | 16:04:29,Handover_Start,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+209,N,2025-09-05 | 16:24:29,Handover_Stop,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+210,N,2025-09-05 | 16:37:36,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+211,N,2025-09-05 | 16:37:37,,Sci User Def IF 012: 4706 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+212,N,2025-09-05 | 16:38:00,,Sci User Def IF 012: 4706 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+213,N,2025-09-05 | 16:38:00,,UVM2,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+214,N,2025-09-05 | 16:38:00,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+215,N,2025-09-05 | 16:53:50,Handover_Start,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+216,C,2025-09-05 | 17:08:50,Handover_Stop,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+217,C,2025-09-05 | 17:56:03,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+218,C,2025-09-05 | 17:56:04,,Sci User Def IF 013: 4706 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+219,C,2025-09-05 | 17:56:27,,Sci User Def IF 013: 4706 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+220,C,2025-09-05 | 17:56:27,,UVW2,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+221,C,2025-09-05 | 17:56:27,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+222,C,2025-09-05 | 19:14:30,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+223,C,2025-09-05 | 19:14:31,,Sci User Def IF 014: 4706 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+224,C,2025-09-05 | 19:14:54,,Sci User Def IF 014: 4706 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+225,C,2025-09-05 | 19:14:54,,UVW2,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+226,C,2025-09-05 | 19:14:54,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+227,C,2025-09-05 | 20:32:57,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+228,C,2025-09-05 | 20:32:58,,Sci User Def IF 015: 2256 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+229,C,2025-09-05 | 20:33:21,,Sci User Def IF 015: 2256 sec,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+230,C,2025-09-05 | 20:33:21,,UVW2,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+231,C,2025-09-05 | 20:33:21,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+232,C,2025-09-05 | 21:10:34,,... exp continues,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+233,C,2025-09-05 | 21:10:34,,Blocked,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+234,C,2025-09-05 | 21:39:31,,,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+235,C,2025-09-05 | 21:44:49,,,Full Frame 001: 47852 sec,Full Frame 002: 47831 sec,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+236,C,2025-09-05 | 21:44:49,,,CLOSED,CLOSED,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+237,C,2025-09-05 | 21:45:04,,,,,Full Frame 003: 46303 sec,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+238,C,2025-09-05 | 21:45:04,,,,,CLOSED,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+239,C,2025-09-05 | 21:45:59,,,,,,Spectro + Q 004: 47986 sec,Spectro + Q SN 005: 47981 sec
+240,C,2025-09-05 | 21:46:16,OBS_END,,,,,,
+241,C,2025-09-05 | 21:55:00,Handover_Start,,,,,,
+242,M,2025-09-05 | 22:10:00,Handover_Stop,,,,,,
+243,M,2025-09-05 | 22:17:00,INSTRUMENT_CLOSE,,,,,,
+244,M,2025-09-05 | 22:17:00,DEACTIVE_OPEN,Dur: 0h 40m 0s,Dur: 0h 40m 0s,Dur: 0h 40m 0s,Dur: 0h 40m 0s,Dur: 0h 40m 0s,Dur: 0h 40m 0s
+245,M,2025-09-05 | 22:17:56,RadMon FAST,,,,,,
+246,M,2025-09-05 | 22:26:35,,,,,CLOSED,,
+247,M,2025-09-05 | 22:27:32,,,CLOSED,,,,
+248,M,2025-09-05 | 22:27:37,,,,CLOSED,,,
+249,M,2025-09-05 | 22:30:00,SLEW_START,RA: 21:18:19.20,RA: 21:18:19.20,DEC: +62:29:24.0,DEC: +62:29:24.0,PA: 333:33:49.2,PA: 333:33:49.2
+250,M,2025-09-05 | 22:30:00,ID: 9471400005,Slew: 4711 secs,Slew: 4711 secs,Ac/Rt: 0450.0/090.000,Ac/Rt: 0450.0/090.000,Sci/CLoop: Y/N,Sci/CLoop: Y/N
+251,M,2025-09-05 | 22:57:00,DEACTIVE_CLOSE,,,,,,
+252,M,2025-09-05 | 23:32:15,40000 km,,,,,,
+253,M,2025-09-05 | 23:48:31,SLEW_END,,,,,,
+254,M,2025-09-06 | 02:12:27,PERIGEE_ENTRY,RA: 21:18:19.20,RA: 21:18:19.20,DEC: +62:29:24.0,DEC: +62:29:24.0,PA: 333:33:49.2,PA: 333:33:49.2
+255,M,2025-09-06 | 02:29:27,SOPS_OPEN,Dur: 0h 25m 0s,Dur: 0h 25m 0s,Dur: 0h 25m 0s,Dur: 0h 25m 0s,Dur: 0h 25m 0s,Dur: 0h 25m 0s
+256,M,2025-09-06 | 02:54:27,SOPS_CLOSE,,,,,,
+257,M,2025-09-06 | 02:59:27,Handover_Start,,,,,,
+258,M,2025-09-06 | 03:19:27,Handover_Stop,,,,,,
+259,M,2025-09-06 | 03:24:27,PSF_STOP,DoY = 249,,,,,
