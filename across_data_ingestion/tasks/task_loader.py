@@ -7,6 +7,9 @@ from .schedules.chandra.high_fidelity_planned import (
 from .schedules.fermi.lat_planned import (
     entrypoint as fermi_planned_schedule_ingestion_task,
 )
+from .schedules.nicer.low_fidelity_planned import (
+    entrypoint as nicer_low_fidelity_schedule_ingestion_task,
+)
 from .schedules.hst.low_fidelity_planned import (
     entrypoint as HST_low_fidelity_schedule_ingestion_task,
 )
@@ -34,6 +37,7 @@ async def init_tasks():
     await TESS_low_fidelity_schedule_ingestion_task()
     await fermi_planned_schedule_ingestion_task()
     await nustar_as_flown_schedule_ingestion_task()
+    await nicer_low_fidelity_schedule_ingestion_task()
     await ixpe_low_fidelity_schedule_ingestion_task()
     await HST_low_fidelity_schedule_ingestion_task()
     await chandra_high_fidelity_planned_schedule_ingestion_task()
