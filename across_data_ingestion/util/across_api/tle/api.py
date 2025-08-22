@@ -27,7 +27,7 @@ def post(data: dict = {}) -> None:
     """
     headers = {
         "accept": "application/json",
-        "Authorization": f"Bearer {config.ACROSS_INGESTION_SERVICE_ACCOUNT_KEY}",
+        "Authorization": f"Bearer {config.ACROSS_SERVER_SECRET}",
         "Content-Type": "application/json",
     }
 
