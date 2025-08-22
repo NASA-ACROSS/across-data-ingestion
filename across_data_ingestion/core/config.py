@@ -19,7 +19,8 @@ class Config(BaseConfig):
     ACROSS_SERVER_ROOT_PATH: str = "/api"
     ACROSS_SERVER_VERSION: str = "/v1"
 
-    ACROSS_INGESTION_SERVICE_ACCOUNT_KEY: str = "local-data-ingestion-service-account"
+    ACROSS_INGESTION_SERVICE_ACCOUNT_ID: str = "9798d4e2-fe46-4da9-8708-dd098c27ea8c"
+    ACROSS_INGESTION_SERVICE_ACCOUNT_KEY: str = "local-service-account-key"
 
     SPACETRACK_USER: str = "spacetrack-username"
     SPACETRACK_PWD: str = "spacetrack-pwd"
@@ -28,6 +29,10 @@ class Config(BaseConfig):
     LOG_LEVEL: str = "DEBUG"
     # Adjusts the output being rendered as JSON (False for dev with pretty-print).
     LOG_JSON_FORMAT: bool = False
+
+    @property
+    def ACROSS_SERVER_URL(self):
+        return f"{self.ACROSS_SERVER_HOST}:{self.ACROSS_SERVER_PORT}{self.ACROSS_SERVER_ROOT_PATH}{self.ACROSS_SERVER_VERSION}"
 
     def is_local(self):
         return self.RUNTIME_ENV == Environments.LOCAL
