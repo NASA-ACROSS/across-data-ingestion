@@ -204,6 +204,8 @@ def filter_jwst_dataframe(df: pd.DataFrame, instruments_info: dict) -> pd.DataFr
         "TARGET_NAME",
     ]
     # Filter the DataFrame to keep only relevant columns and rows
+    # Don't ingest PCS_MODE of NONE or COARSE, and Calibration images
+    # These don't correspond to records in MAST
     ddf = df.loc[
         (~df["PCS_MODE"].isna())
         & (~df["PCS_MODE"].isin(["NONE", "COARSE"]))
