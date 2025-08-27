@@ -12,7 +12,7 @@ across_jwst_plan: dict = {
             "instrument_id": "nircam_instrument_id",
             "object_name": "P330-E",
             "pointing_position": {"ra": "247.890885", "dec": "30.14622222"},
-            "object_position": {"ra": "247.890885", "dec": "30"},
+            "object_position": {"ra": "247.890885", "dec": "30.14622222"},
             "date_range": {
                 "begin": "2025-08-04T04:51:40.000",
                 "end": "2025-08-04T06:49:06.000",
@@ -33,7 +33,7 @@ across_jwst_plan: dict = {
             "instrument_id": "nircam_instrument_id",
             "object_name": "P330-E",
             "pointing_position": {"ra": "247.890885", "dec": "30.14622222"},
-            "object_position": {"ra": "247.890885", "dec": "30"},
+            "object_position": {"ra": "247.890885", "dec": "30.14622222"},
             "date_range": {
                 "begin": "2025-08-04T06:56:31.000",
                 "end": "2025-08-04T09:20:01.000",
@@ -54,7 +54,7 @@ across_jwst_plan: dict = {
             "instrument_id": "nirspec_instrument_id",
             "object_name": "3I_ATLAS",
             "pointing_position": {"ra": "5.971e-05", "dec": "3.4e-06"},
-            "object_position": {"ra": "5.971e-05", "dec": "0"},
+            "object_position": {"ra": "5.971e-05", "dec": "3.4e-06"},
             "date_range": {
                 "begin": "2025-08-06T10:15:55.000",
                 "end": "2025-08-06T10:53:28.000",
@@ -75,7 +75,7 @@ across_jwst_plan: dict = {
             "instrument_id": "nirspec_instrument_id",
             "object_name": "3I_ATLAS",
             "pointing_position": {"ra": "5.971e-05", "dec": "3.4e-06"},
-            "object_position": {"ra": "5.971e-05", "dec": "0"},
+            "object_position": {"ra": "5.971e-05", "dec": "3.4e-06"},
             "date_range": {
                 "begin": "2025-08-06T11:03:52.000",
                 "end": "2025-08-06T11:41:25.000",
@@ -96,7 +96,7 @@ across_jwst_plan: dict = {
             "instrument_id": "miri_instrument_id",
             "object_name": "UDS-2",
             "pointing_position": {"ra": "34.37777625", "dec": "-5.27114444"},
-            "object_position": {"ra": "34.37777625", "dec": "-5"},
+            "object_position": {"ra": "34.37777625", "dec": "-5.27114444"},
             "date_range": {
                 "begin": "2025-08-06T22:59:15.000",
                 "end": "2025-08-07T00:42:45.000",
@@ -117,7 +117,7 @@ across_jwst_plan: dict = {
             "instrument_id": "miri_instrument_id",
             "object_name": "UDS-2",
             "pointing_position": {"ra": "34.37777625", "dec": "-5.27114444"},
-            "object_position": {"ra": "34.37777625", "dec": "-5"},
+            "object_position": {"ra": "34.37777625", "dec": "-5.27114444"},
             "date_range": {
                 "begin": "2025-08-07T00:47:36.000",
                 "end": "2025-08-07T02:28:03.000",
@@ -138,7 +138,7 @@ across_jwst_plan: dict = {
             "instrument_id": "miri_instrument_id",
             "object_name": "UDS-2",
             "pointing_position": {"ra": "34.37777625", "dec": "-5.27114444"},
-            "object_position": {"ra": "34.37777625", "dec": "-5"},
+            "object_position": {"ra": "34.37777625", "dec": "-5.27114444"},
             "date_range": {
                 "begin": "2025-08-07T02:33:33.000",
                 "end": "2025-08-07T04:14:00.000",
@@ -159,7 +159,7 @@ across_jwst_plan: dict = {
             "instrument_id": "miri_instrument_id",
             "object_name": "UDS-2",
             "pointing_position": {"ra": "34.37777625", "dec": "-5.27114444"},
-            "object_position": {"ra": "34.37777625", "dec": "-5"},
+            "object_position": {"ra": "34.37777625", "dec": "-5.27114444"},
             "date_range": {
                 "begin": "2025-08-07T04:21:27.000",
                 "end": "2025-08-07T06:04:57.000",
@@ -180,7 +180,7 @@ across_jwst_plan: dict = {
             "instrument_id": "miri_instrument_id",
             "object_name": "UDS-2",
             "pointing_position": {"ra": "34.37777625", "dec": "-5.27114444"},
-            "object_position": {"ra": "34.37777625", "dec": "-5"},
+            "object_position": {"ra": "34.37777625", "dec": "-5.27114444"},
             "date_range": {
                 "begin": "2025-08-07T06:10:27.000",
                 "end": "2025-08-07T07:50:54.000",
@@ -201,7 +201,7 @@ across_jwst_plan: dict = {
             "instrument_id": "nirspec_instrument_id",
             "object_name": "QSO-J0443-5332",
             "pointing_position": {"ra": "70.85945", "dec": "-53.53748056"},
-            "object_position": {"ra": "70.85945", "dec": "-54"},
+            "object_position": {"ra": "70.85945", "dec": "-53.53748056"},
             "date_range": {
                 "begin": "2025-08-07T08:26:46.000",
                 "end": "2025-08-07T09:42:40.000",
@@ -222,7 +222,7 @@ across_jwst_plan: dict = {
             "instrument_id": "miri_instrument_id",
             "object_name": "UDS-2",
             "pointing_position": {"ra": "34.37777625", "dec": "-5.27114444"},
-            "object_position": {"ra": "34.37777625", "dec": "-5"},
+            "object_position": {"ra": "34.37777625", "dec": "-5.27114444"},
             "date_range": {
                 "begin": "2025-08-07T10:18:32.000",
                 "end": "2025-08-07T12:02:02.000",
@@ -243,7 +243,7 @@ across_jwst_plan: dict = {
             "instrument_id": "nirspec_instrument_id",
             "object_name": "TOI-4010",
             "pointing_position": {"ra": "20.2148325", "dec": "66.07219722"},
-            "object_position": {"ra": "20.2148325", "dec": "66"},
+            "object_position": {"ra": "20.2148325", "dec": "66.07219722"},
             "date_range": {
                 "begin": "2025-08-07T12:41:43.000",
                 "end": "2025-08-07T19:16:37.000",
@@ -264,7 +264,7 @@ across_jwst_plan: dict = {
             "instrument_id": "nirspec_instrument_id",
             "object_name": "HIP-99770",
             "pointing_position": {"ra": "303.63346833", "dec": "36.80630556"},
-            "object_position": {"ra": "303.63346833", "dec": "37"},
+            "object_position": {"ra": "303.63346833", "dec": "36.80630556"},
             "date_range": {
                 "begin": "2025-08-08T05:19:13.000",
                 "end": "2025-08-08T06:59:01.000",
@@ -285,7 +285,7 @@ across_jwst_plan: dict = {
             "instrument_id": "nirspec_instrument_id",
             "object_name": "TOI-2525",
             "pointing_position": {"ra": "86.85078333", "dec": "-60.52140833"},
-            "object_position": {"ra": "86.85078333", "dec": "-61"},
+            "object_position": {"ra": "86.85078333", "dec": "-60.52140833"},
             "date_range": {
                 "begin": "2025-08-08T08:07:02.000",
                 "end": "2025-08-08T19:23:46.000",
@@ -306,7 +306,7 @@ across_jwst_plan: dict = {
             "instrument_id": "niriss_instrument_id",
             "object_name": "HAT-P-11",
             "pointing_position": {"ra": "297.70936375", "dec": "48.08086111"},
-            "object_position": {"ra": "297.70936375", "dec": "48"},
+            "object_position": {"ra": "297.70936375", "dec": "48.08086111"},
             "date_range": {
                 "begin": "2025-08-08T20:30:30.000",
                 "end": "2025-08-09T02:37:24.000",
@@ -327,7 +327,7 @@ across_jwst_plan: dict = {
             "instrument_id": "miri_instrument_id",
             "object_name": "UDS-2",
             "pointing_position": {"ra": "34.37777625", "dec": "-5.27114444"},
-            "object_position": {"ra": "34.37777625", "dec": "-5"},
+            "object_position": {"ra": "34.37777625", "dec": "-5.27114444"},
             "date_range": {
                 "begin": "2025-08-09T03:25:19.000",
                 "end": "2025-08-09T05:08:49.000",
@@ -348,7 +348,7 @@ across_jwst_plan: dict = {
             "instrument_id": "miri_instrument_id",
             "object_name": "UDS-2",
             "pointing_position": {"ra": "34.37777625", "dec": "-5.27114444"},
-            "object_position": {"ra": "34.37777625", "dec": "-5"},
+            "object_position": {"ra": "34.37777625", "dec": "-5.27114444"},
             "date_range": {
                 "begin": "2025-08-09T05:16:17.000",
                 "end": "2025-08-09T06:59:47.000",
@@ -369,7 +369,7 @@ across_jwst_plan: dict = {
             "instrument_id": "miri_instrument_id",
             "object_name": "UDS-2",
             "pointing_position": {"ra": "34.37777625", "dec": "-5.27114444"},
-            "object_position": {"ra": "34.37777625", "dec": "-5"},
+            "object_position": {"ra": "34.37777625", "dec": "-5.27114444"},
             "date_range": {
                 "begin": "2025-08-09T07:06:26.000",
                 "end": "2025-08-09T08:46:53.000",
@@ -390,7 +390,7 @@ across_jwst_plan: dict = {
             "instrument_id": "miri_instrument_id",
             "object_name": "UDS-2",
             "pointing_position": {"ra": "34.37777625", "dec": "-5.27114444"},
-            "object_position": {"ra": "34.37777625", "dec": "-5"},
+            "object_position": {"ra": "34.37777625", "dec": "-5.27114444"},
             "date_range": {
                 "begin": "2025-08-09T08:52:23.000",
                 "end": "2025-08-09T10:32:50.000",
@@ -411,7 +411,7 @@ across_jwst_plan: dict = {
             "instrument_id": "miri_instrument_id",
             "object_name": "UDS-2",
             "pointing_position": {"ra": "34.37777625", "dec": "-5.27114444"},
-            "object_position": {"ra": "34.37777625", "dec": "-5"},
+            "object_position": {"ra": "34.37777625", "dec": "-5.27114444"},
             "date_range": {
                 "begin": "2025-08-09T10:41:44.000",
                 "end": "2025-08-09T12:25:14.000",
@@ -432,7 +432,7 @@ across_jwst_plan: dict = {
             "instrument_id": "nirspec_instrument_id",
             "object_name": "catalog_J0100_phaseII_v1",
             "pointing_position": {"ra": "15.05354375", "dec": "28.04043056"},
-            "object_position": {"ra": "15.05354375", "dec": "28"},
+            "object_position": {"ra": "15.05354375", "dec": "28.04043056"},
             "date_range": {
                 "begin": "2025-08-09T12:55:51.000",
                 "end": "2025-08-09T16:27:57.000",
@@ -453,7 +453,7 @@ across_jwst_plan: dict = {
             "instrument_id": "nircam_instrument_id",
             "object_name": "DRACO-F1",
             "pointing_position": {"ra": "260.19702125", "dec": "57.91138056"},
-            "object_position": {"ra": "260.19702125", "dec": "58"},
+            "object_position": {"ra": "260.19702125", "dec": "57.91138056"},
             "date_range": {
                 "begin": "2025-08-09T17:10:16.000",
                 "end": "2025-08-09T17:36:24.000",
@@ -474,7 +474,7 @@ across_jwst_plan: dict = {
             "instrument_id": "nirspec_instrument_id",
             "object_name": "NGC-0315",
             "pointing_position": {"ra": "14.45368", "dec": "30.35245"},
-            "object_position": {"ra": "14.45368", "dec": "30"},
+            "object_position": {"ra": "14.45368", "dec": "30.35245"},
             "date_range": {
                 "begin": "2025-08-10T03:51:21.000",
                 "end": "2025-08-10T11:29:54.000",
@@ -495,7 +495,7 @@ across_jwst_plan: dict = {
             "instrument_id": "nircam_instrument_id",
             "object_name": "P330-E",
             "pointing_position": {"ra": "247.890885", "dec": "30.14622222"},
-            "object_position": {"ra": "247.890885", "dec": "30"},
+            "object_position": {"ra": "247.890885", "dec": "30.14622222"},
             "date_range": {
                 "begin": "2025-08-10T12:17:58.000",
                 "end": "2025-08-10T15:20:15.000",
@@ -516,7 +516,7 @@ across_jwst_plan: dict = {
             "instrument_id": "nircam_instrument_id",
             "object_name": "P330-E",
             "pointing_position": {"ra": "247.890885", "dec": "30.14622222"},
-            "object_position": {"ra": "247.890885", "dec": "30"},
+            "object_position": {"ra": "247.890885", "dec": "30.14622222"},
             "date_range": {
                 "begin": "2025-08-10T15:27:51.000",
                 "end": "2025-08-10T16:22:06.000",
@@ -537,7 +537,7 @@ across_jwst_plan: dict = {
             "instrument_id": "nircam_instrument_id",
             "object_name": "P330-E",
             "pointing_position": {"ra": "247.890885", "dec": "30.14622222"},
-            "object_position": {"ra": "247.890885", "dec": "30"},
+            "object_position": {"ra": "247.890885", "dec": "30.14622222"},
             "date_range": {
                 "begin": "2025-08-10T16:27:31.000",
                 "end": "2025-08-10T17:20:53.000",
@@ -558,7 +558,7 @@ across_jwst_plan: dict = {
             "instrument_id": "niriss_instrument_id",
             "object_name": "LHS-1140",
             "pointing_position": {"ra": "11.24721208", "dec": "-15.27153889"},
-            "object_position": {"ra": "11.24721208", "dec": "-15"},
+            "object_position": {"ra": "11.24721208", "dec": "-15.27153889"},
             "date_range": {
                 "begin": "2025-08-10T18:23:40.000",
                 "end": "2025-08-10T23:52:16.000",
