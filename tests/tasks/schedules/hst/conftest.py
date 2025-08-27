@@ -75,19 +75,6 @@ def mock_soup_cls(monkeypatch: pytest.MonkeyPatch, mock_soup: MagicMock):
     return mock_soup_cls
 
 
-@pytest.fixture(autouse=True)
-def mock_pandas(
-    monkeypatch: pytest.MonkeyPatch,
-    # fake_planned_exposure_catalog: pd.DataFrame,
-    fake_timeline_file_df: pd.DataFrame,
-) -> None:
-    mock_read_csv = MagicMock(side_effect=pd.read_csv)
-    mock_read_fwf = MagicMock(side_effect=pd.read_fwf)
-
-    monkeypatch.setattr(pd, "read_csv", mock_read_csv)
-    monkeypatch.setattr(pd, "read_fwf", mock_read_fwf)
-
-
 @pytest.fixture
 def mock_read_timeline_file(
     monkeypatch: pytest.MonkeyPatch,

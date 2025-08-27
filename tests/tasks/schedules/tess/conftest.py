@@ -2,7 +2,6 @@ from collections.abc import Generator
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
-import pandas as pd
 import pytest
 import structlog
 
@@ -32,17 +31,6 @@ def mock_logger() -> Generator[MagicMock]:
         MagicMock(spec=structlog.stdlib.BoundLogger),
     ) as mock_logger:
         yield mock_logger
-
-
-@pytest.fixture(autouse=True)
-def mock_pandas(monkeypatch: pytest.MonkeyPatch) -> Generator[MagicMock]:
-    mock = MagicMock()
-    # Not mocking the default behavior
-    mock.read_csv = MagicMock(side_effect=pd.read_csv)
-
-    monkeypatch.setattr(pd, "read_csv", mock.read_csv)
-
-    return mock
 
 
 ## FAKE DATA ##

@@ -1,41 +1,47 @@
+from typing import NamedTuple, cast
+
 import pandas as pd
 import structlog
 from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
 from ....core.constants import SECONDS_IN_A_WEEK
-from ....util import across_api
-from ..types import AcrossObservation, AcrossSchedule
+from ....util.across_server import client, sdk
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
-NICER_BANDPASS = {
-    "min": 0.2,
-    "max": 12.0,
-    "unit": "keV",
-    "filter_name": "NICER XTI",
-}
+NICER_BANDPASS = sdk.Bandpass(
+    sdk.EnergyBandpass(
+        min=0.2,
+        max=12.0,
+        unit=sdk.EnergyUnit.KEV,
+        filter_name="NICER XTI",
+    )
+)
 
 NICER_TIMELINE_FILE = (
     "https://heasarc.gsfc.nasa.gov/docs/nicer/schedule/obs_pred_timeline_detail.csv"
 )
 
 
-def query_nicer_catalog() -> pd.DataFrame | None:
-    """
-    Queries the NICER HEASARC catalog for all NICER observations
-    """
-    try:
-        df = pd.read_csv(NICER_TIMELINE_FILE)
-    except Exception:
-        return None
+class ObservationRow(NamedTuple):
+    ObsID: int
+    Target: str
+    TargetID: int
+    Start: str
+    Stop: str
+    Duration: float
+    RightAscension: float
+    Declination: float
+    Mode: str
 
-    return df
 
-
-def nicer_schedule(
-    telescope_id: str, data: pd.DataFrame, status: str, fidelity: str
-) -> AcrossSchedule | dict:
+def transform_to_across_schedule(
+    telescope_id: str,
+    data: pd.DataFrame,
+    status: sdk.ScheduleStatus,
+    fidelity: sdk.ScheduleFidelity,
+) -> sdk.ScheduleCreate:
     """
     Creates a NICER schedule from the provided data.
     """
@@ -43,47 +49,50 @@ def nicer_schedule(
     begin = Time(f"{min(data["Start"])}", format="isot").isot
     end = Time(f"{max(data["Stop"])}", format="isot").isot
 
-    return {
-        "telescope_id": telescope_id,
-        "name": f"nicer_obs_planned_{begin.split('T')[0]}_{end.split('T')[0]}",
-        "date_range": {
-            "begin": begin,
-            "end": end,
-        },
-        "status": status,
-        "fidelity": fidelity,
-    }
+    return sdk.ScheduleCreate(
+        telescope_id=telescope_id,
+        name=f"nicer_{status.value}_{fidelity.value}_{begin.split('T')[0]}_{end.split('T')[0]}",
+        date_range=sdk.DateRange(
+            begin=begin,
+            end=end,
+        ),
+        status=status,
+        fidelity=fidelity,
+        observations=[],
+    )
 
 
-def nicer_observation(instrument_id: str, row: dict) -> AcrossObservation:
+def transform_to_across_observation(
+    instrument_id: str, row: ObservationRow
+) -> sdk.ObservationCreate:
     """
     Creates a NICER observation from the provided row of data.
     """
-    return {
-        "instrument_id": instrument_id,
-        "object_name": f"{row["Target"]}",
-        "pointing_position": {
-            "ra": f"{row["RightAscension"]}",
-            "dec": f"{row["Declination"]}",
-        },
-        "object_position": {
-            "ra": f"{row["RightAscension"]}",
-            "dec": f"{row["Declination"]}",
-        },
-        "date_range": {
-            "begin": Time(f"{row["Start"]}", format="isot").isot,
-            "end": Time(f"{row["Stop"]}", format="isot").isot,
-        },
-        "external_observation_id": f"{row["ObsID"]}",
-        "type": "imaging",
-        "status": "planned",
-        "exposure_time": float(row["Duration"]),
-        "bandpass": NICER_BANDPASS,
-        "pointing_angle": 0.0,
-    }
+    return sdk.ObservationCreate(
+        instrument_id=instrument_id,
+        object_name=row.Target,
+        pointing_position=sdk.Coordinate(
+            ra=row.RightAscension,
+            dec=row.Declination,
+        ),
+        object_position=sdk.Coordinate(
+            ra=row.RightAscension,
+            dec=row.Declination,
+        ),
+        date_range=sdk.DateRange(
+            begin=Time(row.Start, format="isot").isot,
+            end=Time(row.Stop, format="isot").isot,
+        ),
+        external_observation_id=str(row.ObsID),
+        type=sdk.ObservationType.IMAGING,
+        status=sdk.ObservationStatus.PLANNED,
+        exposure_time=float(row.Duration),
+        bandpass=NICER_BANDPASS,
+        pointing_angle=0.0,
+    )
 
 
-async def ingest(schedule_modes: list[str] = ["Scheduled"]) -> None:
+def ingest(schedule_modes: list[str] = ["Scheduled"]) -> None:
     """
     Method that posts NICER low fidelity observing schedules via the known webfile:
         https://heasarc.gsfc.nasa.gov/docs/nicer/schedule/obs_pred_timeline_detail.csv
@@ -92,46 +101,50 @@ async def ingest(schedule_modes: list[str] = ["Scheduled"]) -> None:
     it will grab all observations with the Mode "Scheduled", and create a schedule with the planned
     observations. Then it will then POST the schedule to the ACROSS server.
     """
-    nicer_df = query_nicer_catalog()
-    if nicer_df is None:
-        logger.warn("Failed to read NICER timeline file")
-        return
+    nicer_df = pd.read_csv(NICER_TIMELINE_FILE)
 
     # Only get planned observations
-    nicer_planned = nicer_df.loc[nicer_df["Mode"].isin(schedule_modes)]
-    if nicer_planned.empty:
-        logger.warn(f"No {schedule_modes} observations found in NICER timeline file.")
+    nicer_planned_df = nicer_df.loc[nicer_df["Mode"].isin(schedule_modes)]
+    if nicer_planned_df.empty:
+        logger.warning(
+            "No observations found in NICER timeline file.",
+            schedule_modes=schedule_modes,
+        )
         return
 
     # GET Telescope by name
-    nicer_telescope_info = across_api.telescope.get({"name": "nicer"})[0]
-    telescope_id = nicer_telescope_info["id"]
-    instrument_id = nicer_telescope_info["instruments"][0]["id"]
+    telescope = sdk.TelescopeApi(client).get_telescopes(name="nicer")[0]
+    telescope_id = telescope.id
+    if telescope.instruments:
+        instrument_id = telescope.instruments[0].id
 
     # Initialize schedule
-    schedule = nicer_schedule(
+    schedule = transform_to_across_schedule(
         telescope_id=telescope_id,
-        data=nicer_planned,
-        status="planned",
-        fidelity="low",
+        data=nicer_planned_df,
+        status=sdk.ScheduleStatus.PLANNED,
+        fidelity=sdk.ScheduleFidelity.LOW,
     )
 
-    # Transform dataframe to list of dictionaries
-    schedule_observations = nicer_planned.to_dict(orient="records")
+    nicer_obs = list(nicer_df.itertuples())
 
     # Transform observations
-    schedule["observations"] = [
-        nicer_observation(instrument_id, row) for row in schedule_observations
+    schedule.observations = [
+        transform_to_across_observation(
+            instrument_id,
+            cast(ObservationRow, obs),
+        )
+        for obs in nicer_obs
     ]
 
     # Post schedule
-    across_api.schedule.post(dict(schedule))
+    sdk.ScheduleApi(client).create_schedule(schedule)
 
 
 @repeat_every(seconds=2 * SECONDS_IN_A_WEEK)  # BiWeekly
 async def entrypoint():
     try:
-        await ingest()
+        ingest()
         logger.info("Schedule ingestion completed.")
     except Exception as e:
         # Surface the error through logging, if we do not catch everything and log, the errors get voided
