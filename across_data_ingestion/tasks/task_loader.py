@@ -45,5 +45,5 @@ async def init_tasks():
     create_task(nustar_as_flown_schedule_ingestion_task())
     await HST_low_fidelity_schedule_ingestion_task()
     await tle_ingestion_task()
-    await swift_low_fidelity_schedule_ingestion_task()
     await chandra_high_fidelity_planned_schedule_ingestion_task()
+    await swift_low_fidelity_schedule_ingestion_task()
