@@ -1,6 +1,7 @@
 # type dependencies
 
 mypy
+types-boto3[ssm]
 types-requests
 types-cachetools
 types-shapely
