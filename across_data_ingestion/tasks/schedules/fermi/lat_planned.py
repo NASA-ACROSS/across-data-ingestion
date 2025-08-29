@@ -6,10 +6,11 @@ from urllib.error import HTTPError
 import astropy.units as u  # type: ignore[import-untyped]
 import httpx
 import numpy as np
+import pandas as pd
 import pydantic
 import structlog
 from astropy.io import fits  # type: ignore[import-untyped]
-from astropy.table import Row, Table  # type: ignore[import-untyped]
+from astropy.table import Table  # type: ignore[import-untyped]
 from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
@@ -21,32 +22,42 @@ logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 FERMI_LAT_POINTING_FILE_BASE_PATH = (
     "https://fermi.gsfc.nasa.gov/ssc/observations/timeline/ft2/files/"
 )
-FERMI_JD_WEEK_23 = (
-    Time("2008-01-01 00:00:00").jd + 310
-)  # Fermi schedules start at Fermi week 23 on the 311th day of 2008
+
+# Fermi schedules start at Fermi week 23 on the 311th day of 2008
+FERMI_WEEK_START = 23
+FERMI_SCHEDULE_DATE_START = Time("2008-01-01 00:00:00").jd + 310
+
 FERMI_TIME_START_EPOCH = Time("2001-01-01")  # Start of Fermi time system
 FERMI_LAT_MIN_ENERGY = 0.02  # GeV
 FERMI_LAT_MAX_ENERGY = 300  # GeV
-FERMI_FILETYPE_DICTIONARY: dict[int, Literal["PRELIM", "FINAL"]] = {
+
+# Dictionary of filetypes and number of weeks ahead to ingest
+FIDELITY_BY_WEEKS_AHEAD: dict[int, Literal["PRELIM", "FINAL"]] = {
     3: "PRELIM",
     1: "FINAL",
     0: "FINAL",
-}  # Dictionary of filetypes and number of weeks ahead to ingest
+}
+
 # Assume Fermi LAT footprint is a circle, so no pointing angle needed
 FERMI_LAT_POINTING_ANGLE = 0
 
+# Data columns that are used for transformation.
+FERMI_DATA_COLS = ["RA_SCZ", "DEC_SCZ", "START", "STOP"]
 
-class ScheduleFile(pydantic.BaseModel):
+
+class PointingFile(pydantic.BaseModel):
     name: str = ""
-    fidelity: Literal["PRELIM", "FINAL"] = "PRELIM"
+    fidelity: str = "PRELIM"
     week: int = 0
     start: str = ""
     end: str = ""
+    rev: int = 0
+    last_modified: datetime = datetime.now()
 
 
-class FileData(pydantic.BaseModel):
-    table: Table = Table()
-    file: ScheduleFile = ScheduleFile()
+class PointingData(pydantic.BaseModel):
+    df: pd.DataFrame = pd.DataFrame()
+    file: PointingFile = PointingFile()
 
     # needed for astropy.Table
     model_config = {"arbitrary_types_allowed": True}
@@ -64,7 +75,7 @@ def calculate_date_from_fermi_week(fermi_week: int) -> str:
     E.g. "2025010" = Jan. 10, 2025.
     """
     fermi_week_in_datetime = Time(
-        (fermi_week - 23) * 7 + FERMI_JD_WEEK_23, format="jd"
+        (fermi_week - FERMI_WEEK_START) * 7 + FERMI_SCHEDULE_DATE_START, format="jd"
     ).yday
     fermi_week_year = fermi_week_in_datetime.split(":")[0]
     fermi_week_day = fermi_week_in_datetime.split(":")[1]
@@ -72,71 +83,9 @@ def calculate_date_from_fermi_week(fermi_week: int) -> str:
     return fermi_week_year + fermi_week_day
 
 
-def transform_to_schedule(
-    telescope_id: str,
-    fermi_week_to_ingest: int,
-    filedata: FileData,
-) -> sdk.ScheduleCreate:
-    # START and STOP times are in seconds from 2001-01-01 00:00:00
-    begin = (FERMI_TIME_START_EPOCH + filedata.table[0]["START"] * u.second).isot
-    end = (FERMI_TIME_START_EPOCH + filedata.table[-1]["STOP"] * u.second).isot
-
-    fidelity = (
-        sdk.ScheduleFidelity.LOW
-        if filedata.file.fidelity == "PRELIM"
-        else sdk.ScheduleFidelity.HIGH
-    )
-
-    return sdk.ScheduleCreate(
-        telescope_id=telescope_id,
-        name=f"fermi_lat_week_{fermi_week_to_ingest}",
-        date_range=sdk.DateRange(
-            begin=begin,
-            end=end,
-        ),
-        status=sdk.ScheduleStatus.PLANNED,
-        fidelity=fidelity,
-        observations=[],
-    )
-
-
-def transform_to_observation(
-    instrument_id: str, fermi_week_to_ingest: int, obs_idx: int, row: Row
-) -> sdk.ObservationCreate:
-    return sdk.ObservationCreate(
-        instrument_id=instrument_id,
-        object_name=f"fermi_week_{fermi_week_to_ingest}_observation_{obs_idx}",
-        pointing_position=sdk.Coordinate(
-            ra=row["RA_SCZ"],
-            dec=row["DEC_SCZ"],
-        ),
-        date_range=sdk.DateRange(
-            begin=(FERMI_TIME_START_EPOCH + row["START"] * u.second).isot,
-            end=(FERMI_TIME_START_EPOCH + row["STOP"] * u.second).isot,
-        ),
-        external_observation_id=f"fermi_week_{fermi_week_to_ingest}_observation_{obs_idx}",
-        type=sdk.ObservationType.IMAGING,
-        status=sdk.ObservationStatus.PLANNED,
-        pointing_angle=FERMI_LAT_POINTING_ANGLE,
-        exposure_time=float(row["STOP"] - row["START"]),
-        bandpass=sdk.Bandpass(
-            sdk.EnergyBandpass(
-                filter_name="fermi_lat",
-                min=FERMI_LAT_MIN_ENERGY,
-                max=FERMI_LAT_MAX_ENERGY,
-                unit=sdk.EnergyUnit.GEV,
-            )
-        ),
-    )
-
-
-def get_pointing_filenames(
-    html_lines: list[str], current_fermi_week: int
-) -> list[ScheduleFile]:
-    files: list[ScheduleFile] = []
-
-    # create a dict to match filenames
-    filename_dict: dict[str, str] = {}
+def parse_pointing_files(html_lines: list[str]) -> list[PointingFile]:
+    """Parse all files into ScheduleFiles which can be sorted for the next batch later"""
+    files: list[PointingFile] = []
 
     for line in html_lines:
         # split on any HTML tags
@@ -146,74 +95,89 @@ def get_pointing_filenames(
             # Example filename: FERMI_POINTING_FINAL_023_2008311_2008318_00.fits
             filename = split_line[0]
 
-            # index of FINAL or PRELIM
+            # Parse filename into parts
             fermi_fidelity_index = 2
-            parts = filename.split("_")
-            key_tokens = parts[fermi_fidelity_index : len(parts) - 1]
-            fidelity, fermi_week, start, end = key_tokens
-            key = ".".join([fidelity, fermi_week, start, end])
+            # ignore beginning of the filename, it is the same for all.
+            parts = filename.split("_")[fermi_fidelity_index:]
+            fidelity, fermi_week, start, end, rev_ext = parts
 
-            filename_dict[key] = filename
+            date = split_line[1]  # dd-MMM-YYYY
+            time = split_line[2]  # hh:mm
+            last_modified_str = f"{date} {time}"
 
-    # Get the planned schedule for 3 weeks in the future, 1 week in the future, and the current week
-    for weeks_ahead, fermi_fidelity in FERMI_FILETYPE_DICTIONARY.items():
-        week = current_fermi_week + weeks_ahead
-        start_date = calculate_date_from_fermi_week(week)
-        end_date = calculate_date_from_fermi_week(week + 1)
+            rev = int(rev_ext.split(".")[0])  # 00.fits
 
-        key = ".".join([fermi_fidelity, str(week), start_date, end_date])
-
-        filename = filename_dict.get(key, "")
-
-        if filename:
             files.append(
-                ScheduleFile(
+                PointingFile(
                     name=filename,
-                    fidelity=fermi_fidelity,
-                    week=week,
-                    start=start_date,
-                    end=end_date,
+                    fidelity=fidelity,
+                    week=int(fermi_week),
+                    start=start,
+                    end=end,
+                    rev=rev,
+                    last_modified=datetime.strptime(
+                        last_modified_str, "%d-%b-%Y %H:%M"
+                    ),
                 )
-            )
-        else:
-            logger.warning(
-                "No matching filename for the week.",
-                week=week,
-                start=start_date,
-                end=end_date,
             )
 
     return files
 
 
-def get_schedule_file_data(files: list[ScheduleFile]) -> FileData:
-    # Try the most recent version first, then try the older ones
-    sorted_files = sorted(files, reverse=True, key=lambda file: file.week)
+def download_pointings_data(
+    week_files_groups: list[list[PointingFile]],
+) -> list[PointingData]:
+    """
+    Download pointing data for the most recent available version of the week for each week.
+    """
+    pointings: list[PointingData] = []
 
-    for file in sorted_files:
-        url = FERMI_LAT_POINTING_FILE_BASE_PATH + file.name
+    for files in week_files_groups:
+        pointing_data: PointingData | None = None
 
-        try:
-            hdu = fits.open(url)
-            data = Table(hdu[1].data)
+        for file in files:
+            try:
+                url = FERMI_LAT_POINTING_FILE_BASE_PATH + file.name
+                hdu = fits.open(url)
+                tbl = Table(hdu[1].data)
 
-            return FileData(table=data, file=file)
-        except HTTPError as err:
-            if err.status == 404:
-                # File wasn't found, so log a warning and try finding an older version
-                logger.warning("File not found, skipping.", url=url)
-            else:
-                logger.error(
-                    "Failed to read the file due to an HTTP error.",
-                    url=url,
-                    err=err,
-                    exc_info=True,
-                )
+                # filter out SAA using bitwise NOT `~` operator. Using "is False" doesn't
+                # work because it is np.False, and using "== False" raises a ruff warning to use "is False"
+                tbl = tbl[~tbl["IN_SAA"]]
 
-            continue
+                # Pull only needed columns, some columns are multi-dimensional
+                # but currently, we only use 1D columns.
+                # DataFrame is used downstream for leveraging vectorized processing
+                # for optimization.
+                df = tbl[FERMI_DATA_COLS].to_pandas()
 
-    # returns an empty table and empty file
-    return FileData()
+                pointing_data = PointingData(df=df, file=file)
+
+                # move on to the next week
+                break
+            except HTTPError as err:
+                # File wasn't found or error; log and try finding an older version
+                if err.status == 404:
+                    logger.warning("File not found, skipping.", url=err.url)
+                else:
+                    logger.exception(
+                        "Failed to read the file due to an HTTP error.",
+                        url=err.url,
+                    )
+
+                # try the next file
+                continue
+
+        if pointing_data:
+            pointings.append(pointing_data)
+        else:
+            logger.warning(
+                "No pointing data found for a given week.",
+                week=files[0].week,
+                fidelity=files[0].fidelity,
+            )
+
+    return pointings
 
 
 def get_pointing_files_html_lines() -> list[str]:
@@ -226,22 +190,112 @@ def get_pointing_files_html_lines() -> list[str]:
     return res.text.splitlines()
 
 
-def get_planned_schedule_data(current_fermi_week: int):
-    # Attempt to get the html first
-    html = get_pointing_files_html_lines()
+def find_files_for_weeks_ahead(
+    all_files: list[PointingFile], current_week: int
+) -> list[list[PointingFile]]:
+    """find files for each fidelity for the weeks ahead of the provided week"""
+    files: list[list[PointingFile]] = []
 
-    # extract the filenames from html for the current week
-    files = get_pointing_filenames(html, current_fermi_week)
+    for weeks_ahead, fidelity in FIDELITY_BY_WEEKS_AHEAD.items():
+        fidelity_files = [f for f in all_files if f.fidelity == fidelity]
 
-    # open the files and create the table data
-    filedata = get_schedule_file_data(files)
+        week = current_week + weeks_ahead
 
-    if len(filedata.table):
-        # filter out SAA using bitwise NOT `~` operator. Using "is False" doesn't
-        # work because it is np.False, and using "== False" raises a ruff warning to use "is False"
-        filedata.table = filedata.table[~filedata.table["IN_SAA"]]
+        week_files = [f for f in fidelity_files if f.week == week]
 
-    return filedata
+        # latest modified should be first
+        week_files.sort(key=lambda f: f.last_modified, reverse=True)
+
+        if not week_files:
+            logger.warning(
+                "No files found for the week",
+                extra={
+                    "fidelity": fidelity,
+                    "week": week,
+                    "date": calculate_date_from_fermi_week(week),
+                },
+            )
+
+            continue
+
+        files.append(week_files)
+
+    return files
+
+
+def transform_to_schedule(
+    telescope_id: str,
+    fermi_week_to_ingest: int,
+    pointing_df: pd.DataFrame,
+    fidelity: str,
+) -> sdk.ScheduleCreate:
+    # START and STOP times are in seconds from 2001-01-01 00:00:00
+    begin = (FERMI_TIME_START_EPOCH + pointing_df["START"].iloc[0] * u.second).isot
+    end = (FERMI_TIME_START_EPOCH + pointing_df["STOP"].iloc[-1] * u.second).isot
+
+    across_fidelity: sdk.ScheduleFidelity = (
+        sdk.ScheduleFidelity.LOW if fidelity == "PRELIM" else sdk.ScheduleFidelity.HIGH
+    )
+
+    return sdk.ScheduleCreate(
+        telescope_id=telescope_id,
+        name=f"fermi_lat_week_{fermi_week_to_ingest}",
+        date_range=sdk.DateRange(
+            begin=begin,
+            end=end,
+        ),
+        status=sdk.ScheduleStatus.PLANNED,
+        fidelity=across_fidelity,
+        observations=[],
+    )
+
+
+def transform_to_observations(
+    instrument_id: str, fermi_week_to_ingest: int, df: pd.DataFrame
+):
+    # Vectorize START/STOP → ISO times and exposure
+    # Using vectorized processing as opposed to traditional for loops
+    # helps speed up real file processing ~5x from ~6.5s to ~1s.
+    starts_iso = (FERMI_TIME_START_EPOCH + df["START"].to_numpy() * u.second).isot
+    stops_iso = (FERMI_TIME_START_EPOCH + df["STOP"].to_numpy() * u.second).isot
+    exposures = (df["STOP"] - df["START"]).to_numpy().astype(float)
+
+    # Precompute observation names
+    obs_names = [
+        f"fermi_week_{fermi_week_to_ingest}_observation_{i}" for i in range(len(df))
+    ]
+
+    # Add computed fields to DataFrame for easy iteration, avoid modifying og DF.
+    df = df.copy()
+    df["BEGIN"] = starts_iso
+    df["END"] = stops_iso
+    df["EXPOSURE"] = exposures
+    df["OBS_NAME"] = obs_names
+
+    observations = [
+        sdk.ObservationCreate(
+            instrument_id=instrument_id,
+            object_name=row.OBS_NAME,  # type:ignore
+            pointing_position=sdk.Coordinate(ra=row.RA_SCZ, dec=row.DEC_SCZ),  # type:ignore
+            date_range=sdk.DateRange(begin=row.BEGIN, end=row.END),  # type:ignore
+            external_observation_id=row.OBS_NAME,  # type:ignore
+            exposure_time=row.EXPOSURE,  # type:ignore
+            type=sdk.ObservationType.IMAGING,
+            status=sdk.ObservationStatus.PLANNED,
+            pointing_angle=FERMI_LAT_POINTING_ANGLE,
+            bandpass=sdk.Bandpass(
+                sdk.EnergyBandpass(
+                    filter_name="fermi_lat",
+                    min=FERMI_LAT_MIN_ENERGY,
+                    max=FERMI_LAT_MAX_ENERGY,
+                    unit=sdk.EnergyUnit.GEV,
+                )
+            ),
+        )
+        for row in df.itertuples(index=True)
+    ]
+
+    return observations
 
 
 def ingest() -> None:
@@ -257,16 +311,24 @@ def ingest() -> None:
     """
     # Calculate current Fermi mission week
     now = get_current_time()
-    current_fermi_week = int(np.floor((Time(now).jd - FERMI_JD_WEEK_23) / 7 + 23))
+    current_fermi_week = int(
+        np.floor((Time(now).jd - FERMI_SCHEDULE_DATE_START) / 7 + FERMI_WEEK_START)
+    )
 
-    schedule_filedata = get_planned_schedule_data(current_fermi_week)
+    html_lines = get_pointing_files_html_lines()
+    pointing_files = parse_pointing_files(html_lines)
+    week_files_groups = find_files_for_weeks_ahead(pointing_files, current_fermi_week)
 
-    if len(schedule_filedata.table) == 0:
-        logger.warning("No schedule data to transform.")
+    # open the files and create the table data
+    pointings = download_pointings_data(week_files_groups)
+
+    if len(pointings) == 0:
+        logger.warning(
+            "No pointing data to transform.", current_fermi_week=current_fermi_week
+        )
         return
 
-    # GET Telescope by name
-    [telescope] = sdk.TelescopeApi(client).get_telescopes(name="lat")
+    telescope = sdk.TelescopeApi(client).get_telescopes(name="lat")[0]
     telescope_id = telescope.id
 
     if telescope.instruments:
@@ -274,21 +336,30 @@ def ingest() -> None:
             if instrument.name == "Large Area Telescope":
                 lat_instrument_id = instrument.id
 
-    schedule = transform_to_schedule(
-        telescope_id, current_fermi_week, schedule_filedata
-    )
+    schedules: list[sdk.ScheduleCreate] = []
 
-    for i, row in enumerate(schedule_filedata.table):
-        observation = transform_to_observation(
-            lat_instrument_id, schedule_filedata.file.week, i, row
+    for pointing in pointings:
+        schedule = transform_to_schedule(
+            telescope_id,
+            pointing.file.week,
+            pointing.df,
+            fidelity=pointing.file.fidelity,
         )
-        schedule.observations.append(observation)
 
-    try:
-        sdk.ScheduleApi(client).create_schedule(schedule)
-    except sdk.ApiException as err:
-        if err.status == 409:
-            logger.info("Schedule already exists.", schedule_name=schedule.name)
+        schedule.observations = transform_to_observations(
+            instrument_id=lat_instrument_id,
+            fermi_week_to_ingest=pointing.file.week,
+            df=pointing.df,
+        )
+
+        schedules.append(schedule)
+
+    sdk.ScheduleApi(client).create_many_schedules(
+        sdk.ScheduleCreateMany(
+            schedules=schedules,
+            telescope_id=telescope_id,
+        )
+    )
 
 
 @repeat_every(seconds=SECONDS_IN_A_WEEK)  # Weekly
