@@ -11,7 +11,7 @@
          Begin UT End  UT   SU Id    Investigat Exp #  Target                         Instrume Mode   Apertures    Elements     Time(sec) OB AL EX O#
 -------- -------- --------  -------  ---------- ------ ----------                     -------- ------ ------------ ------------ --------- -- -- -- --
 2025.209 01:07:54 02:03:30  1791807  Loriga     07-001 FSR2007-0584                   WFC3/IR  MULTIA IR-FIX       F110W           44.11  07 01 01
-2025.209 01:07:54 02:03:30  1791807  Loriga     07-002 FSR2007-0584                   WFC3/IR  MULTIA IR-FIX       F160W           41.17  07 01 02
+2025.209 01:08:54 02:04:30  1791900  Loriga     07-002 FSR2007-0584                   WFC3/IR  MULTIA IR-FIX       F160W           41.17  07 01 02
 
 
 
@@ -24,7 +24,7 @@
          Observation  Set            Principal                                        Science                      Spectral     Exposure
          Begin UT End  UT   SU Id    Investigat Exp #  Target                         Instrume Mode   Apertures    Elements     Time(sec) OB AL EX O#
 -------- -------- --------  -------  ---------- ------ ----------                     -------- ------ ------------ ------------ --------- -- -- -- --
-2025.209 01:07:54 02:03:30  1791807  Loriga     07-003 FSR2007-0584                   WFC3/IR  MULTIA IR-FIX       F110W           44.11  07 03 01
+2025.209 01:10:54 02:06:30  1791910  Loriga     07-003 FSR2007-0584                   WFC3/IR  MULTIA IR-FIX       F110W           44.11  07 03 01
                                                                                                                    F435W
 
 

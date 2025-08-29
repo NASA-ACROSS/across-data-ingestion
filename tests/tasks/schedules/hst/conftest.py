@@ -214,12 +214,12 @@ def fake_filters(fake_instrument_id: str) -> list[sdk.Filter]:
 def fake_invalid_obs_timeline_file_df() -> pd.DataFrame:
     raw_observations = [
         {
-            "date": 2025.209,
+            "date": "2025.209",
             "target_name": "FSR2007-0584",
             "mode": "ACQ",
         },
         {
-            "date": 2025.209,
+            "date": "2025.209",
             "target_name": "BIAS",
             "mode": "MULTIA",
         },
@@ -232,10 +232,10 @@ def fake_invalid_obs_timeline_file_df() -> pd.DataFrame:
 def fake_timeline_file_df() -> pd.DataFrame:
     raw_observations = [
         {
-            "date": 2025.209,
+            "date": "2025.209",
             "begin_time": "01:07:54",
             "end_time": "02:03:30",
-            "obs_id": 1791807,
+            "obs_id": "1791807",
             "PI": "Loriga",
             "exposure": "07-001",
             "target_name": "FSR2007-0584",
@@ -244,15 +244,15 @@ def fake_timeline_file_df() -> pd.DataFrame:
             "aperture": "IR-FIX",
             "element": "F110W",
             "exp_time": 44.11,
-            "ob": 7,
-            "al": 1,
-            "ex": 1,
+            "ob": "07",
+            "al": "01",
+            "ex": "01",
         },
         {
-            "date": 2025.209,
-            "begin_time": "01:07:54",
-            "end_time": "02:03:30",
-            "obs_id": 1791807,
+            "date": "2025.209",
+            "begin_time": "01:08:54",
+            "end_time": "02:04:30",
+            "obs_id": "1791900",
             "PI": "Loriga",
             "exposure": "07-002",
             "target_name": "FSR2007-0584",
@@ -261,15 +261,15 @@ def fake_timeline_file_df() -> pd.DataFrame:
             "aperture": "IR-FIX",
             "element": "F160W",
             "exp_time": 41.17,
-            "ob": 7,
-            "al": 1,
-            "ex": 2,
+            "ob": "07",
+            "al": "01",
+            "ex": "02",
         },
         {
-            "date": 2025.209,
-            "begin_time": "01:07:54",
-            "end_time": "02:03:30",
-            "obs_id": 1791807,
+            "date": "2025.209",
+            "begin_time": "01:10:54",
+            "end_time": "02:06:30",
+            "obs_id": "1791910",
             "PI": "Loriga",
             "exposure": "07-003",
             "target_name": "FSR2007-0584",
@@ -278,9 +278,9 @@ def fake_timeline_file_df() -> pd.DataFrame:
             "aperture": "IR-FIX",
             "element": "F110W",
             "exp_time": 44.11,
-            "ob": 7,
-            "al": 3,
-            "ex": 1,
+            "ob": "07",
+            "al": "03",
+            "ex": "01",
         },
     ]
     schedules = pd.DataFrame(raw_observations)
@@ -309,10 +309,10 @@ def fake_timeline_html_tags() -> list[MagicMock]:
 @pytest.fixture
 def fake_timeline_row() -> dict:
     return {
-        "date": 2025.209,
+        "date": "2025.209",
         "begin_time": "01:07:54",
         "end_time": "02:03:30",
-        "obs_id": 1791807,
+        "obs_id": "1791807",
         "PI": "Loriga",
         "exposure": "07-001",
         "target_name": "FSR2007-0584",

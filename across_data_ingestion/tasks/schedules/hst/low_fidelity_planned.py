@@ -52,10 +52,10 @@ class Col(pydantic.BaseModel):
 
 
 TIMELINE_FILE_COLUMNS: list[Col] = [
-    Col(name="date", type=float, spacing=(0, 8)),
+    Col(name="date", type=str, spacing=(0, 8)),
     Col(name="begin_time", type=str, spacing=(8, 17)),
     Col(name="end_time", type=str, spacing=(17, 27)),
-    Col(name="obs_id", type=int, spacing=(27, 35)),
+    Col(name="obs_id", type=str, spacing=(27, 35)),
     Col(name="PI", type=str, spacing=(35, 47)),
     Col(name="exposure", type=str, spacing=(47, 54)),
     Col(name="target_name", type=str, spacing=(55, 84)),
@@ -64,9 +64,9 @@ TIMELINE_FILE_COLUMNS: list[Col] = [
     Col(name="aperture", type=str, spacing=(101, 114)),
     Col(name="element", type=str, spacing=(114, 127)),
     Col(name="exp_time", type=float, spacing=(127, 137)),
-    Col(name="ob", type=int, spacing=(137, 140)),
-    Col(name="al", type=int, spacing=(140, 143)),
-    Col(name="ex", type=int, spacing=(143, 146)),
+    Col(name="ob", type=str, spacing=(137, 140)),
+    Col(name="al", type=str, spacing=(140, 143)),
+    Col(name="ex", type=str, spacing=(143, 146)),
 ]
 
 # List of target names found in observations to ignore
