@@ -2,10 +2,9 @@ import os
 from typing import TYPE_CHECKING, Literal, cast
 
 import boto3
-from types_boto3_ssm import type_defs
 
 if TYPE_CHECKING:
-    from types_boto3_ssm import SSMClient
+    from types_boto3_ssm import SSMClient, type_defs
 
 from ..core.config import config
 
@@ -30,7 +29,7 @@ class SSM:
         return cls._client
 
     @classmethod
-    def get_parameter(cls, name: str, path: str = "") -> type_defs.ParameterTypeDef:
+    def get_parameter(cls, name: str, path: str = "") -> "type_defs.ParameterTypeDef":
         """Get a parameter from AWS Parameter Store or environment variable.
 
         Args:
