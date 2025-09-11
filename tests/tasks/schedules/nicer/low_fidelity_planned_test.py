@@ -1,164 +1,98 @@
-import json
 import os
-from unittest.mock import AsyncMock, patch
+from unittest.mock import MagicMock
 
-import pandas as pd
 import pytest
+import structlog
 
-from across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned import (
-    entrypoint,
-    ingest,
-    nicer_schedule,
-    query_nicer_catalog,
-)
+import across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned as task
+from across_data_ingestion.util.across_server import sdk
+
+from .mocks.across_nicer_schedule import expected
 
 
-class TestNicerLowFidelityScheduleIngestionTask:
-    mock_file_base_path = os.path.join(os.path.dirname(__file__), "mocks/")
-    mock_observation_table = "nicer_first_10_rows.csv"
-    mock_schedule_output = "nicer_first_10_rows_schedule.json"
+def get_mock_path(file: str = "") -> str:
+    return os.path.join(os.path.dirname(__file__), "mocks/", file)
 
-    @pytest.mark.asyncio
-    async def test_should_generate_across_schedules(
-        self, mock_schedule_post: AsyncMock
-    ):
-        """Should generate ACROSS schedules"""
-        mock_output_schedule_file = self.mock_file_base_path + self.mock_schedule_output
 
-        with patch(
-            "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.query_nicer_catalog",
-            return_value=pd.read_csv(
-                self.mock_file_base_path + self.mock_observation_table
-            ),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "nicer_telescope_id",
-                    "instruments": [{"id": "xti_instrument_id"}],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.logger"
-        ):
-            with open(mock_output_schedule_file) as expected_output_file:
-                expected = json.load(expected_output_file)
-                await ingest()
-                mock_schedule_post.assert_called_once_with(expected)
+MOCK_NICER_CSV = "nicer_scheduled_observations.csv"
 
-    def test_query_nicer_catalog_should_return_dataframe_when_successful(self):
-        """Should return a DataFrame if querying NICER catalog is successful"""
-        with patch(
-            "pandas.read_csv",
-            return_value=pd.read_csv(
-                self.mock_file_base_path + self.mock_observation_table
-            ),
-        ):
-            data = query_nicer_catalog()
-            assert isinstance(data, pd.DataFrame)
 
-    def test_query_nicer_catalog_should_return_none_if_query_fails(self):
-        """Should return None if querying NICER catalog fails"""
-        with patch(
-            "pandas.read_csv",
-            return_value=None,
-            side_effect=ValueError(),
-        ):
-            data = query_nicer_catalog()
-            assert data is None
+@pytest.fixture(autouse=True)
+def set_mock_csv_files(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        task,
+        "NICER_TIMELINE_FILE",
+        get_mock_path(MOCK_NICER_CSV),
+    )
 
-    def test_create_schedule_should_return_expected(self):
-        """Should return an empty dictionary when the input table is empty"""
-        # Ingest a table with no rows
-        mock_data = pd.read_csv(self.mock_file_base_path + self.mock_observation_table)
-        schedule = nicer_schedule("nicer_telescope_id", mock_data, "planned", "low")
-        expected_schedule = {
-            "date_range": {
-                "begin": "2025-06-12T00:06:03.000",
-                "end": "2025-06-12T03:11:03.000",
-            },
-            "fidelity": "low",
-            "name": "nicer_obs_planned_2025-06-12_2025-06-12",
-            "status": "planned",
-            "telescope_id": "nicer_telescope_id",
-        }
-        assert schedule == expected_schedule
 
-    @pytest.mark.asyncio
-    async def test_should_log_error_when_query_nicer_catalog_returns_none(self):
-        """Should log an error when NICER query returns None"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.logger"
-        ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.query_nicer_catalog",
-            return_value=None,
-        ):
-            await ingest()
-            assert (
-                "Failed to read NICER timeline file" in log_mock.warn.call_args.args[0]
-            )
+@pytest.fixture
+def mock_logger(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
+    # must be patched because it is set at runtime when the file is imported.
+    mock = MagicMock(spec=structlog.stdlib.BoundLogger)
+    monkeypatch.setattr(task, "logger", mock)
+    return mock
 
-    @pytest.mark.asyncio
-    async def test_should_return_empty_dict_when_no_schedule_modes(
-        self, mock_schedule_post: AsyncMock
-    ):
-        """Should return an empty dictionary when no schedule modes are provided"""
 
-        with patch(
-            "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.query_nicer_catalog",
-            return_value=pd.read_csv(
-                self.mock_file_base_path + self.mock_observation_table
-            ),
-        ):
-            await ingest(schedule_modes=["InvalidMode"])
-            mock_schedule_post.assert_not_called()
+class TestIngest:
+    def test_should_read_nicer_data(self, mock_pandas: MagicMock):
+        task.ingest()
 
-    @pytest.mark.asyncio
-    async def test_should_log_info_when_success(self):
-        """Should log info with ran at when success"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.query_nicer_catalog",
-            return_value=pd.read_csv(
-                self.mock_file_base_path + self.mock_observation_table
-            ),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "nicer_telescope_id",
-                    "instruments": [{"id": "xti_instrument_id"}],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ), patch(
-            "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.logger"
-        ) as log_mock:
-            await entrypoint()
-            assert "ingestion completed" in log_mock.info.call_args.args[0]
+        mock_pandas.read_csv.assert_called_once()
 
-    @pytest.mark.asyncio
-    async def test_should_log_error_when_schedule_ingestion_fails(self):
-        """Should log an error when schedule ingestion fails"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.logger"
-        ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.nicer.low_fidelity_planned.ingest",
-            return_value=None,
-            side_effect=Exception(),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "nicer_telescope_id",
-                    "instruments": [{"id": "xti_instrument_id"}],
-                }
-            ],
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ):
-            await entrypoint()
-            assert (
-                "Schedule ingestion encountered an unknown error"
-                in log_mock.error.call_args.args[0]
-            )
+    def test_should_log_warning_when_all_observations_are_filtered(
+        self, monkeypatch: pytest.MonkeyPatch, mock_logger: MagicMock
+    ) -> None:
+        monkeypatch.setattr(
+            task, "NICER_TIMELINE_FILE", get_mock_path("no_scheduled.csv")
+        )
+
+        task.ingest()
+
+        mock_logger.warning.assert_called_once()
+
+    def test_should_get_telescope(self, mock_telescope_api: MagicMock) -> None:
+        task.ingest()
+
+        mock_telescope_api.get_telescopes.assert_called_once()
+
+    def test_should_create_schedule(self, mock_schedule_api: MagicMock) -> None:
+        task.ingest()
+
+        mock_schedule_api.create_schedule.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "field",
+        [
+            field
+            for field in sdk.ScheduleCreate.model_fields.keys()
+            if field != "observations"
+        ],
+    )
+    def test_should_create_schedule_with_expected_fields(
+        self, mock_schedule_api: MagicMock, field: str
+    ) -> None:
+        task.ingest()
+
+        created_schedule: sdk.ScheduleCreate = (
+            mock_schedule_api.create_schedule.call_args[0][0]
+        )
+
+        assert getattr(created_schedule, field) == getattr(expected, field)
+
+    @pytest.mark.parametrize("field", sdk.ObservationCreate.model_fields)
+    def test_should_create_observation_with_expected_fields(
+        self,
+        mock_schedule_api: MagicMock,
+        field: str,
+    ) -> None:
+        task.ingest()
+
+        created_schedule: sdk.ScheduleCreate = (
+            mock_schedule_api.create_schedule.call_args[0][0]
+        )
+
+        created_obs = created_schedule.observations[0]
+        expected_obs = expected.observations[0]
+
+        assert getattr(created_obs, field) == getattr(expected_obs, field)

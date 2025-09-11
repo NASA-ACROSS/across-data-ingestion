@@ -6,7 +6,6 @@ This is the codebase for the NASA ACROSS Data Ingestion Server. It runs ingestio
 
 - [Getting Started](#getting-started)
   - [Development](#development)
-  - [Testing Routes Locally](#testing-routes-locally)
   - [Debugging](#debugging)
   - [VS Code Setup](#vs-code-setup)
 
@@ -33,9 +32,13 @@ That's it! This is a [`Makefile target`](https://makefiletutorial.com/#targets) 
 
 If everything completed successfully, you should be able to access the generated OpenAPI docs locally at [http://127.0.0.1:8001/docs](http://127.0.0.1:8001/docs).
 
+Logs should populate with tasks running in the background as they reach their trigger condition.
+
 General documentation for other project commands can be found with `make help`.
 
 ### Development
+
+The across-server is assumed to be running locally alongside the ingestion server. The across-server can be run through a standard docker container in the background. Please see the [across-server documentation](https://github.com/ACROSS-Team/across-server/blob/main/README.md) for more information.
 
 In order to run the server through the CLI run
 
@@ -59,7 +62,7 @@ make tail_log
 
 ### Debugging
 
-In the `Run and Debug` sidebar panel in vscode, launch `Uvicorn: Fastapi`. This will start the development server with an attached debugger. More information on debugging in vscode can be found in [here](https://code.visualstudio.com/docs/editor/debugging).
+In the `Run and Debug` sidebar panel in vscode, launch `local: Start Data Ingestion`. This will start the development server with an attached debugger. More information on debugging in vscode can be found in [here](https://code.visualstudio.com/docs/editor/debugging).
 
 ### VS Code Setup
 
@@ -76,3 +79,37 @@ This should be automatically set when the extensions load due to the workspace s
 #### Workspace
 
 This should handle any project specific configuration that is needed along with any required extension recommendations, spelling, launch, tasks, etc.
+
+### Project Structure
+
+The data-ingestion server is as follows:
+across-data-ingestion # Your named directory where the repo lives
+├── .github/    # Contains GH actions and workflows for CI/CD
+├── across-data-ingestion
+│   ├── core/               # Any shared ACROSS dependencies
+│   │   ├── enums/
+│   │   ├── schemas.py
+│   │   ├── config.py
+│   │   ├── constants.py
+│   │   ├── logging.py
+│   │   └── exceptions.py
+│   ├── tasks/               # Any shared ACROSS dependencies
+│   │   ├── example/
+│   │   ├── schedules/       # schedule ingestion for each observatory
+│   │   │   └── [observatory]/
+│   │   │        └── [schedule-fidelity-status].py  # ingest the schedule of noted fidelity and status
+│   │   ├── [task]/
+│   │   └── task_loader.py  # import and assign crons to each task
+│   ├── routes/
+│   ├── util/
+│   │   ├── [util or external service].py    # file or directory for a utility or external service
+│   │   └── across_server/  # ACROSS SERVER SDK WRAPPER
+│   └── main.py             # Entrypoint to the server
+├── tests/  # mirrors the source code project structure
+├── requirements/   # project dependencies
+├── .env
+├── .gitignore
+├── pyproject.toml
+├── Makefile
+├── README.md
+└── ...

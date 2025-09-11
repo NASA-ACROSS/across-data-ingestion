@@ -1,120 +1,101 @@
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock
 
+import bs4
+import httpx
 import pandas as pd
+import pytest
 
+import across_data_ingestion.tasks.schedules.ixpe.low_fidelity_planned as task
 from across_data_ingestion.tasks.schedules.ixpe.low_fidelity_planned import (
-    entrypoint,
     ingest,
-    ixpe_to_across_schedule,
     query_ixpe_schedule,
 )
-
-from .mocks.ixpe_across_schedule import ixpe_across_schedule
-from .mocks.mock_ixpe_query import mock_ixpe_query
-from .mocks.sample_respone import sample_respone
-
-
-class mock_response:
-    def __init__(self, read_sample_response: bool = True):
-        if read_sample_response:
-            self.text = sample_respone
-        else:
-            self.text = ""
-
-    def raise_for_status(self):
-        pass
+from across_data_ingestion.util import across_server
 
 
 class TestNicerLowFidelityScheduleIngestionTask:
-    def test_should_generate_across_schedules(self, mock_schedule_post: Mock):
-        """Should generate ACROSS schedules"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.ixpe.low_fidelity_planned.query_ixpe_schedule",
-            return_value=pd.DataFrame(mock_ixpe_query),
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=[
-                {
-                    "id": "ixpe_telescope_id",
-                    "instruments": [{"id": "ixpe_instrument_id"}],
-                }
-            ],
+    class TestIngest:
+        @pytest.fixture(autouse=True)
+        def patch_query_ixpe_schedule(
+            self, monkeypatch: pytest.MonkeyPatch, fake_ixpe_schedule_df: pd.DataFrame
         ):
-            ingest()
-            mock_schedule_post.assert_called_with(ixpe_across_schedule)
+            mock = MagicMock(return_value=fake_ixpe_schedule_df)
+            monkeypatch.setattr(
+                task,
+                "query_ixpe_schedule",
+                mock,
+            )
 
-    def test_query_nicer_catalog_should_return_dataframe_when_successful(self):
-        """Should return a DataFrame if querying IXPE catalog is successful"""
-        with patch(
-            "httpx.get",
-            return_value=mock_response(),
+            return mock
+
+        def test_should_create_across_schedules(self, mock_schedule_api: MagicMock):
+            """Should create ACROSS schedules"""
+            ingest()
+            mock_schedule_api.create_schedule.assert_called()
+
+        def test_should_call_create_schedule_with_schedule_create_instance(
+            self, mock_schedule_api: MagicMock
         ):
-            data = query_ixpe_schedule(url="")
+            """Should create ACROSS schedules with ScheduleCreate"""
+            ingest()
+            args = mock_schedule_api.create_schedule.call_args[0]
+            assert isinstance(args[0], across_server.sdk.ScheduleCreate)
+
+        def test_should_call_get_telescopes(self, mock_telescope_api: MagicMock):
+            """Should create ACROSS schedules"""
+            ingest()
+            mock_telescope_api.get_telescopes.assert_called()
+
+        def test_should_log_error_when_query_ixpe_catalog_returns_none(
+            self,
+            mock_logger: MagicMock,
+            patch_query_ixpe_schedule: MagicMock,
+        ):
+            """Should log an error when ixpe query returns None"""
+            patch_query_ixpe_schedule.return_value = pd.DataFrame()
+            ingest()
+            assert (
+                "Failed to read IXPE timeline file"
+                in mock_logger.warning.call_args.args[0]
+            )
+
+    class TestQueryIxpeSchedule:
+        def test_should_return_dataframe_when_successful(self):
+            """Should return a DataFrame if querying IXPE catalog is successful"""
+            data = query_ixpe_schedule()
             assert isinstance(data, pd.DataFrame)
 
-    def test_query_nicer_catalog_should_return_none_if_query_fails(self):
-        """Should return None if querying IXPE catalog fails"""
-        with patch(
-            "httpx.get",
-            return_value=mock_response(read_sample_response=False),
+        def test_should_return_empty_df_when_query_fails(
+            self, mock_httpx_get: MagicMock
         ):
-            data = query_ixpe_schedule(url="")
-            assert data is None
-
-    def test_create_schedule_should_return_expected(self):
-        """Should return an empty dictionary when the input table is empty"""
-        # Ingest a table with no rows
-        mock_data = pd.DataFrame(mock_ixpe_query)
-        schedule = ixpe_to_across_schedule(
-            "ixpe_telescope_id", mock_data, "planned", "low"
-        )
-        expected_schedule = {
-            "date_range": {
-                "begin": "2025-04-08T06:00:00.000",
-                "end": "2025-09-08T06:00:00.000",
-            },
-            "fidelity": "low",
-            "name": "ixpe_ltp_2025-04-08_2025-09-08",
-            "status": "planned",
-            "telescope_id": "ixpe_telescope_id",
-        }
-        assert schedule == expected_schedule
-
-    def test_should_log_error_when_query_ixpe_catalog_returns_none(self):
-        """Should log an error when ixpe query returns None"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.ixpe.low_fidelity_planned.logger"
-        ) as log_mock, patch(
-            "httpx.get",
-            return_value=None,
-        ):
-            ingest()
-            assert (
-                "Failed to read IXPE timeline file" in log_mock.warn.call_args.args[0]
+            """Should return empty df when IXPE catalog fails"""
+            fake_res = httpx.Response(
+                status_code=200, request=httpx.Request("GET", "https://fake.com")
             )
+            mock_httpx_get.return_value = fake_res
+            data = query_ixpe_schedule()
+            assert not len(data)
 
-    def test_should_log_info_when_success(self):
-        """Should log info with ran at when success"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.ixpe.low_fidelity_planned.logger"
-        ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.ixpe.low_fidelity_planned.ingest",
-            return_value={},
+        def test_should_raise_error_when_status_is_failure(
+            self, mock_httpx_get: MagicMock
         ):
-            entrypoint()
-            assert "Schedule ingestion completed." in log_mock.info.call_args.args[0]
-
-    def test_should_log_error_when_schedule_ingestion_fails(self):
-        """Should log an error when schedule ingestion fails"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.ixpe.low_fidelity_planned.logger"
-        ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.ixpe.low_fidelity_planned.ingest",
-            return_value=None,
-            side_effect=Exception(),
-        ):
-            entrypoint()
-            assert (
-                "Schedule ingestion encountered an unknown error"
-                in log_mock.error.call_args.args[0]
+            fake_error_res = httpx.Response(
+                status_code=400, request=httpx.Request("GET", "http://test.com")
             )
+            mock_httpx_get.return_value = fake_error_res
+
+            with pytest.raises(httpx.HTTPStatusError):
+                query_ixpe_schedule()
+
+        def test_should_log_error_when_parsing_fails(
+            self, monkeypatch: pytest.MonkeyPatch, mock_logger: MagicMock
+        ):
+            mock_soup_instance = MagicMock(spec=bs4.BeautifulSoup)
+            mock_soup_instance.find.side_effect = Exception("oh no")
+            mock_soup_cls = MagicMock(return_value=mock_soup_instance)
+
+            monkeypatch.setattr(bs4, "BeautifulSoup", mock_soup_cls)
+
+            query_ixpe_schedule()
+
+            mock_logger.error.assert_called_once()
