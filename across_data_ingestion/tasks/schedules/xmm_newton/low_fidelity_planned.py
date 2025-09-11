@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import Literal
 
 import astropy.units as u  # type: ignore[import-untyped]
 import pandas as pd
@@ -8,8 +7,7 @@ from astropy.coordinates import SkyCoord  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
 from ....core.constants import SECONDS_IN_A_DAY
-from ....util import across_api
-from ..types import AcrossObservation, AcrossSchedule, DateRange, Position
+from ....util.across_server import client, sdk
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
@@ -19,71 +17,89 @@ PLANNED_SCHEDULE_TABLE_URL = (
 )
 REVOLUTION_FILE_BASE_URL = "https://xmmweb.esac.esa.int/user/mplan/summaries/"
 
-EPIC_BANDPASS: dict[str, str | float] = {
-    "filter_name": "XMM-Newton EPIC",
-    "min": 0.3,
-    "max": 12.0,
-    "type": "ENERGY",
-    "unit": "keV",
-}
-RGS_BANDPASS: dict[str, str | float] = {
-    "filter_name": "XMM-Newton RGS",
-    "min": 0.35,
-    "max": 2.5,
-    "type": "ENERGY",
-    "unit": "keV",
-}
-OM_UVW2_BANDPASS: dict[str, str | float] = {
-    "filter_name": "OM UVW2",
-    "min": 187.0,
-    "max": 237.0,
-    "type": "WAVELENGTH",
-    "unit": "nm",
-}
-OM_UVM2_BANDPASS: dict[str, str | float] = {
-    "filter_name": "OM UVM2",
-    "min": 207.0,
-    "max": 255.0,
-    "type": "WAVELENGTH",
-    "unit": "nm",
-}
-OM_UVW1_BANDPASS: dict[str, str | float] = {
-    "filter_name": "OM UVW1",
-    "min": 249.5,
-    "max": 332.5,
-    "type": "WAVELENGTH",
-    "unit": "nm",
-}
-OM_U_BANDPASS: dict[str, str | float] = {
-    "filter_name": "OM U",
-    "min": 302.0,
-    "max": 386.0,
-    "type": "WAVELENGTH",
-    "unit": "nm",
-}
-OM_B_BANDPASS: dict[str, str | float] = {
-    "filter_name": "OM B",
-    "min": 397.5,
-    "max": 502.5,
-    "type": "WAVELENGTH",
-    "unit": "nm",
-}
-OM_V_BANDPASS: dict[str, str | float] = {
-    "filter_name": "OM V",
-    "min": 508.0,
-    "max": 578.0,
-    "type": "WAVELENGTH",
-    "unit": "nm",
-}
-OM_WHITE_BANDPASS: dict[str, str | float] = {
-    "filter_name": "OM White",
-    "min": 232.5,
-    "max": 579.5,
-    "type": "WAVELENGTH",
-    "unit": "nm",
-}
+EPIC_BANDPASS = sdk.EnergyBandpass.model_validate(
+    {
+        "filter_name": "XMM-Newton EPIC",
+        "min": 0.3,
+        "max": 12.0,
+        "type": "ENERGY",
+        "unit": sdk.EnergyUnit.KEV,
+    }
+)
+RGS_BANDPASS = sdk.EnergyBandpass.model_validate(
+    {
+        "filter_name": "XMM-Newton RGS",
+        "min": 0.35,
+        "max": 2.5,
+        "type": "ENERGY",
+        "unit": sdk.EnergyUnit.KEV,
+    }
+)
+OM_UVW2_BANDPASS = sdk.WavelengthBandpass.model_validate(
+    {
+        "filter_name": "OM UVW2",
+        "min": 187.0,
+        "max": 237.0,
+        "type": "WAVELENGTH",
+        "unit": sdk.WavelengthUnit.NM,
+    }
+)
+OM_UVM2_BANDPASS = sdk.WavelengthBandpass.model_validate(
+    {
+        "filter_name": "OM UVM2",
+        "min": 207.0,
+        "max": 255.0,
+        "type": "WAVELENGTH",
+        "unit": sdk.WavelengthUnit.NM,
+    }
+)
+OM_UVW1_BANDPASS = sdk.WavelengthBandpass.model_validate(
+    {
+        "filter_name": "OM UVW1",
+        "min": 249.5,
+        "max": 332.5,
+        "type": "WAVELENGTH",
+        "unit": sdk.WavelengthUnit.NM,
+    }
+)
+OM_U_BANDPASS = sdk.WavelengthBandpass.model_validate(
+    {
+        "filter_name": "OM U",
+        "min": 302.0,
+        "max": 386.0,
+        "type": "WAVELENGTH",
+        "unit": sdk.WavelengthUnit.NM,
+    }
+)
+OM_B_BANDPASS = sdk.WavelengthBandpass.model_validate(
+    {
+        "filter_name": "OM B",
+        "min": 397.5,
+        "max": 502.5,
+        "type": "WAVELENGTH",
+        "unit": sdk.WavelengthUnit.NM,
+    }
+)
+OM_V_BANDPASS = sdk.WavelengthBandpass.model_validate(
+    {
+        "filter_name": "OM V",
+        "min": 508.0,
+        "max": 578.0,
+        "type": "WAVELENGTH",
+        "unit": sdk.WavelengthUnit.NM,
+    }
+)
+OM_WHITE_BANDPASS = sdk.WavelengthBandpass.model_validate(
+    {
+        "filter_name": "OM White",
+        "min": 232.5,
+        "max": 579.5,
+        "type": "WAVELENGTH",
+        "unit": sdk.WavelengthUnit.NM,
+    }
+)
 
-XMM_BANDPASSES: dict[str, dict[str, str | float]] = {
+XMM_BANDPASSES: dict[str, sdk.EnergyBandpass | sdk.WavelengthBandpass] = {
     "EPIC": EPIC_BANDPASS,
     "RGS": RGS_BANDPASS,
     "UVW2": OM_UVW2_BANDPASS,
@@ -192,20 +208,20 @@ def extract_om_exposures_from_timeline_data(timeline_df: pd.DataFrame) -> dict:
 
 def transform_to_across_schedule(
     start_datetime: str, end_datetime: str, telescope_id: str
-) -> AcrossSchedule:
+) -> sdk.ScheduleCreate:
     """Format the schedule data in the ACROSS format"""
-    return AcrossSchedule(
-        **{
-            "name": f"XMM_Newton_planned_{start_datetime.split()[0]}_{end_datetime.split()[0]}",
-            "telescope_id": telescope_id,
-            "status": "planned",
-            "fidelity": "low",
-            "date_range": {
+    return sdk.ScheduleCreate(
+        name=f"XMM_Newton_planned_{start_datetime.split()[0]}_{end_datetime.split()[0]}",
+        telescope_id=telescope_id,
+        status=sdk.ScheduleStatus.PLANNED,
+        fidelity=sdk.ScheduleFidelity.LOW,
+        date_range=sdk.DateRange.model_validate(
+            {
                 "begin": start_datetime,
                 "end": end_datetime,
-            },
-            "observations": [],
-        }
+            }
+        ),
+        observations=[],
     )
 
 
@@ -214,41 +230,39 @@ def transform_to_across_observation(
     exposure_start: str,
     exposure_time: float,
     instrument_id: str,
-    observation_type: Literal["imaging", "spectroscopy"],
-    bandpass: dict,
-) -> AcrossObservation:
+    observation_type: sdk.ObservationType,
+    bandpass: sdk.Bandpass,
+) -> sdk.ObservationCreate:
     """Construct ACROSS observation for the given exposure"""
     pointing_coord = SkyCoord(
         row["RA hh:mm:ss"], row["DEC dd:mm:ss"], unit=(u.hourangle, u.deg)
     )
-    pointing_position = Position(
-        **{
+    pointing_position = sdk.Coordinate.model_validate(
+        {
             "ra": pointing_coord.ra.deg,
             "dec": pointing_coord.dec.deg,
         }
     )
     start_time = datetime.strptime(exposure_start, "%Y-%m-%d %H:%M:%S")
     end_time = start_time + timedelta(seconds=exposure_time)
-    date_range = DateRange(
-        **{
+    date_range = sdk.DateRange.model_validate(
+        {
             "begin": start_time.strftime("%Y-%m-%d %H:%M:%S"),
             "end": end_time.strftime("%Y-%m-%d %H:%M:%S"),
         }
     )
-    return AcrossObservation(
-        **{
-            "instrument_id": instrument_id,
-            "object_name": row["Target Name"],
-            "external_observation_id": "0" + str(row["Obs Id."]),
-            "pointing_position": pointing_position,
-            "object_position": pointing_position,
-            "pointing_angle": row["PA ddd.dd"],
-            "date_range": date_range,
-            "exposure_time": exposure_time,
-            "status": "planned",
-            "type": observation_type,
-            "bandpass": bandpass,
-        }
+    return sdk.ObservationCreate(
+        instrument_id=instrument_id,
+        object_name=row["Target Name"],
+        external_observation_id="0" + str(row["Obs Id."]),
+        pointing_position=pointing_position,
+        object_position=pointing_position,
+        pointing_angle=row["PA ddd.dd"],
+        date_range=date_range,
+        exposure_time=exposure_time,
+        status=sdk.ObservationStatus.PLANNED,
+        type=observation_type,
+        bandpass=bandpass,
     )
 
 
@@ -263,12 +277,11 @@ def ingest() -> None:
     for each OM exposure, and adds them as ACROSS observations.
     """
     # GET telescope and instrument info
-    telescope_info = across_api.telescope.get({"name": "XMM-Newton"})[0]
-    telescope_id = telescope_info["id"]
-    instrument_id_dict = {
-        instrument["short_name"]: instrument["id"]
-        for instrument in telescope_info["instruments"]
-    }
+    telescope = sdk.TelescopeApi(client).get_telescopes(name="XMM-Newton")[0]
+    if telescope.instruments:
+        instrument_id_dict = {
+            instrument.short_name: instrument.id for instrument in telescope.instruments
+        }
 
     raw_planned_schedule_data = read_planned_schedule_table()
     if not len(raw_planned_schedule_data):
@@ -281,7 +294,7 @@ def ingest() -> None:
         raw_planned_schedule_data["UTC Obs End yyyy-mm-dd hh:mm:ss"].values
     )
     across_schedule = transform_to_across_schedule(
-        start_datetime, end_datetime, telescope_id
+        start_datetime, end_datetime, telescope.id
     )
 
     # Iterate over the planned schedule data by unique revolution ID,
@@ -299,47 +312,55 @@ def ingest() -> None:
 
         # Iterate over each observation row in the current dataframe
         for i, row in current_revolution_observations_df.iterrows():
-            # Create ACROSS observations for instruments besides OM
-            mos_across_observation = transform_to_across_observation(
-                row,
-                row["UTC Obs Start yyyy-mm-dd hh:mm:ss"],
-                # Get the maximum exposure time between the two MOS instruments
+            # Get the maximum exposure time between the two MOS instruments
+            mos_exposure_time = (
                 max(
                     # "()" exposures signify closed filter, for our case we can ignore
                     float(row["MOS1 Dur. Ks"].replace("( ", "").replace(")", "")),
                     float(row["MOS2 Dur. Ks"].replace("( ", "").replace(")", "")),
                 )
-                * 1000.0,  # exposure time is in ks, so convert to s
+                * 1000.0
+            )  # exposure time is in ks, so convert to s
+
+            # Get the maximum exposure time between the two RGS instruments
+            rgs_exposure_time = (
+                max(
+                    float(row["RGS1 Dur. Ks"]),
+                    float(row["RGS2 Dur. Ks"]),
+                )
+                * 1000.0
+            )  # exposure time is in ks, so convert to s
+
+            # Create ACROSS observations for instruments besides OM
+            mos_across_observation = transform_to_across_observation(
+                row,
+                row["UTC Obs Start yyyy-mm-dd hh:mm:ss"],
+                mos_exposure_time,
                 instrument_id_dict["EPIC-MOS"],
-                "imaging",
-                XMM_BANDPASSES["EPIC"],
+                sdk.ObservationType.IMAGING,
+                sdk.Bandpass(XMM_BANDPASSES["EPIC"]),
             )
-            across_schedule["observations"].append(mos_across_observation)
+            across_schedule.observations.append(mos_across_observation)
 
             pn_across_observation = transform_to_across_observation(
                 row,
                 row["UTC Obs Start yyyy-mm-dd hh:mm:ss"],
                 float(row["PN Dur Ks"].replace("( ", "").replace(")", "")) * 1000.0,
                 instrument_id_dict["EPIC-PN"],
-                "imaging",
-                XMM_BANDPASSES["EPIC"],
+                sdk.ObservationType.IMAGING,
+                sdk.Bandpass(XMM_BANDPASSES["EPIC"]),
             )
-            across_schedule["observations"].append(pn_across_observation)
+            across_schedule.observations.append(pn_across_observation)
 
             rgs_across_observation = transform_to_across_observation(
                 row,
                 row["UTC Obs Start yyyy-mm-dd hh:mm:ss"],
-                # Get the maximum exposure time between the two RGS instruments
-                max(
-                    float(row["RGS1 Dur. Ks"]),
-                    float(row["RGS2 Dur. Ks"]),
-                )
-                * 1000.0,
+                rgs_exposure_time,
                 instrument_id_dict["RGS"],
-                "spectroscopy",
-                XMM_BANDPASSES["RGS"],
+                sdk.ObservationType.SPECTROSCOPY,
+                sdk.Bandpass(XMM_BANDPASSES["RGS"]),
             )
-            across_schedule["observations"].append(rgs_across_observation)
+            across_schedule.observations.append(rgs_across_observation)
 
             # Create ACROSS observations for OM
             if len(revolution_timeline_df):
@@ -355,12 +376,18 @@ def ingest() -> None:
                         exposure["start_time"],
                         exposure["exposure_time"],
                         instrument_id_dict["OM"],
-                        "imaging",
-                        XMM_BANDPASSES[exposure["filter"]],
+                        sdk.ObservationType.IMAGING,
+                        sdk.Bandpass(XMM_BANDPASSES[exposure["filter"]]),
                     )
-                    across_schedule["observations"].append(om_across_observation)
+                    across_schedule.observations.append(om_across_observation)
 
-    across_api.schedule.post(across_schedule)
+    try:
+        sdk.ScheduleApi(client).create_schedule(across_schedule)
+    except sdk.ApiException as err:
+        if err.status == 409:
+            logger.warning("Schedule already exists.", err=err.__dict__)
+        else:
+            raise err
 
 
 # Updated approximately every 8 hrs, for future cron scheduling
