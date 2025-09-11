@@ -1,12 +1,14 @@
+from across_data_ingestion.util.across_server import sdk
+
 xmm_newton_planned_schedule: dict = {
     "name": "XMM_Newton_planned_2025-09-04_2025-09-05",
-    "telescope_id": "f2ae30ec-cd64-41b1-a951-4da29aa9f4ab",
+    "telescope_id": "telescope_uuid",
     "status": "planned",
     "fidelity": "low",
     "date_range": {"begin": "2025-09-04 08:40:22", "end": "2025-09-05 21:46:16"},
     "observations": [
         {
-            "instrument_id": "ab55be45-9796-40da-8125-e512f446ac96",
+            "instrument_id": "epic-mos_instrument_uuid",
             "object_name": "Sgr A*",
             "external_observation_id": "0963230101",
             "pointing_position": {"ra": 266.4166666666667, "dec": -29.00777777777778},
@@ -19,16 +21,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 47900.0,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "XMM-Newton EPIC",
-                "min": 0.3,
-                "max": 12.0,
-                "type": "ENERGY",
-                "unit": "keV",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.EnergyBandpass.model_validate(
+                    {
+                        "filter_name": "XMM-Newton EPIC",
+                        "min": 0.3,
+                        "max": 12.0,
+                        "type": "ENERGY",
+                        "unit": "keV",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "b9c82f10-1292-462b-85b3-1c1c2292806c",
+            "instrument_id": "epic-pn_instrument_uuid",
             "object_name": "Sgr A*",
             "external_observation_id": "0963230101",
             "pointing_position": {"ra": 266.4166666666667, "dec": -29.00777777777778},
@@ -41,16 +47,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 46300.0,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "XMM-Newton EPIC",
-                "min": 0.3,
-                "max": 12.0,
-                "type": "ENERGY",
-                "unit": "keV",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.EnergyBandpass.model_validate(
+                    {
+                        "filter_name": "XMM-Newton EPIC",
+                        "min": 0.3,
+                        "max": 12.0,
+                        "type": "ENERGY",
+                        "unit": "keV",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "eb40e1c6-6c03-4474-9462-73d273efa3ac",
+            "instrument_id": "rgs_instrument_uuid",
             "object_name": "Sgr A*",
             "external_observation_id": "0963230101",
             "pointing_position": {"ra": 266.4166666666667, "dec": -29.00777777777778},
@@ -63,16 +73,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 48000.0,
             "status": "planned",
             "type": "spectroscopy",
-            "bandpass": {
-                "filter_name": "XMM-Newton RGS",
-                "min": 0.35,
-                "max": 2.5,
-                "type": "ENERGY",
-                "unit": "keV",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.EnergyBandpass.model_validate(
+                    {
+                        "filter_name": "XMM-Newton RGS",
+                        "min": 0.35,
+                        "max": 2.5,
+                        "type": "ENERGY",
+                        "unit": "keV",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "Sgr A*",
             "external_observation_id": "0963230101",
             "pointing_position": {"ra": 266.4166666666667, "dec": -29.00777777777778},
@@ -85,16 +99,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 288,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM V",
-                "min": 508.0,
-                "max": 578.0,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM V",
+                        "min": 508.0,
+                        "max": 578.0,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "Sgr A*",
             "external_observation_id": "0963230101",
             "pointing_position": {"ra": 266.4166666666667, "dec": -29.00777777777778},
@@ -107,16 +125,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 4706,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM U",
-                "min": 302.0,
-                "max": 386.0,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM U",
+                        "min": 302.0,
+                        "max": 386.0,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "Sgr A*",
             "external_observation_id": "0963230101",
             "pointing_position": {"ra": 266.4166666666667, "dec": -29.00777777777778},
@@ -129,16 +151,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 5606,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM U",
-                "min": 302.0,
-                "max": 386.0,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM U",
+                        "min": 302.0,
+                        "max": 386.0,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "Sgr A*",
             "external_observation_id": "0963230101",
             "pointing_position": {"ra": 266.4166666666667, "dec": -29.00777777777778},
@@ -151,16 +177,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 4706,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM UVW1",
-                "min": 249.5,
-                "max": 332.5,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM UVW1",
+                        "min": 249.5,
+                        "max": 332.5,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "Sgr A*",
             "external_observation_id": "0963230101",
             "pointing_position": {"ra": 266.4166666666667, "dec": -29.00777777777778},
@@ -173,16 +203,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 4706,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM UVW1",
-                "min": 249.5,
-                "max": 332.5,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM UVW1",
+                        "min": 249.5,
+                        "max": 332.5,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "Sgr A*",
             "external_observation_id": "0963230101",
             "pointing_position": {"ra": 266.4166666666667, "dec": -29.00777777777778},
@@ -195,16 +229,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 4706,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM UVM2",
-                "min": 207.0,
-                "max": 255.0,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM UVM2",
+                        "min": 207.0,
+                        "max": 255.0,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "Sgr A*",
             "external_observation_id": "0963230101",
             "pointing_position": {"ra": 266.4166666666667, "dec": -29.00777777777778},
@@ -217,16 +255,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 4706,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM UVM2",
-                "min": 207.0,
-                "max": 255.0,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM UVM2",
+                        "min": 207.0,
+                        "max": 255.0,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "Sgr A*",
             "external_observation_id": "0963230101",
             "pointing_position": {"ra": 266.4166666666667, "dec": -29.00777777777778},
@@ -239,16 +281,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 4706,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM UVM2",
-                "min": 207.0,
-                "max": 255.0,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM UVM2",
+                        "min": 207.0,
+                        "max": 255.0,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "Sgr A*",
             "external_observation_id": "0963230101",
             "pointing_position": {"ra": 266.4166666666667, "dec": -29.00777777777778},
@@ -261,16 +307,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 4706,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM UVW2",
-                "min": 187.0,
-                "max": 237.0,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM UVW2",
+                        "min": 187.0,
+                        "max": 237.0,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "Sgr A*",
             "external_observation_id": "0963230101",
             "pointing_position": {"ra": 266.4166666666667, "dec": -29.00777777777778},
@@ -283,16 +333,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 4706,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM UVW2",
-                "min": 187.0,
-                "max": 237.0,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM UVW2",
+                        "min": 187.0,
+                        "max": 237.0,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "Sgr A*",
             "external_observation_id": "0963230101",
             "pointing_position": {"ra": 266.4166666666667, "dec": -29.00777777777778},
@@ -305,16 +359,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 2256,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM UVW2",
-                "min": 187.0,
-                "max": 237.0,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM UVW2",
+                        "min": 187.0,
+                        "max": 237.0,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "ab55be45-9796-40da-8125-e512f446ac96",
+            "instrument_id": "epic-mos_instrument_uuid",
             "object_name": "Crab",
             "external_observation_id": "0811026701",
             "pointing_position": {"ra": 83.63333333333331, "dec": 22.014444444444443},
@@ -327,16 +385,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 8600.0,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "XMM-Newton EPIC",
-                "min": 0.3,
-                "max": 12.0,
-                "type": "ENERGY",
-                "unit": "keV",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.EnergyBandpass.model_validate(
+                    {
+                        "filter_name": "XMM-Newton EPIC",
+                        "min": 0.3,
+                        "max": 12.0,
+                        "type": "ENERGY",
+                        "unit": "keV",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "b9c82f10-1292-462b-85b3-1c1c2292806c",
+            "instrument_id": "epic-pn_instrument_uuid",
             "object_name": "Crab",
             "external_observation_id": "0811026701",
             "pointing_position": {"ra": 83.63333333333331, "dec": 22.014444444444443},
@@ -349,16 +411,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 7100.0,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "XMM-Newton EPIC",
-                "min": 0.3,
-                "max": 12.0,
-                "type": "ENERGY",
-                "unit": "keV",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.EnergyBandpass.model_validate(
+                    {
+                        "filter_name": "XMM-Newton EPIC",
+                        "min": 0.3,
+                        "max": 12.0,
+                        "type": "ENERGY",
+                        "unit": "keV",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "eb40e1c6-6c03-4474-9462-73d273efa3ac",
+            "instrument_id": "rgs_instrument_uuid",
             "object_name": "Crab",
             "external_observation_id": "0811026701",
             "pointing_position": {"ra": 83.63333333333331, "dec": 22.014444444444443},
@@ -371,16 +437,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 9000.0,
             "status": "planned",
             "type": "spectroscopy",
-            "bandpass": {
-                "filter_name": "XMM-Newton RGS",
-                "min": 0.35,
-                "max": 2.5,
-                "type": "ENERGY",
-                "unit": "keV",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.EnergyBandpass.model_validate(
+                    {
+                        "filter_name": "XMM-Newton RGS",
+                        "min": 0.35,
+                        "max": 2.5,
+                        "type": "ENERGY",
+                        "unit": "keV",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "Crab",
             "external_observation_id": "0811026701",
             "pointing_position": {"ra": 83.63333333333331, "dec": 22.014444444444443},
@@ -393,16 +463,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 7868,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM UVW1",
-                "min": 249.5,
-                "max": 332.5,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM UVW1",
+                        "min": 249.5,
+                        "max": 332.5,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "ab55be45-9796-40da-8125-e512f446ac96",
+            "instrument_id": "epic-mos_instrument_uuid",
             "object_name": "BW Cir",
             "external_observation_id": "0960860801",
             "pointing_position": {"ra": 209.53749999999997, "dec": -64.73472222222222},
@@ -415,16 +489,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 21900.0,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "XMM-Newton EPIC",
-                "min": 0.3,
-                "max": 12.0,
-                "type": "ENERGY",
-                "unit": "keV",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.EnergyBandpass.model_validate(
+                    {
+                        "filter_name": "XMM-Newton EPIC",
+                        "min": 0.3,
+                        "max": 12.0,
+                        "type": "ENERGY",
+                        "unit": "keV",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "b9c82f10-1292-462b-85b3-1c1c2292806c",
+            "instrument_id": "epic-pn_instrument_uuid",
             "object_name": "BW Cir",
             "external_observation_id": "0960860801",
             "pointing_position": {"ra": 209.53749999999997, "dec": -64.73472222222222},
@@ -437,16 +515,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 20300.0,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "XMM-Newton EPIC",
-                "min": 0.3,
-                "max": 12.0,
-                "type": "ENERGY",
-                "unit": "keV",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.EnergyBandpass.model_validate(
+                    {
+                        "filter_name": "XMM-Newton EPIC",
+                        "min": 0.3,
+                        "max": 12.0,
+                        "type": "ENERGY",
+                        "unit": "keV",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "eb40e1c6-6c03-4474-9462-73d273efa3ac",
+            "instrument_id": "rgs_instrument_uuid",
             "object_name": "BW Cir",
             "external_observation_id": "0960860801",
             "pointing_position": {"ra": 209.53749999999997, "dec": -64.73472222222222},
@@ -459,16 +541,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 22000.0,
             "status": "planned",
             "type": "spectroscopy",
-            "bandpass": {
-                "filter_name": "XMM-Newton RGS",
-                "min": 0.35,
-                "max": 2.5,
-                "type": "ENERGY",
-                "unit": "keV",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.EnergyBandpass.model_validate(
+                    {
+                        "filter_name": "XMM-Newton RGS",
+                        "min": 0.35,
+                        "max": 2.5,
+                        "type": "ENERGY",
+                        "unit": "keV",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "BW Cir",
             "external_observation_id": "0960860801",
             "pointing_position": {"ra": 209.53749999999997, "dec": -64.73472222222222},
@@ -481,16 +567,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 288,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM V",
-                "min": 508.0,
-                "max": 578.0,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM V",
+                        "min": 508.0,
+                        "max": 578.0,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "BW Cir",
             "external_observation_id": "0960860801",
             "pointing_position": {"ra": 209.53749999999997, "dec": -64.73472222222222},
@@ -503,16 +593,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 4006,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM V",
-                "min": 508.0,
-                "max": 578.0,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM V",
+                        "min": 508.0,
+                        "max": 578.0,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "BW Cir",
             "external_observation_id": "0960860801",
             "pointing_position": {"ra": 209.53749999999997, "dec": -64.73472222222222},
@@ -525,16 +619,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 4070,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM V",
-                "min": 508.0,
-                "max": 578.0,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM V",
+                        "min": 508.0,
+                        "max": 578.0,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "BW Cir",
             "external_observation_id": "0960860801",
             "pointing_position": {"ra": 209.53749999999997, "dec": -64.73472222222222},
@@ -547,16 +645,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 4070,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM V",
-                "min": 508.0,
-                "max": 578.0,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM V",
+                        "min": 508.0,
+                        "max": 578.0,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "BW Cir",
             "external_observation_id": "0960860801",
             "pointing_position": {"ra": 209.53749999999997, "dec": -64.73472222222222},
@@ -569,16 +671,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 4070,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM V",
-                "min": 508.0,
-                "max": 578.0,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM V",
+                        "min": 508.0,
+                        "max": 578.0,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "BW Cir",
             "external_observation_id": "0960860801",
             "pointing_position": {"ra": 209.53749999999997, "dec": -64.73472222222222},
@@ -591,16 +697,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 4070,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM V",
-                "min": 508.0,
-                "max": 578.0,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM V",
+                        "min": 508.0,
+                        "max": 578.0,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "ab55be45-9796-40da-8125-e512f446ac96",
+            "instrument_id": "epic-mos_instrument_uuid",
             "object_name": "Crab",
             "external_observation_id": "0811026501",
             "pointing_position": {"ra": 83.63333333333331, "dec": 22.014444444444443},
@@ -613,16 +723,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 10600.0,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "XMM-Newton EPIC",
-                "min": 0.3,
-                "max": 12.0,
-                "type": "ENERGY",
-                "unit": "keV",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.EnergyBandpass.model_validate(
+                    {
+                        "filter_name": "XMM-Newton EPIC",
+                        "min": 0.3,
+                        "max": 12.0,
+                        "type": "ENERGY",
+                        "unit": "keV",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "b9c82f10-1292-462b-85b3-1c1c2292806c",
+            "instrument_id": "epic-pn_instrument_uuid",
             "object_name": "Crab",
             "external_observation_id": "0811026501",
             "pointing_position": {"ra": 83.63333333333331, "dec": 22.014444444444443},
@@ -635,16 +749,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 8600.0,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "XMM-Newton EPIC",
-                "min": 0.3,
-                "max": 12.0,
-                "type": "ENERGY",
-                "unit": "keV",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.EnergyBandpass.model_validate(
+                    {
+                        "filter_name": "XMM-Newton EPIC",
+                        "min": 0.3,
+                        "max": 12.0,
+                        "type": "ENERGY",
+                        "unit": "keV",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "eb40e1c6-6c03-4474-9462-73d273efa3ac",
+            "instrument_id": "rgs_instrument_uuid",
             "object_name": "Crab",
             "external_observation_id": "0811026501",
             "pointing_position": {"ra": 83.63333333333331, "dec": 22.014444444444443},
@@ -657,16 +775,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 11000.0,
             "status": "planned",
             "type": "spectroscopy",
-            "bandpass": {
-                "filter_name": "XMM-Newton RGS",
-                "min": 0.35,
-                "max": 2.5,
-                "type": "ENERGY",
-                "unit": "keV",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.EnergyBandpass.model_validate(
+                    {
+                        "filter_name": "XMM-Newton RGS",
+                        "min": 0.35,
+                        "max": 2.5,
+                        "type": "ENERGY",
+                        "unit": "keV",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "e523b7de-8ea0-46eb-ba42-dff6f336130c",
+            "instrument_id": "om_instrument_uuid",
             "object_name": "Crab",
             "external_observation_id": "0811026501",
             "pointing_position": {"ra": 83.63333333333331, "dec": 22.014444444444443},
@@ -679,16 +801,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 7868,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "OM UVM2",
-                "min": 207.0,
-                "max": 255.0,
-                "type": "WAVELENGTH",
-                "unit": "nm",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.WavelengthBandpass.model_validate(
+                    {
+                        "filter_name": "OM UVM2",
+                        "min": 207.0,
+                        "max": 255.0,
+                        "type": "WAVELENGTH",
+                        "unit": "nm",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "ab55be45-9796-40da-8125-e512f446ac96",
+            "instrument_id": "epic-mos_instrument_uuid",
             "object_name": "Crab",
             "external_observation_id": "0811026601",
             "pointing_position": {"ra": 83.63333333333331, "dec": 22.014444444444443},
@@ -701,16 +827,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 16600.0,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "XMM-Newton EPIC",
-                "min": 0.3,
-                "max": 12.0,
-                "type": "ENERGY",
-                "unit": "keV",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.EnergyBandpass.model_validate(
+                    {
+                        "filter_name": "XMM-Newton EPIC",
+                        "min": 0.3,
+                        "max": 12.0,
+                        "type": "ENERGY",
+                        "unit": "keV",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "b9c82f10-1292-462b-85b3-1c1c2292806c",
+            "instrument_id": "epic-pn_instrument_uuid",
             "object_name": "Crab",
             "external_observation_id": "0811026601",
             "pointing_position": {"ra": 83.63333333333331, "dec": 22.014444444444443},
@@ -723,16 +853,20 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 15100.0,
             "status": "planned",
             "type": "imaging",
-            "bandpass": {
-                "filter_name": "XMM-Newton EPIC",
-                "min": 0.3,
-                "max": 12.0,
-                "type": "ENERGY",
-                "unit": "keV",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.EnergyBandpass.model_validate(
+                    {
+                        "filter_name": "XMM-Newton EPIC",
+                        "min": 0.3,
+                        "max": 12.0,
+                        "type": "ENERGY",
+                        "unit": "keV",
+                    },
+                )
+            ),
         },
         {
-            "instrument_id": "eb40e1c6-6c03-4474-9462-73d273efa3ac",
+            "instrument_id": "rgs_instrument_uuid",
             "object_name": "Crab",
             "external_observation_id": "0811026601",
             "pointing_position": {"ra": 83.63333333333331, "dec": 22.014444444444443},
@@ -745,13 +879,17 @@ xmm_newton_planned_schedule: dict = {
             "exposure_time": 0.0,
             "status": "planned",
             "type": "spectroscopy",
-            "bandpass": {
-                "filter_name": "XMM-Newton RGS",
-                "min": 0.35,
-                "max": 2.5,
-                "type": "ENERGY",
-                "unit": "keV",
-            },
+            "bandpass": sdk.Bandpass(
+                sdk.EnergyBandpass.model_validate(
+                    {
+                        "filter_name": "XMM-Newton RGS",
+                        "min": 0.35,
+                        "max": 2.5,
+                        "type": "ENERGY",
+                        "unit": "keV",
+                    },
+                )
+            ),
         },
     ],
 }
