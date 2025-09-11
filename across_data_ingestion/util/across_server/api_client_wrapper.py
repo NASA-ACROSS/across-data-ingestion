@@ -74,6 +74,9 @@ class ApiClientWrapper(sdk.ApiClient):
             self.refresh_token()
 
         if self._cred_store:
+            if self._lock.locked():
+                return
+
             with self._lock:
                 if self._should_rotate:
                     res = sdk.InternalApi(super()).service_account_rotate_key(

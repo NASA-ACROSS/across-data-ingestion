@@ -22,6 +22,7 @@
                 "--port",
                 "8001"
             ],
+            "justMyCode": false
         },
         {
             "name": "dev: Start Data Ingestion",

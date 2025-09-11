@@ -1,231 +1,217 @@
-from collections.abc import Generator
-from io import StringIO
-from unittest.mock import MagicMock, Mock, patch
+import os
+from datetime import datetime
+from unittest.mock import MagicMock
 
+import bs4
+import httpx
 import pandas as pd
 import pytest
+import structlog
+
+import across_data_ingestion.tasks.schedules.hst.low_fidelity_planned as task
+from across_data_ingestion.util.across_server import sdk
 
 
 @pytest.fixture
-def mock_log() -> Generator[MagicMock]:
-    with patch(
-        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.logger"
-    ) as log_mock:
-        yield log_mock
+def mock_logger(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
+    # must be patched because it is set at runtime when the file is imported.
+    mock = MagicMock(spec=structlog.stdlib.BoundLogger)
+    monkeypatch.setattr(task, "logger", mock)
+    return mock
+
+
+@pytest.fixture(autouse=True)
+def set_sdk_data(
+    mock_telescope_api: MagicMock,
+    mock_instrument_api: MagicMock,
+    fake_telescope: sdk.Telescope,
+    fake_instrument: sdk.Instrument,
+) -> None:
+    mock_telescope_api.get_telescopes.return_value = [fake_telescope]
+    mock_instrument_api.get_instruments.return_value = [fake_instrument]
+
+
+@pytest.fixture(autouse=True)
+def set_httpx_get(
+    mock_httpx_get: MagicMock,
+    # fake_timeline_file_raw_data: str,
+) -> None:
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.text = "some html"
+
+    mock_httpx_get.return_value = mock_response
+
+
+@pytest.fixture(autouse=True)
+def set_mock_csv_files(monkeypatch: pytest.MonkeyPatch) -> None:
+    def get_mock_path(file: str = "") -> str:
+        return os.path.join(os.path.dirname(__file__), "mocks/", file)
+
+    monkeypatch.setattr(
+        task,
+        "HST_EXPOSURE_CATALOG_URL",
+        get_mock_path("mock_planned_exposure_catalog.csv"),
+    )
+    monkeypatch.setattr(
+        task,
+        "BASE_TIMELINE_URL",
+        get_mock_path(),
+    )
+
+
+@pytest.fixture()
+def mock_soup(fake_timeline_html_tags: list[MagicMock]) -> MagicMock:
+    mock = MagicMock(spec=bs4.BeautifulSoup)
+    mock.find_all.return_value = fake_timeline_html_tags
+    return mock
+
+
+@pytest.fixture(autouse=True)
+def mock_soup_cls(monkeypatch: pytest.MonkeyPatch, mock_soup: MagicMock):
+    mock_soup_cls = MagicMock(return_value=mock_soup)
+
+    monkeypatch.setattr(bs4, "BeautifulSoup", mock_soup_cls)
+
+    return mock_soup_cls
 
 
 @pytest.fixture
-def mock_soup(
-    mock_timeline_html_tags: list, mock_timeline_file_raw_data: str
-) -> Generator[MagicMock]:
-    mock_soup = MagicMock()
-    mock_soup.find_all.return_value = mock_timeline_html_tags
-    mock_soup.text = mock_timeline_file_raw_data
-    with patch(
-        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.BeautifulSoup",
-        return_value=mock_soup,
-    ) as mock_soup:
-        yield mock_soup
+def mock_read_timeline_file(
+    monkeypatch: pytest.MonkeyPatch,
+    fake_timeline_file_df: pd.DataFrame,
+) -> MagicMock:
+    mock = MagicMock(return_value=fake_timeline_file_df)
+    monkeypatch.setattr(task, "read_timeline_file", mock)
+    return mock
 
 
 @pytest.fixture
-def mock_get() -> Generator[MagicMock]:
-    with patch(
-        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.httpx.get"
-    ) as mock_get:
-        mock_get.text = "mock response text"
-        yield mock_get
-
-
-@pytest.fixture
-def mock_pandas(
-    mock_planned_exposure_catalog: pd.DataFrame,
-    mock_timeline_file_dataframe: pd.DataFrame,
-) -> Generator[MagicMock]:
-    with patch(
-        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.pd"
-    ) as mock_pandas:
-        mock_pandas.read_csv.return_value = mock_planned_exposure_catalog
-        mock_pandas.read_fwf.return_value = mock_timeline_file_dataframe
-        yield mock_pandas
-
-
-@pytest.fixture
-def mock_telescope_id() -> str:
-    return "hst-mock-telescope-id"
-
-
-@pytest.fixture
-def mock_instrument_id() -> str:
-    return "hst-wfc3-ir-mock-id"
-
-
-@pytest.fixture
-def mock_telescope_get(mock_telescope_id: str, mock_instrument_id: str) -> list:
-    return [
+def fake_planned_exposure_catalog_df():
+    rows = [
         {
-            "id": mock_telescope_id,
-            "instruments": [
-                {
-                    "id": mock_instrument_id,
-                    "name": "Wide Field Camera 3 - Infrared Channel",
-                    "short_name": "HST_WFC3_IR",
-                },
-            ],
+            "object_name": "FSR2007-0584",
+            "ra_h": "2",
+            "ra_m": "27",
+            "ra_s": "15.0",
+            "dec_d": "61",
+            "dec_m": "37",
+            "dec_s": "28.0",
+            "config": "WFC3/IR",
+            "mode": "MULTIACCUM",
+            "aper": "IR-FIX",
+            "spec": "F110W",
+            "wave": "0",
+            "time": "-1",
+            "prop": "17918",
+            "cy": "32",
+            "dataset": "PLANNED",
+            "release": "---",
+        },
+        {
+            "object_name": "FSR2007-0584",
+            "ra_h": "2",
+            "ra_m": "27",
+            "ra_s": "15.0",
+            "dec_d": "61",
+            "dec_m": "37",
+            "dec_s": "28.0",
+            "config": "WFC3/IR",
+            "mode": "MULTIACCUM",
+            "aper": "IR-FIX",
+            "spec": "F160W",
+            "wave": "0",
+            "time": "-1",
+            "prop": "17918",
+            "cy": "32",
+            "dataset": "PLANNED",
+            "release": "---",
         },
     ]
 
-
-@pytest.fixture
-def mock_instrument_get(mock_telescope_id: str, mock_instrument_id: str) -> list:
-    return [
-        {
-            "id": mock_instrument_id,
-            "name": "Wide Field Camera 3 - Infrared Channel",
-            "short_name": "HST_WFC3_IR",
-            "telescope": [
-                {
-                    "id": mock_telescope_id,
-                },
-            ],
-            "filters": [
-                {
-                    "id": "mock-wfc3-F110W-id",
-                    "name": "HST WFC3 F110W",
-                    "min_wavelength": 7103.999999999999,
-                    "max_wavelength": 15963.999999999996,
-                    "instrument_id": mock_instrument_id,
-                },
-                {
-                    "id": "mock-wfc3-F160W-id",
-                    "name": "HST WFC3 F160W",
-                    "min_wavelength": 12685.999999999998,
-                    "max_wavelength": 18051.999999999996,
-                    "instrument_id": mock_instrument_id,
-                },
-            ],
-        }
-    ]
+    return pd.DataFrame(rows)
 
 
 @pytest.fixture
-def mock_schedule_post() -> Generator:
-    yield Mock(return_value=None)
-
-
-@pytest.fixture(autouse=True)
-def mock_read_planned_exposure_catalog(
-    mock_planned_exposure_catalog: pd.DataFrame,
-) -> Generator:
-    with patch(
-        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.read_planned_exposure_catalog",
-        return_value=mock_planned_exposure_catalog,
-    ) as mock_read_exposure_catalog:
-        yield mock_read_exposure_catalog
-
-
-@pytest.fixture(autouse=True)
-def mock_read_timeline_file(mock_timeline_file_dataframe: pd.DataFrame) -> Generator:
-    with patch(
-        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.read_timeline_file",
-        return_value=mock_timeline_file_dataframe,
-    ) as mock_read_timeline:
-        yield mock_read_timeline
-
-
-@pytest.fixture(autouse=True)
-def mock_get_latest_timeline_file() -> Generator:
-    with patch(
-        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.get_latest_timeline_file",
-        return_value="timeline_07_28_25",
-    ) as mock_latest_timeline_file:
-        yield mock_latest_timeline_file
+def fake_instrument_id() -> str:
+    return "fake_instrument_id"
 
 
 @pytest.fixture
-def mock_extract_observation_pointing_coordinate() -> Generator:
-    with patch(
-        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.extract_observation_pointing_coordinates"
-    ) as mock_coordinate_info:
-        mock_coordinate_info.return_value = {
-            "ra": "00:00:00",
-            "dec": "12:34:56",
-        }
-        yield mock_coordinate_info
-
-
-@pytest.fixture
-def mock_extract_instrument_info_from_observation() -> Generator:
-    with patch(
-        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.extract_instrument_info"
-    ) as mock_instrument_info:
-        yield mock_instrument_info
-
-
-@pytest.fixture
-def mock_planned_exposure_catalog() -> pd.DataFrame:
-    colnames = [
-        "object_name",
-        "ra_h",
-        "ra_m",
-        "ra_s",
-        "dec_d",
-        "dec_m",
-        "dec_s",
-        "config",
-        "mode",
-        "aper",
-        "spec",
-        "wave",
-        "time",
-        "prop",
-        "cy",
-        "dataset",
-        "release",
-    ]
-    s = (
-        "FSR2007-0584     02 27 15.00   +61 37 28.0 WFC3/IR   MULTIACCUM  IR-FIX       F110W               0    -1 17918 32 PLANNED        ---\n"
-        "FSR2007-0584     02 27 15.00   +61 37 28.0 WFC3/IR   MULTIACCUM  IR-FIX       F160W               0    -1 17918 32 PLANNED        ---"
-    )
-    planned_exposure_catalog = pd.read_csv(StringIO(s), sep="\s+", names=colnames)
-    return planned_exposure_catalog
-
-
-@pytest.fixture
-def mock_timeline_file_raw_data() -> str:
-    return (
-        "2025.209 01:07:54 02:03:30  1791807  Loriga     07-001 FSR2007-0584                   WFC3/IR  MULTIA IR-FIX       F110W           44.11  07 01 01   \n"
-        "2025.209 01:07:54 02:03:30  1791807  Loriga     07-002 FSR2007-0584                   WFC3/IR  MULTIA IR-FIX       F160W           41.17  07 01 02  \n"
-        "2025.209 01:07:54 02:03:30  1791807  Loriga     07-003 FSR2007-0584                   WFC3/IR  MULTIA IR-FIX       F110W           44.11  07 03 01  \n"
+def fake_telescope() -> sdk.Telescope:
+    return sdk.Telescope(
+        id="telescope_uuid",
+        name="Hubble Space Telescope",
+        short_name="hst",
+        created_on=datetime.now(),
+        instruments=[
+            sdk.IDNameSchema(
+                id="instrument_uuid",
+                name="Wide Field Camera 3 - Infrared Channel",
+                short_name="HST_WFC3_IR",
+            )
+        ],
     )
 
 
 @pytest.fixture
-def mock_schedule_data() -> dict:
-    return {
-        "name": "mock-schedule",
-        "telescope_id": "mock-telescope-id",
-        "status": "planned",
-        "fidelity": "low",
-        "date_range": {
-            "begin": "2025-08-01 00:00:00",
-            "end": "2025-08-08 00:00:00",
+def fake_instrument(
+    fake_instrument_id: str,
+    fake_telescope: sdk.Telescope,
+    fake_filters: list[sdk.Filter],
+) -> sdk.Instrument:
+    return sdk.Instrument(
+        id=fake_instrument_id,
+        name="FAKE HST INSTRUMENT",
+        short_name="HST_FAKE",
+        created_on=datetime.now(),
+        filters=fake_filters,
+        telescope=sdk.IDNameSchema(
+            id=fake_telescope.id,
+            name=fake_telescope.name,
+            short_name=fake_telescope.short_name,
+        ),
+    )
+
+
+@pytest.fixture
+def fake_filters(fake_instrument_id: str) -> list[sdk.Filter]:
+    filters = [
+        {
+            "id": "fake_filter_id_1",
+            "name": "FAKE HST FILTER",
+            "short_name": "HST FAKE ABCD",
+            "min_wavelength": 7103.999999999999,
+            "max_wavelength": 15963.999999999996,
+            "instrument_id": fake_instrument_id,
+            "created_on": datetime.now(),
+            "peak_wavelength": None,
+            "reference_url": None,
+            "sensitivity_depth": None,
+            "sensitivity_depth_unit": None,
+            "sensitivity_time_seconds": None,
+            "is_operational": True,
         },
-        "observations": [],
-    }
+        {
+            "id": "fake_filter_id_2",
+            "name": "FAKE HST FILTER 2",
+            "short_name": "HST FAKE WXYZ",
+            "min_wavelength": 12685.999999999998,
+            "max_wavelength": 18051.999999999996,
+            "instrument_id": fake_instrument_id,
+            "created_on": datetime.now(),
+            "peak_wavelength": None,
+            "reference_url": None,
+            "sensitivity_depth": None,
+            "sensitivity_depth_unit": None,
+            "sensitivity_time_seconds": None,
+            "is_operational": True,
+        },
+    ]
+    return [sdk.Filter.model_validate(f) for f in filters]
 
 
 @pytest.fixture
-def mock_transform_to_across_schedule(mock_schedule_data: dict) -> Generator:
-    with patch(
-        "across_data_ingestion.tasks.schedules.hst.low_fidelity_planned.transform_to_across_schedule",
-        return_value=mock_schedule_data,
-    ) as mock_across_schedule:
-        yield mock_across_schedule
-
-
-@pytest.fixture
-def mock_timeline_file_invalid_obs_dataframe() -> pd.DataFrame:
+def fake_invalid_obs_timeline_file_df() -> pd.DataFrame:
     raw_observations = [
         {
             "date": "2025.209",
@@ -243,7 +229,7 @@ def mock_timeline_file_invalid_obs_dataframe() -> pd.DataFrame:
 
 
 @pytest.fixture
-def mock_timeline_file_dataframe() -> pd.DataFrame:
+def fake_timeline_file_df() -> pd.DataFrame:
     raw_observations = [
         {
             "date": "2025.209",
@@ -257,13 +243,16 @@ def mock_timeline_file_dataframe() -> pd.DataFrame:
             "mode": "MULTIA",
             "aperture": "IR-FIX",
             "element": "F110W",
-            "exp_time": "44.11",
+            "exp_time": 44.11,
+            "ob": "07",
+            "al": "01",
+            "ex": "01",
         },
         {
             "date": "2025.209",
-            "begin_time": "01:07:54",
-            "end_time": "02:03:30",
-            "obs_id": "1791807",
+            "begin_time": "01:08:54",
+            "end_time": "02:04:30",
+            "obs_id": "1791900",
             "PI": "Loriga",
             "exposure": "07-002",
             "target_name": "FSR2007-0584",
@@ -271,13 +260,16 @@ def mock_timeline_file_dataframe() -> pd.DataFrame:
             "mode": "MULTIA",
             "aperture": "IR-FIX",
             "element": "F160W",
-            "exp_time": "41.17",
+            "exp_time": 41.17,
+            "ob": "07",
+            "al": "01",
+            "ex": "02",
         },
         {
             "date": "2025.209",
-            "begin_time": "01:07:54",
-            "end_time": "02:03:30",
-            "obs_id": "1791807",
+            "begin_time": "01:10:54",
+            "end_time": "02:06:30",
+            "obs_id": "1791910",
             "PI": "Loriga",
             "exposure": "07-003",
             "target_name": "FSR2007-0584",
@@ -285,7 +277,10 @@ def mock_timeline_file_dataframe() -> pd.DataFrame:
             "mode": "MULTIA",
             "aperture": "IR-FIX",
             "element": "F110W",
-            "exp_time": "44.11",
+            "exp_time": 44.11,
+            "ob": "07",
+            "al": "03",
+            "ex": "01",
         },
     ]
     schedules = pd.DataFrame(raw_observations)
@@ -293,16 +288,37 @@ def mock_timeline_file_dataframe() -> pd.DataFrame:
 
 
 @pytest.fixture
-def mock_timeline_html_tags() -> list:
-    class MockATag:
-        def __init__(self, href: str) -> None:
-            self.href = href
-
-        def get(self, key: str) -> str:
-            return self.href
-
-    return [
-        MockATag("timeline_01_01_01"),
-        MockATag("timeline_01_01_25"),
-        MockATag("timeline_07_28_25"),
+def fake_timeline_html_tags() -> list[MagicMock]:
+    dates = [
+        "timeline_01_01_01",
+        "timeline_01_01_25",
+        "timeline_07_28_25",
     ]
+
+    mocks = []
+
+    for date in dates:
+        mock = MagicMock(spec=bs4.Tag)
+        mock.get = MagicMock(return_value=date)
+
+        mocks.append(mock)
+
+    return mocks
+
+
+@pytest.fixture
+def fake_timeline_row() -> dict:
+    return {
+        "date": "2025.209",
+        "begin_time": "01:07:54",
+        "end_time": "02:03:30",
+        "obs_id": "1791807",
+        "PI": "Loriga",
+        "exposure": "07-001",
+        "target_name": "FSR2007-0584",
+        "instrument": "WFC3/IR",
+        "mode": "MULTIA",
+        "aperture": "IR-FIX",
+        "element": "F110W",
+        "exp_time": 44.11,
+    }

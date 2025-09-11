@@ -63,9 +63,13 @@ class TestVOService:
 
     def test_get_results_should_return_results(self):
         """Should return query results when running get_results"""
-        with patch("httpx.AsyncClient", self.mock_client), patch(
-            "httpx.get", return_value=self.mock_client.response
-        ), patch("xml.etree.ElementTree.fromstring", return_value=self.mock_xml_root()):
+        with (
+            patch("httpx.AsyncClient", self.mock_client),
+            patch("httpx.get", return_value=self.mock_client.response),
+            patch(
+                "xml.etree.ElementTree.fromstring", return_value=self.mock_xml_root()
+            ),
+        ):
             service = VOService(self.url)
             service.job_url = "mock_job_url"
             results = service._get_results()
@@ -81,9 +85,11 @@ class TestVOService:
             def find(self, pattern):
                 return MockBadXMLElement
 
-        with patch("httpx.AsyncClient", self.mock_client), patch(
-            "httpx.get", return_value=self.mock_client.response
-        ), patch("xml.etree.ElementTree.fromstring", return_value=MockBadXMLRoot()):
+        with (
+            patch("httpx.AsyncClient", self.mock_client),
+            patch("httpx.get", return_value=self.mock_client.response),
+            patch("xml.etree.ElementTree.fromstring", return_value=MockBadXMLRoot()),
+        ):
             service = VOService(self.url)
             service.job_url = "mock_job_url"
             results = service._get_results()
@@ -98,10 +104,13 @@ class TestVOService:
         with open(mock_votable_file, "r") as f:
             table = f.read()
             self.mock_client.response.text = table
-            with patch("httpx.AsyncClient", self.mock_client), patch(
-                "httpx.get", return_value=self.mock_client.response
-            ), patch(
-                "xml.etree.ElementTree.fromstring", return_value=self.mock_xml_root()
+            with (
+                patch("httpx.AsyncClient", self.mock_client),
+                patch("httpx.get", return_value=self.mock_client.response),
+                patch(
+                    "xml.etree.ElementTree.fromstring",
+                    return_value=self.mock_xml_root(),
+                ),
             ):
                 service = VOService(self.url)
                 service.job_url = "mock_job_url"
@@ -112,8 +121,9 @@ class TestVOService:
     async def test_query_should_return_None_for_no_results(self):
         """Should return None when query finds no results"""
         self.mock_client.response.text = None
-        with patch("httpx.AsyncClient", self.mock_client), patch(
-            "httpx.get", return_value=self.mock_client.response
+        with (
+            patch("httpx.AsyncClient", self.mock_client),
+            patch("httpx.get", return_value=self.mock_client.response),
         ):
             service = VOService(self.url)
             service.job_url = "mock_job_url"

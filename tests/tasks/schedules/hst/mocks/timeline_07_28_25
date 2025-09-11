@@ -1,0 +1,41 @@
+
+
+
+29-Jul-2025 22:51:44             ---   HST  Observing  Timeline  Report  for  SMS:   252097D1   ---                           Page 1
+                 SMS Start: 2025.209:00:00:00 (28-JUL-2025 00:00:00), End: 2025.216:00:00:00 (04-AUG-2025 00:00:00)
+
+
+
+
+         Observation  Set            Principal                                        Science                      Spectral     Exposure
+         Begin UT End  UT   SU Id    Investigat Exp #  Target                         Instrume Mode   Apertures    Elements     Time(sec) OB AL EX O#
+-------- -------- --------  -------  ---------- ------ ----------                     -------- ------ ------------ ------------ --------- -- -- -- --
+2025.209 01:07:54 02:03:30  1791807  Loriga     07-001 FSR2007-0584                   WFC3/IR  MULTIA IR-FIX       F110W           44.11  07 01 01
+2025.209 01:08:54 02:04:30  1791900  Loriga     07-002 FSR2007-0584                   WFC3/IR  MULTIA IR-FIX       F160W           41.17  07 01 02
+
+
+
+29-Jul-2025 22:51:45             ---   HST  Observing  Timeline  Report  for  SMS:   252097D1   ---                           Page 2
+                 SMS Start: 2025.209:00:00:00 (28-JUL-2025 00:00:00), End: 2025.216:00:00:00 (04-AUG-2025 00:00:00)
+
+
+
+
+         Observation  Set            Principal                                        Science                      Spectral     Exposure
+         Begin UT End  UT   SU Id    Investigat Exp #  Target                         Instrume Mode   Apertures    Elements     Time(sec) OB AL EX O#
+-------- -------- --------  -------  ---------- ------ ----------                     -------- ------ ------------ ------------ --------- -- -- -- --
+2025.209 01:10:54 02:06:30  1791910  Loriga     07-003 FSR2007-0584                   WFC3/IR  MULTIA IR-FIX       F110W           44.11  07 03 01
+                                                                                                                   F435W
+
+
+
+
+29-Jul-2025 22:51:48                         ---  HST  Observing  Timeline  Report  ---                                       Page 1
+                                              Proposal  Titles    for  SMS:   252097D1
+
+
+
+     Prop  Prog    Principal
+     Id    Id      Investigator       Proposal Title
+     ----- ----    ---------------    ----------------------------------------------------------------------
+     17918 FJW     Loriga             Unveiling the unseen: a HST first (and only) view of extremely obscured Gal

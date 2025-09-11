@@ -4,182 +4,227 @@ import pytest
 from astropy.table import Table  # type: ignore[import-untyped]
 
 from across_data_ingestion.tasks.schedules.chandra.high_fidelity_planned import (
-    entrypoint,
-    get_instrument_info_from_observation,
+    get_observation_data_from_tap,
     ingest,
+    match_instrument_from_tap_observation,
 )
-
-from .mocks.chandra_high_fidelity_planned_mock_schedule_output import (
-    chandra_planned_schedule,
-)
+from across_data_ingestion.util.across_server import sdk
 
 
 class TestChandraHighFidelityPlannedScheduleIngestionTask:
     @pytest.mark.asyncio
-    async def test_should_generate_across_schedule(
+    async def test_should_call_get_telescopes_with_sdk(
         self,
-        mock_telescope_get: AsyncMock,
-        mock_schedule_post: AsyncMock,
-        mock_query_vo_service: AsyncMock,
+        mock_telescope_api: AsyncMock,
     ):
-        """Should generate ACROSS schedules"""
+        """Should get telescopes from ACROSS"""
         await ingest()
-        mock_schedule_post.assert_called_once_with(chandra_planned_schedule)
+        mock_telescope_api.get_telescopes.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_should_log_when_query_returns_no_response(
+    async def test_should_create_schedule_in_across(
         self,
-        mock_telescope_get: AsyncMock,
-        mock_schedule_post: AsyncMock,
-        mock_query_vo_service: AsyncMock,
-        mock_logger: MagicMock,
+        mock_schedule_api: AsyncMock,
     ):
-        mock_query_vo_service.return_value = None
-        """Should log when querying VO service returns None"""
+        """Should create ACROSS schedules"""
         await ingest()
-        assert "No observations" in mock_logger.info.call_args.args[0]
-
-    @pytest.mark.asyncio
-    async def test_should_log_warning_when_exposure_query_returns_no_response(
-        self,
-        mock_telescope_get: AsyncMock,
-        mock_schedule_post: AsyncMock,
-        mock_query_vo_service: AsyncMock,
-        mock_logger: MagicMock,
-        mock_observation_table: Table,
-    ):
-        """Should log a warning when querying VO service for exposure times returns None"""
-        mock_query_vo_service.side_effect = [mock_observation_table, None]
-        await ingest()
-        assert "No exposure time" in mock_logger.warn.call_args.args[0]
-
-    @pytest.mark.asyncio
-    async def test_should_log_warning_when_unable_to_parse_instrument(
-        mock_observation_table: Table,
-        mock_telescope_get: AsyncMock,
-        mock_schedule_post: AsyncMock,
-        mock_query_vo_service: AsyncMock,
-        mock_get_instrument_info_from_obs: AsyncMock,
-        mock_logger: MagicMock,
-    ):
-        """Should log warning when unable to parse instrument from observation"""
-        mock_get_instrument_info_from_obs.return_value = ("", "")
-        await ingest()
-        assert "Cannot parse observations" in mock_logger.warn.call_args.args[0]
-
-    @pytest.mark.asyncio
-    async def test_should_log_info_when_success(
-        self,
-        mock_telescope_get: AsyncMock,
-        mock_schedule_post: AsyncMock,
-        mock_query_vo_service: AsyncMock,
-        mock_logger: MagicMock,
-    ):
-        """Should log info with ran at when success"""
-        await entrypoint()
-        assert "ingestion completed" in mock_logger.info.call_args.args[0]
-
-    @pytest.mark.asyncio
-    async def test_should_log_error_when_schedule_ingestion_fails(
-        self,
-        mock_logger: MagicMock,
-        mock_ingest: AsyncMock,
-    ):
-        """Should log an error when schedule ingestion fails"""
-        mock_ingest.side_effect = Exception()
-        await entrypoint()
-        assert "encountered an error" in mock_logger.error.call_args.args[0]
+        mock_schedule_api.create_schedule.assert_called_once()
 
     @pytest.mark.parametrize(
-        "mock_tap_row, expected_instrument_info",
+        "mock_tap_row, expected_instrument_short_name",
         [
             (
                 {"instrument": "ACIS", "grating": "NONE", "exposure_mode": "NONE"},
-                (
-                    "ACIS",
-                    "acis-mock-id",
-                ),
+                "ACIS",
             ),
             (
                 {"instrument": "ACIS", "grating": "HETG", "exposure_mode": "NONE"},
-                (
-                    "ACIS-HETG",
-                    "acis-hetg-mock-id",
-                ),
+                "ACIS-HETG",
             ),
             (
                 {"instrument": "ACIS", "grating": "LETG", "exposure_mode": "NONE"},
-                (
-                    "ACIS-LETG",
-                    "acis-letg-mock-id",
-                ),
+                "ACIS-LETG",
             ),
             (
                 {"instrument": "ACIS", "grating": "NONE", "exposure_mode": "CC"},
-                (
-                    "ACIS-CC",
-                    "acis-cc-mock-id",
-                ),
+                "ACIS-CC",
             ),
             (
                 {"instrument": "HRC", "grating": "NONE", "exposure_mode": ""},
-                (
-                    "HRC",
-                    "hrc-mock-id",
-                ),
+                "HRC",
             ),
             (
                 {"instrument": "HRC", "grating": "HETG", "exposure_mode": ""},
-                (
-                    "HRC-HETG",
-                    "hrc-hetg-mock-id",
-                ),
+                "HRC-HETG",
             ),
             (
                 {"instrument": "HRC", "grating": "LETG", "exposure_mode": ""},
-                (
-                    "HRC-LETG",
-                    "hrc-letg-mock-id",
-                ),
+                "HRC-LETG",
             ),
             (
                 {"instrument": "HRC", "grating": "NONE", "exposure_mode": "TIMING"},
-                (
-                    "HRC-Timing",
-                    "hrc-timing-mock-id",
-                ),
+                "HRC-Timing",
             ),
             (
-                {"instrument": "ACIS", "grating": "BADGRATING", "exposure_mode": ""},
-                (
-                    "",
-                    "",
-                ),
+                {"instrument": "ACIS", "grating": "BAD_GRATING", "exposure_mode": ""},
+                None,
             ),
             (
-                {"instrument": "HRC", "grating": "BADGRATING", "exposure_mode": ""},
-                (
-                    "",
-                    "",
-                ),
+                {"instrument": "HRC", "grating": "BAD_GRATING", "exposure_mode": ""},
+                None,
             ),
             (
-                {"instrument": "BADINSTRUMENT", "grating": "", "exposure_mode": ""},
-                (
-                    "",
-                    "",
-                ),
+                {"instrument": "BAD_INSTRUMENT", "grating": "", "exposure_mode": ""},
+                None,
             ),
         ],
     )
-    def test_get_instrument_info_from_observation(
+    def test_should_match_instrument_from_tap_observation(
         self,
         mock_tap_row: dict,
-        expected_instrument_info: tuple,
-        mock_instrument_info: list,
+        expected_instrument_short_name: tuple,
+        fake_instruments_by_short_name: dict[str, sdk.IDNameSchema],
     ) -> None:
         """Should return correct instrument name and id from observation row"""
-        assert (
-            get_instrument_info_from_observation(mock_instrument_info, mock_tap_row)
-            == expected_instrument_info
+        instrument = match_instrument_from_tap_observation(
+            fake_instruments_by_short_name, mock_tap_row
         )
+
+        assert instrument.short_name == expected_instrument_short_name
+
+    class TestGetObservationsFromTap:
+        @pytest.mark.asyncio
+        async def test_should_initialize_vo_service(
+            self, mock_vo_service_cls: AsyncMock
+        ):
+            await get_observation_data_from_tap()
+
+            mock_vo_service_cls.assert_called_once()
+
+        @pytest.mark.asyncio
+        async def test_should_use_within_context_manager(
+            self, mock_vo_service: AsyncMock
+        ):
+            await get_observation_data_from_tap()
+
+            mock_vo_service.__aenter__.assert_called_once()
+
+        @pytest.mark.asyncio
+        @pytest.mark.parametrize(
+            ["expected_table", "call_idx"],
+            [("cxc.observation", 0), ("ivoa.obsplan", 1)],
+        )
+        async def test_should_query_tap_for_observations(
+            self, mock_vo_service_query: AsyncMock, expected_table: str, call_idx: int
+        ):
+            await get_observation_data_from_tap()
+
+            obs_call = mock_vo_service_query.call_args_list[call_idx]
+
+            assert expected_table in obs_call.args[0]
+
+        @pytest.mark.asyncio
+        @pytest.mark.parametrize(
+            ["expected_col"],
+            [
+                ("obs_id",),
+                ("target_name",),
+                ("t_plan_exptime",),
+                ("start_date",),
+                ("ra",),
+                ("dec",),
+                ("instrument",),
+                ("grating",),
+                ("exposure_mode",),
+            ],
+        )
+        async def test_should_return_joined_table_with_expected_cols(
+            self, expected_col: str
+        ):
+            table = await get_observation_data_from_tap()
+            assert expected_col in table.colnames
+
+        class TestWarnings:
+            @pytest.mark.parametrize(
+                (
+                    "expected_warning",
+                    "fake_observation_table",
+                    "fake_exposure_times_table",
+                ),
+                [
+                    ("No observations", None, None),
+                    ("No exposure times", "fake_observation_table", None),
+                ],
+                indirect=[
+                    "fake_observation_table",
+                    "fake_exposure_times_table",
+                ],
+            )
+            @pytest.mark.asyncio
+            async def test_should_log_warning_when_no_exposure_times(
+                self,
+                mock_vo_service_query: AsyncMock,
+                mock_logger: MagicMock,
+                expected_warning: str,
+                fake_observation_table: Table | None,
+                fake_exposure_times_table: Table | None,
+            ):
+                # only observation table is returned
+                mock_vo_service_query.side_effect = [
+                    fake_observation_table,
+                    fake_exposure_times_table,
+                ]
+
+                await get_observation_data_from_tap()
+
+                call = mock_logger.warning.call_args_list[0]
+
+                assert expected_warning in call.args[0]
+
+            @pytest.mark.parametrize(
+                ("fake_observation_table", "fake_exposure_times_table"),
+                [
+                    (None, None),
+                    ("fake_observation_table", None),
+                ],
+                indirect=True,
+            )
+            @pytest.mark.asyncio
+            async def test_should_return_empty_table_when_no_observations(
+                self,
+                fake_observation_table: Table | None,
+                fake_exposure_times_table: Table | None,
+                mock_vo_service_query: AsyncMock,
+            ):
+                # need to reset both to return nothing
+                mock_vo_service_query.side_effect = [
+                    fake_observation_table,
+                    fake_exposure_times_table,
+                ]
+                mock_vo_service_query.return_value = None
+
+                table = await get_observation_data_from_tap()
+
+                assert len(table) == 0
+
+            @pytest.mark.asyncio
+            async def test_should_log_warning_when_observations_do_not_match_len_of_exposures(
+                self,
+                fake_observation_data: dict,
+                fake_exposure_times_table: dict,
+                mock_vo_service_query: AsyncMock,
+                mock_logger: MagicMock,
+            ):
+                fake_observation_data2 = dict.copy(fake_observation_data)
+                fake_observation_data2["obsid"] = 1
+
+                mock_vo_service_query.side_effect = [
+                    Table([fake_observation_data, fake_observation_data2]),
+                    fake_exposure_times_table,
+                ]
+
+                await get_observation_data_from_tap()
+
+                call = mock_logger.warning.call_args_list[0]
+
+                assert "Mismatched number" in call.args[0]
