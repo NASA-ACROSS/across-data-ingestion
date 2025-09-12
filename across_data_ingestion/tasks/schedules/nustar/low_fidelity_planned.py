@@ -25,13 +25,20 @@ NUSTAR_BANDPASS = sdk.EnergyBandpass.model_validate(
 
 def read_planned_schedule_table() -> pd.DataFrame:
     """Read the planned schedule table as a pandas DataFrame"""
-    dfs: list[pd.DataFrame] = pd.read_html(
-        PLANNED_SCHEDULE_TABLE_URL, flavor="bs4", header=0
-    )
+    try:
+        dfs: list[pd.DataFrame] = pd.read_html(
+            PLANNED_SCHEDULE_TABLE_URL, flavor="bs4", header=0
+        )
+    except ValueError as err:
+        logger.warning(
+            "Could not find planned schedule table.",
+            err=err,
+        )
+        return pd.DataFrame([])
     if len(dfs) > 0:
         schedule_df = dfs[0]
         return schedule_df
-    logger.warn("Could not read planned schedule table")
+    logger.warning("Could not read planned schedule table")
     return pd.DataFrame([])
 
 
