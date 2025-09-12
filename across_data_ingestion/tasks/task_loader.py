@@ -43,7 +43,7 @@ async def init_tasks():
     create_task(check_server())
     await TESS_low_fidelity_schedule_ingestion_task()
     await fermi_planned_schedule_ingestion_task()
-    await nustar_low_fidelity_schedule_ingestion_task()
+    create_task(nustar_low_fidelity_schedule_ingestion_task())
     await nicer_low_fidelity_schedule_ingestion_task()
     await ixpe_low_fidelity_schedule_ingestion_task()
     create_task(nustar_as_flown_schedule_ingestion_task())
