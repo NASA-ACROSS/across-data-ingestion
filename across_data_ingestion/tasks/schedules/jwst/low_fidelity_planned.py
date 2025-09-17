@@ -10,8 +10,7 @@ from bs4 import BeautifulSoup  # type: ignore[import-untyped]
 from fastapi_utils.tasks import repeat_every
 
 from ....core.constants import SECONDS_IN_A_WEEK
-from ....util import across_api
-from ..types import AcrossObservation, AcrossSchedule
+from ....util.across_server import client, sdk
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
@@ -128,7 +127,8 @@ def get_most_recent_jwst_planned_url() -> str:
 def read_mast_observations(mast_proposal_ids: list[str]) -> pd.DataFrame:
     """Fetches JWST planned observations from MAST based on proposal IDs."""
     jwst_planned_obs: ATable = astroquery.mast.Observations.query_criteria(
-        obs_collection=["JWST"], proposal_id=mast_proposal_ids, calib_level=["-1"]
+        obs_collection=["JWST"],
+        proposal_id=mast_proposal_ids,  # , calib_level=["-1"]
     )
 
     columns = [
@@ -272,66 +272,65 @@ def query_jwst_planned_execution_schedule(
 def jwst_to_across_schedule(
     telescope_id: str,
     data: pd.DataFrame,
-    status: str,
-    fidelity: str,
-) -> AcrossSchedule | dict:
+    status: sdk.ScheduleStatus,
+    fidelity: sdk.ScheduleFidelity,
+) -> sdk.ScheduleCreate:
     """
     Creates a JWST schedule from the provided data.
     """
 
-    begin = Time(min(data["SCHEDULED_START_TIME"])).isot
-    end = Time(max(data["SCHEDULED_END_TIME"])).isot
+    begin_atime = Time(min(data["SCHEDULED_START_TIME"]))
+    end_atime = Time(max(data["SCHEDULED_END_TIME"]))
 
-    return {
-        "telescope_id": telescope_id,
-        "name": f"jwst_low_fidelity_planned_{begin.split('T')[0]}_{end.split('T')[0]}",
-        "date_range": {
-            "begin": begin,
-            "end": end,
-        },
-        "status": status,
-        "fidelity": fidelity,
-    }
+    return sdk.ScheduleCreate(
+        telescope_id=telescope_id,
+        name=f"jwst_low_fidelity_planned_{begin_atime.isot.split('T')[0]}_{end_atime.isot.split('T')[0]}",
+        date_range=sdk.DateRange(
+            begin=begin_atime.to_datetime(), end=end_atime.to_datetime()
+        ),
+        status=status,
+        fidelity=fidelity,
+        observations=[],
+    )
 
 
-def jwst_to_across_observation(row: dict) -> AcrossObservation | dict:
+def jwst_to_across_observation(row: dict) -> sdk.ObservationCreate:
     """
     Creates a JWST observation from the provided row of data.
     Calculates the exposure time from the End - Start
     Sets the external_id a custom value based off of the P S and Pnum values
     """
-    obs_start_at = Time(row["SCHEDULED_START_TIME"]).isot
-    obs_end_at = Time(row["SCHEDULED_END_TIME"]).isot
+    obs_start_at = Time(row["SCHEDULED_START_TIME"]).to_datetime()
+    obs_end_at = Time(row["SCHEDULED_END_TIME"]).to_datetime()
 
-    bandpass = {
-        "min": row["EM_MIN"],
-        "max": row["EM_MAX"],
-        "unit": "nm",
-        "filter_name": row["FILTERS"] if pd.notna(row["FILTERS"]) else "unknown_filter",
-    }
+    bandpass = sdk.WavelengthBandpass.model_validate(
+        {
+            "min": row["EM_MIN"],
+            "max": row["EM_MAX"],
+            "unit": "nm",
+            "filter_name": row["FILTERS"]
+            if pd.notna(row["FILTERS"])
+            else "unknown_filter",
+        }
+    )
 
-    return {
-        "instrument_id": row["INSTRUMENT_ID"],
-        "object_name": f"{row["TARGET_NAME"]}",
-        "pointing_position": {
-            "ra": f"{round(row["RA"], 8)}",
-            "dec": f"{round(row["DEC"], 8)}",
-        },
-        "object_position": {
-            "ra": f"{round(row["RA"], 8)}",
-            "dec": f"{round(row["DEC"], 8)}",
-        },
-        "date_range": {
-            "begin": obs_start_at,
-            "end": obs_end_at,
-        },
-        "external_observation_id": row["VISIT_ID"],
-        "type": row["OBSERVATION_TYPE"],
-        "status": "planned",
-        "exposure_time": row["DURATION"],
-        "bandpass": bandpass,
-        "pointing_angle": 0.0,  # No Value for position angle -_-
-    }
+    return sdk.ObservationCreate(
+        instrument_id=row["INSTRUMENT_ID"],
+        object_name=row["TARGET_NAME"],
+        pointing_position=sdk.Coordinate(
+            ra=round(row["RA"], 8), dec=round(row["DEC"], 8)
+        ),
+        object_position=sdk.Coordinate(
+            ra=round(row["RA"], 8), dec=round(row["DEC"], 8)
+        ),
+        date_range=sdk.DateRange(begin=obs_start_at, end=obs_end_at),
+        external_observation_id=row["VISIT_ID"],
+        type=row["OBSERVATION_TYPE"],
+        status=sdk.ObservationStatus.PLANNED,
+        exposure_time=row["DURATION"],
+        bandpass=sdk.Bandpass(bandpass),
+        pointing_angle=0.0,
+    )
 
 
 def ingest() -> None:
@@ -339,11 +338,16 @@ def ingest() -> None:
     Fetches the JWST schedule from the specified URL and returns the parsed data.
     """
     # GET Telescope by name
-    jwst_telescope_information = across_api.telescope.get({"name": "jwst"})[0]
-    telescope_id = jwst_telescope_information["id"]
+    (jwst_telescope_information,) = sdk.TelescopeApi(client).get_telescopes(name="jwst")
+    telescope_id = jwst_telescope_information.id
     instruments_info = {}
-    for inst in jwst_telescope_information["instruments"]:
-        instruments_info[inst["short_name"]] = inst["id"]
+    jwst_instruments = (
+        jwst_telescope_information.instruments
+        if jwst_telescope_information.instruments
+        else []
+    )
+    for inst in jwst_instruments:
+        instruments_info[inst.short_name] = inst.id
 
     # Query the JWST planned execution schedule
     latest_jwst_plan = query_jwst_planned_execution_schedule(instruments_info)
@@ -353,22 +357,28 @@ def ingest() -> None:
         return
 
     # Initialize schedule
-    schedule = jwst_to_across_schedule(
+    jwst_schedule = jwst_to_across_schedule(
         telescope_id=telescope_id,
         data=latest_jwst_plan,
-        status="planned",
-        fidelity="low",
+        status=sdk.ScheduleStatus.PLANNED,
+        fidelity=sdk.ScheduleFidelity.LOW,
     )
 
     # Transform dataframe to list of dictionaries
     schedule_observations = latest_jwst_plan.to_dict(orient="records")
 
     # Transform observations
-    schedule["observations"] = [
+    jwst_schedule.observations = [
         jwst_to_across_observation(row) for row in schedule_observations
     ]
 
-    across_api.schedule.post(dict(schedule))
+    try:
+        sdk.ScheduleApi(client).create_schedule(jwst_schedule)
+    except sdk.ApiException as err:
+        if err.status == 409:
+            logger.warning("A schedule already exists", extra=err.__dict__)
+        else:
+            raise err
 
 
 @repeat_every(seconds=SECONDS_IN_A_WEEK)  # Weekly
