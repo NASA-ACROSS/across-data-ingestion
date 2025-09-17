@@ -4,13 +4,14 @@ import httpx
 
 from ....core.config import config  # type: ignore[import-untyped]
 from ....core.exceptions import AcrossHTTPException  # type: ignore[import-untyped]
+from ....tasks.schedules.types import AcrossSchedule
 
 logger = logging.getLogger("uvicorn.error")
 
 SCHEDULE_URL: str = f"{config.across_server_url()}/schedule/"
 
 
-def post(data: dict = {}) -> None:
+def post(data: dict | AcrossSchedule = {}) -> None:
     """
     Method to utilize the ACROSS web api to post a schedule
 
@@ -28,7 +29,7 @@ def post(data: dict = {}) -> None:
 
     headers = {
         "accept": "application/json",
-        "Authorization": f"Bearer {config.ACROSS_INGESTION_SERVICE_ACCOUNT_KEY}",
+        "Authorization": f"Bearer {config.ACROSS_SERVER_SECRET}",
         "Content-Type": "application/json",
     }
 

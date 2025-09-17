@@ -1,0 +1,24 @@
+Column     Meaning
+------------------------------------------------------------------------
+targname - Name of the target, truncated to 16 characters.
+ra, dec  - RA and Dec of target (J2000).
+config   - Instrument configuration.
+mode     - Instrument operating mode.
+aper     - Apertures used.
+spec     - Spectral elements used.
+wave     - "Central" wavelength of the observation, angstroms.
+time     - Length of exposure (in seconds).
+prop     - Proposal ID.
+cy       - The proposal cycle for the observation
+dataset  - Contains the dataset name for completed observations,
+           or PLANNED if the observation has not yet executed.
+release  - Date on which observation becomes public, or conflict type
+           (GTO-RES indicates observations reserved by GTOs;
+            --- indicates normal observations from Cycle 6-7.)
+
+
+
+targname         ra           dec          config    mode        aper         spec            wave  time  prop  cy dataset   release
+---------------- ------------ ------------ --------- ----------- ------------ --------------- ----- ----- ----- -- --------- --------a
+FSR2007-0584     02 27 15.00   +61 37 28.0 WFC3/IR   MULTIACCUM  IR-FIX       F110W               0    -1 17918 32 PLANNED        ---
+FSR2007-0584     02 27 15.00   +61 37 28.0 WFC3/IR   MULTIACCUM  IR-FIX       F160W               0    -1 17918 32 PLANNED        ---

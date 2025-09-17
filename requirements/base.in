@@ -1,5 +1,7 @@
 # Core dependencies
 
+across-tools @ git+ssh://git@github.com/ACROSS-Team/across-tools.git@main
+across-server-openapi-python @ git+ssh://git@github.com/ACROSS-Team/across-server-openapi-python.git@main
 alembic >=1.13.2,<2
 asyncer >=0.0.8,<0.0.9
 astropy >=7.0.0
@@ -27,4 +29,6 @@ pytest-asyncio >=0.25.1
 pandas >=2.2.3
 pandas-stubs >= 2.2.3.241126
 structlog >= 25.1.0
-across-tools @ git+ssh://git@github.com/ACROSS-Team/across-tools.git@main
+beautifulsoup4 >=4.12.2
+fastapi-utilities >= 0.3.1
+swifttools >= 3.0.23

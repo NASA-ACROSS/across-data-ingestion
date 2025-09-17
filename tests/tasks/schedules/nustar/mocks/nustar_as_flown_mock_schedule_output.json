@@ -16,6 +16,10 @@
                     "ra": "263.0411",
                     "dec": "-24.7155"
                 },
+                "object_position": {
+                    "ra": "263.0411",
+                    "dec": "-24.7155"
+                },
                 "date_range": {
                     "begin": "2025-05-04T20:46:10.560",
                     "end": "2025-05-05T07:41:05.280"
@@ -37,6 +41,10 @@
                 "instrument_id": "nustar_instrument_uuid",
                 "object_name": "SGR_1935p2154",
                 "pointing_position": {
+                    "ra": "293.7577",
+                    "dec": "21.9405"
+                },
+                "object_position": {
                     "ra": "293.7577",
                     "dec": "21.9405"
                 },
@@ -64,6 +72,10 @@
                     "ra": "293.7578",
                     "dec": "21.9408"
                 },
+                "object_position": {
+                    "ra": "293.7578",
+                    "dec": "21.9408"
+                },
                 "date_range": {
                     "begin": "2025-05-05T07:41:05.280",
                     "end": "2025-05-05T08:11:11.040"
@@ -85,6 +97,10 @@
                 "instrument_id": "nustar_instrument_uuid",
                 "object_name": "RBS707",
                 "pointing_position": {
+                    "ra": "128.0422",
+                    "dec": "37.0936"
+                },
+                "object_position": {
                     "ra": "128.0422",
                     "dec": "37.0936"
                 },
