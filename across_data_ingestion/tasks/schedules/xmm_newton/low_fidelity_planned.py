@@ -4,10 +4,11 @@ import astropy.units as u  # type: ignore[import-untyped]
 import pandas as pd
 import structlog
 from astropy.coordinates import SkyCoord  # type: ignore[import-untyped]
-from fastapi_utils.tasks import repeat_every
+from fastapi_utilities import repeat_at  # type: ignore
 
-from ....core.constants import SECONDS_IN_A_DAY
 from ....util.across_server import client, sdk
+
+pd.options.mode.chained_assignment = None  # Disable pandas chained assignment warning
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
@@ -117,16 +118,17 @@ def read_planned_schedule_table() -> pd.DataFrame:
     dfs: list[pd.DataFrame] = pd.read_html(
         PLANNED_SCHEDULE_TABLE_URL, flavor="bs4", header=0
     )
-    if len(dfs) > 0:
-        schedule_df = dfs[0]
-        # Filter by future observations
-        planned_schedule_df = schedule_df[
-            schedule_df["UTC Obs Start yyyy-mm-dd hh:mm:ss"]
-            > datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        ]
-        return planned_schedule_df
-    logger.warn("Could not read planned schedule table")
-    return pd.DataFrame([])
+    if len(dfs) == 0:
+        logger.warn("Could not read planned schedule table")
+        return pd.DataFrame([])
+
+    schedule_df = dfs[0]
+    # Filter by future observations
+    planned_schedule_df = schedule_df[
+        schedule_df["UTC Obs Start yyyy-mm-dd hh:mm:ss"]
+        > datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    ]
+    return planned_schedule_df
 
 
 def read_revolution_timeline_file(revolution_id: int) -> pd.DataFrame:
@@ -134,11 +136,14 @@ def read_revolution_timeline_file(revolution_id: int) -> pd.DataFrame:
     dfs: list[pd.DataFrame] = pd.read_html(
         REVOLUTION_FILE_BASE_URL + f"{revolution_id}_nice.html", flavor="bs4", header=0
     )
-    if len(dfs) > 1:
-        # The second HTML table on that page is the timeline data, so return it
-        return dfs[1]
-    logger.warn("Could not read revolution timeline file", revolution_id=revolution_id)
-    return pd.DataFrame([])
+    if len(dfs) == 0:
+        logger.warn(
+            "Could not read revolution timeline file", revolution_id=revolution_id
+        )
+        return pd.DataFrame([])
+
+    # The second HTML table on that page is the timeline data, so return it
+    return dfs[1]
 
 
 def extract_om_exposures_from_timeline_data(timeline_df: pd.DataFrame) -> dict:
@@ -266,6 +271,73 @@ def transform_to_across_observation(
     )
 
 
+def create_mos_observations(
+    observations_df: pd.DataFrame, instrument_id_dict: dict
+) -> list[sdk.ObservationCreate]:
+    observations_df["max_mos_exposure"] = observations_df.apply(
+        lambda row: max(
+            # "()" exposures signify closed filter, for our case we can ignore
+            float(str(row["MOS1 Dur. Ks"]).replace("( ", "").replace(")", "")),
+            float(str(row["MOS2 Dur. Ks"]).replace("( ", "").replace(")", "")),
+        )
+        * 1000.0,
+        axis=1,
+    )
+
+    return [
+        transform_to_across_observation(
+            row,
+            row["UTC Obs Start yyyy-mm-dd hh:mm:ss"],
+            row["max_mos_exposure"],
+            instrument_id_dict["EPIC-MOS"],
+            sdk.ObservationType.IMAGING,
+            sdk.Bandpass(XMM_BANDPASSES["EPIC"]),
+        )
+        for _, row in observations_df.iterrows()
+    ]
+
+
+def create_rgs_observations(
+    observations_df: pd.DataFrame, instrument_id_dict: dict
+) -> list[sdk.ObservationCreate]:
+    observations_df["max_rgs_exposure"] = observations_df.apply(
+        lambda row: max(
+            float(row["RGS1 Dur. Ks"]),
+            float(row["RGS2 Dur. Ks"]),
+        )
+        * 1000.0,
+        axis=1,
+    )
+
+    return [
+        transform_to_across_observation(
+            row,
+            row["UTC Obs Start yyyy-mm-dd hh:mm:ss"],
+            row["max_rgs_exposure"],
+            instrument_id_dict["RGS"],
+            sdk.ObservationType.SPECTROSCOPY,
+            sdk.Bandpass(XMM_BANDPASSES["RGS"]),
+        )
+        for _, row in observations_df.iterrows()
+    ]
+
+
+def create_pn_observations(
+    observations_df: pd.DataFrame, instrument_id_dict: dict
+) -> list[sdk.ObservationCreate]:
+    return [
+        transform_to_across_observation(
+            row,
+            row["UTC Obs Start yyyy-mm-dd hh:mm:ss"],
+            float(str(row["PN Dur Ks"]).replace("( ", "").replace(")", "")) * 1000.0,
+            instrument_id_dict["EPIC-PN"],
+            sdk.ObservationType.IMAGING,
+            sdk.Bandpass(XMM_BANDPASSES["EPIC"]),
+        )
+        for _, row in observations_df.iterrows()
+    ]
+
+
 def ingest() -> None:
     """
     Ingests low fidelity planned XMM-Newton schedules.
@@ -310,76 +382,40 @@ def ingest() -> None:
             raw_planned_schedule_data["Revn #"] == rev_id
         ]
 
-        # Iterate over each observation row in the current dataframe
-        for i, row in current_revolution_observations_df.iterrows():
-            # Get the maximum exposure time between the two MOS instruments
-            mos_exposure_time = (
-                max(
-                    # "()" exposures signify closed filter, for our case we can ignore
-                    float(row["MOS1 Dur. Ks"].replace("( ", "").replace(")", "")),
-                    float(row["MOS2 Dur. Ks"].replace("( ", "").replace(")", "")),
-                )
-                * 1000.0
-            )  # exposure time is in ks, so convert to s
+        # Create observations for each instrument
+        across_mos_observations = create_mos_observations(
+            current_revolution_observations_df, instrument_id_dict
+        )
+        across_schedule.observations.extend(across_mos_observations)
 
-            # Get the maximum exposure time between the two RGS instruments
-            rgs_exposure_time = (
-                max(
-                    float(row["RGS1 Dur. Ks"]),
-                    float(row["RGS2 Dur. Ks"]),
-                )
-                * 1000.0
-            )  # exposure time is in ks, so convert to s
+        across_rgs_observations = create_rgs_observations(
+            current_revolution_observations_df, instrument_id_dict
+        )
+        across_schedule.observations.extend(across_rgs_observations)
 
-            # Create ACROSS observations for instruments besides OM
-            mos_across_observation = transform_to_across_observation(
-                row,
-                row["UTC Obs Start yyyy-mm-dd hh:mm:ss"],
-                mos_exposure_time,
-                instrument_id_dict["EPIC-MOS"],
-                sdk.ObservationType.IMAGING,
-                sdk.Bandpass(XMM_BANDPASSES["EPIC"]),
+        across_pn_observations = create_pn_observations(
+            current_revolution_observations_df, instrument_id_dict
+        )
+        across_schedule.observations.extend(across_pn_observations)
+
+        if len(revolution_timeline_df):
+            # Get OM exposure info from the revolution timeline df
+            om_exposures = extract_om_exposures_from_timeline_data(
+                revolution_timeline_df
             )
-            across_schedule.observations.append(mos_across_observation)
-
-            pn_across_observation = transform_to_across_observation(
-                row,
-                row["UTC Obs Start yyyy-mm-dd hh:mm:ss"],
-                float(row["PN Dur Ks"].replace("( ", "").replace(")", "")) * 1000.0,
-                instrument_id_dict["EPIC-PN"],
-                sdk.ObservationType.IMAGING,
-                sdk.Bandpass(XMM_BANDPASSES["EPIC"]),
-            )
-            across_schedule.observations.append(pn_across_observation)
-
-            rgs_across_observation = transform_to_across_observation(
-                row,
-                row["UTC Obs Start yyyy-mm-dd hh:mm:ss"],
-                rgs_exposure_time,
-                instrument_id_dict["RGS"],
-                sdk.ObservationType.SPECTROSCOPY,
-                sdk.Bandpass(XMM_BANDPASSES["RGS"]),
-            )
-            across_schedule.observations.append(rgs_across_observation)
-
-            # Create ACROSS observations for OM
-            if len(revolution_timeline_df):
-                # Get OM exposure info from the revolution timeline df
-                om_exposures = extract_om_exposures_from_timeline_data(
-                    revolution_timeline_df
+            across_om_observations = [
+                transform_to_across_observation(
+                    row,
+                    exposure["start_time"],
+                    exposure["exposure_time"],
+                    instrument_id_dict["OM"],
+                    sdk.ObservationType.IMAGING,
+                    sdk.Bandpass(XMM_BANDPASSES[exposure["filter"]]),
                 )
-                # Retrieve exposure info from exposures dict by matching on Obs ID
-                om_exposures_for_obs_id = om_exposures["0" + str(row["Obs Id."])]
-                for exposure in om_exposures_for_obs_id:
-                    om_across_observation = transform_to_across_observation(
-                        row,
-                        exposure["start_time"],
-                        exposure["exposure_time"],
-                        instrument_id_dict["OM"],
-                        sdk.ObservationType.IMAGING,
-                        sdk.Bandpass(XMM_BANDPASSES[exposure["filter"]]),
-                    )
-                    across_schedule.observations.append(om_across_observation)
+                for _, row in current_revolution_observations_df.iterrows()
+                for exposure in om_exposures["0" + str(row["Obs Id."])]
+            ]
+            across_schedule.observations.extend(across_om_observations)
 
     try:
         sdk.ScheduleApi(client).create_schedule(across_schedule)
@@ -390,9 +426,8 @@ def ingest() -> None:
             raise err
 
 
-# Updated approximately every 8 hrs, for future cron scheduling
-@repeat_every(seconds=SECONDS_IN_A_DAY)  # For testing purposes, run once daily
-def entrypoint() -> None:
+@repeat_at(cron="0 1,9,17 * * *", logger=logger)
+async def entrypoint() -> None:
     try:
         ingest()
         logger.info("XMM-Newton schedule ingestion ran successfully")

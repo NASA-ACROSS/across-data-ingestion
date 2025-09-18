@@ -29,7 +29,7 @@ from .schedules.tess.low_fidelity_planned import (
     entrypoint as TESS_low_fidelity_schedule_ingestion_task,
 )
 from .schedules.xmm_newton.low_fidelity_planned import (
-    entrypoint as XMM_Newton_log_fidelity_schedule_ingestion_task,
+    entrypoint as XMM_Newton_low_fidelity_schedule_ingestion_task,
 )
 from .tles.tle_ingestion import (
     entrypoint as tle_ingestion_task,
@@ -52,5 +52,5 @@ async def init_tasks():
     create_task(HST_low_fidelity_schedule_ingestion_task())
     create_task(tle_ingestion_task())
     create_task(chandra_high_fidelity_planned_schedule_ingestion_task())
-    await XMM_Newton_log_fidelity_schedule_ingestion_task()
+    create_task(XMM_Newton_low_fidelity_schedule_ingestion_task())
     create_task(swift_low_fidelity_schedule_ingestion_task())

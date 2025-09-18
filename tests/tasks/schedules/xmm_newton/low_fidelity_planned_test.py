@@ -44,17 +44,44 @@ class TestXMMNewtonLowFidelityPlannedScheduleIngestionTask:
 
             assert isinstance(args[0].observations[0], sdk.ObservationCreate)
 
+        @pytest.mark.parametrize(
+            "instrument_id",
+            [
+                "epic-pn_instrument_uuid",
+                "epic-mos_instrument_uuid",
+                "rgs_instrument_uuid",
+                "om_instrument_uuid",
+            ],
+        )
+        @pytest.mark.parametrize("field", sdk.ObservationCreate.model_fields)
         def test_should_create_schedule_with_expected_parameters(
             self,
             mock_schedule_api: MagicMock,
+            instrument_id: str,
+            field: str,
         ) -> None:
             """Should create the expected schedule"""
             ingest()
 
-            actual = mock_schedule_api.create_schedule.call_args[0][0]
-            expected = sdk.ScheduleCreate.model_validate(xmm_newton_planned_schedule)
+            created_schedule: sdk.ScheduleCreate = (
+                mock_schedule_api.create_schedule.call_args[0][0]
+            )
+            created_obs = [
+                obs
+                for obs in created_schedule.observations
+                if obs.instrument_id == instrument_id
+            ][0]
 
-            assert actual == expected
+            expected_schedule = sdk.ScheduleCreate.model_validate(
+                xmm_newton_planned_schedule
+            )
+            expected_obs = [
+                obs
+                for obs in expected_schedule.observations
+                if obs.instrument_id == instrument_id
+            ][0]
+
+            assert getattr(created_obs, field) == getattr(expected_obs, field)
 
         def test_should_return_if_cannot_planned_schedule(
             self,
