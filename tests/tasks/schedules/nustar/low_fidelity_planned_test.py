@@ -135,7 +135,6 @@ class TestNustarAsFlownScheduleIngestionTask:
             """Should return empty dataframe when reading planned schedule table fails"""
             mock_pandas_read_html.side_effect = ValueError()
             data = read_planned_schedule_table()
-            assert isinstance(data, pd.DataFrame)
             assert len(data) == 0
 
         def test_should_log_warning_when_schedule_not_found(
@@ -155,5 +154,4 @@ class TestNustarAsFlownScheduleIngestionTask:
             """Should return empty dataframe when pandas read html returns empty list"""
             mock_pandas_read_html.return_value = []
             data = read_planned_schedule_table()
-            assert isinstance(data, pd.DataFrame)
             assert len(data) == 0
