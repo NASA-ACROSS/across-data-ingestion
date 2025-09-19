@@ -3,6 +3,7 @@ from collections.abc import Generator
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
+import pandas as pd
 import pytest
 import structlog
 from astropy.io import ascii  # type: ignore[import-untyped]
@@ -26,6 +27,7 @@ def set_telescope(
 
 MOCK_FILE_BASE_PATH = os.path.join(os.path.dirname(__file__), "mocks/")
 MOCK_OBSERVATION_TABLE_NAME = "NUMASTER_mock_table.ascii"
+MOCK_PLANNED_SCHEDULE_TABLE_NAME = "nustar_mock_planned_schedule_table.csv"
 MOCK_SCHEDULE_OUTPUT_JSON = "nustar_as_flown_mock_schedule_output.json"
 
 
@@ -35,6 +37,16 @@ def mock_logger() -> Generator[MagicMock]:
     # must be patched because it is set at runtime when the file is imported.
     with patch(
         "across_data_ingestion.tasks.schedules.nustar.as_flown.logger",
+        MagicMock(spec=structlog.stdlib.BoundLogger),
+    ) as mock_logger:
+        yield mock_logger
+
+
+@pytest.fixture
+def mock_planned_logger() -> Generator[MagicMock]:
+    # must be patched because it is set at runtime when the file is imported.
+    with patch(
+        "across_data_ingestion.tasks.schedules.nustar.low_fidelity_planned.logger",
         MagicMock(spec=structlog.stdlib.BoundLogger),
     ) as mock_logger:
         yield mock_logger
@@ -54,10 +66,24 @@ def mock_heasarc_query_tap(
     return mock_heasarc_query_tap
 
 
+@pytest.fixture(autouse=True)
+def mock_pandas_read_html(
+    monkeypatch: pytest.MonkeyPatch, fake_planned_schedule_dataframe: pd.DataFrame
+) -> MagicMock:
+    mock_read_html = MagicMock(return_value=[fake_planned_schedule_dataframe])
+    monkeypatch.setattr(pd, "read_html", mock_read_html)
+    return mock_read_html
+
+
 ## FAKE DATA ##
 @pytest.fixture
 def fake_observation_table() -> Table:
     return Table(ascii.read(MOCK_FILE_BASE_PATH + MOCK_OBSERVATION_TABLE_NAME))
+
+
+@pytest.fixture
+def fake_planned_schedule_dataframe() -> pd.DataFrame:
+    return pd.read_csv(MOCK_FILE_BASE_PATH + MOCK_PLANNED_SCHEDULE_TABLE_NAME)
 
 
 @pytest.fixture
