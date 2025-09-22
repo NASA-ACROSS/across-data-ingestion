@@ -1,4 +1,4 @@
-science_execution_response_text = """<!DOCTYPE html>
+fake_science_execution_response_text = """<!DOCTYPE html>
 <main id="main-content" class=" "  >
 				<div class="background-img banner__interior "
 								 aria-labelledby="page-title"

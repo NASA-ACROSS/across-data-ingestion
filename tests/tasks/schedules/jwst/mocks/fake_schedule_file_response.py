@@ -1,4 +1,4 @@
-schedule_file_response: str = """Visit Information for OP Package 2521607f02
+fake_schedule_file_response: str = """Visit Information for OP Package 2521607f02
 
 VISIT ID       PCS MODE    VISIT TYPE                     SCHEDULED START TIME  DURATION     SCIENCE INSTRUMENT AND MODE                         TARGET NAME                      CATEGORY                        KEYWORDS
 -------------  ----------  -----------------------------  --------------------  -----------  --------------------------------------------------  -------------------------------  ------------------------------  --------------------------------

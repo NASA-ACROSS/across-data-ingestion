@@ -1,6 +1,6 @@
 import pandas as pd
 
-mock_mast_query_response = pd.DataFrame(
+fake_mast_query_response = pd.DataFrame(
     [
         {
             "instrument_name": "NIRISS/IMAGE",

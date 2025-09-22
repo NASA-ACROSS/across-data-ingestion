@@ -1,22 +1,19 @@
 import os
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock
 
+import httpx
 import pandas as pd
+import pytest  # type: ignore
 from astropy.io import ascii  # type: ignore
+from astroquery.mast import Observations  # type: ignore
 
-from across_data_ingestion.tasks.schedules.jwst.low_fidelity_planned import (
-    entrypoint,
-    get_most_recent_jwst_planned_url,
-    ingest,
-    query_jwst_planned_execution_schedule,
-    read_mast_observations,
-)
+import across_data_ingestion.tasks.schedules.jwst.low_fidelity_planned as task
 
-from .mocks.across_jwst_plan import across_jwst_plan
-from .mocks.mock_jwst_plan import mock_jwst_plan_query
-from .mocks.mock_mast_query_response import mock_mast_query_response
-from .mocks.mock_schedule_file_response import schedule_file_response
-from .mocks.mock_scienct_execution_page import science_execution_response_text
+from .mocks.fake_across_jwst_plan import fake_across_plan
+from .mocks.fake_jwst_plan import fake_jwst_plan
+from .mocks.fake_mast_query_response import fake_mast_query_response
+from .mocks.fake_schedule_file_response import fake_schedule_file_response
+from .mocks.fake_science_execution_page import fake_science_execution_response_text
 
 
 class mock_response:
@@ -30,94 +27,93 @@ class mock_response:
         pass
 
 
-def mock_telescope_get() -> list[dict]:
-    return [
-        {
-            "id": "jwst_telescope_id",
-            "instruments": [
-                {"short_name": "JWST_MIRI", "id": "miri_instrument_id"},
-                {"short_name": "JWST_NIRCAM", "id": "nircam_instrument_id"},
-                {"short_name": "JWST_NIRISS", "id": "niriss_instrument_id"},
-                {"short_name": "JWST_NIRSPEC", "id": "nirspec_instrument_id"},
-            ],
-        }
-    ]
-
-
-class TestJWSTLowFidelityScheduleIngestionTask:
-    def test_should_generate_across_schedules(self, mock_schedule_post: Mock):
-        """Should generate ACROSS schedules"""
-
-        with patch(
-            "across_data_ingestion.tasks.schedules.jwst.low_fidelity_planned.query_jwst_planned_execution_schedule",
-            return_value=mock_jwst_plan_query,
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=mock_telescope_get(),
+class Test:
+    class TestIngest:
+        def test_should_generate_across_schedules(
+            self,
+            mock_telescope_api: MagicMock,
+            mock_schedule_api: MagicMock,
+            monkeypatch: pytest.MonkeyPatch,
         ):
-            ingest()
-            mock_schedule_post.assert_called_with(across_jwst_plan)
+            """Should generate ACROSS schedules"""
 
-    def test_query_jwst_planned_execution_schedule_should_return_expected(self):
-        """Should return correct dataframe from file result"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.jwst.low_fidelity_planned.get_most_recent_jwst_planned_url",
-            return_value="mock_url",
-        ), patch(
-            "httpx.get",
-            return_value=mock_response(text=schedule_file_response),
-        ), patch(
-            "across_data_ingestion.tasks.schedules.jwst.low_fidelity_planned.read_mast_observations",
-            return_value=mock_mast_query_response,
+            monkeypatch.setattr(
+                task,
+                "query_jwst_planned_execution_schedule",
+                MagicMock(return_value=fake_jwst_plan),
+            )
+
+            task.ingest()
+            mock_schedule_api.create_schedule.assert_called_with(fake_across_plan)
+
+        def test_query_jwst_planned_execution_schedule_should_return_expected(
+            self, monkeypatch: pytest.MonkeyPatch
         ):
+            """Should return correct dataframe from file result"""
+
+            monkeypatch.setattr(
+                task,
+                "get_most_recent_jwst_planned_url",
+                MagicMock(return_value="mock_url"),
+            )
+            monkeypatch.setattr(
+                httpx,
+                "get",
+                MagicMock(return_value=mock_response(text=fake_schedule_file_response)),
+            )
+            monkeypatch.setattr(
+                task,
+                "read_mast_observations",
+                MagicMock(return_value=fake_mast_query_response),
+            )
+
             instruments_info = {
                 "JWST_MIRI": "miri_instrument_id",
                 "JWST_NIRCAM": "nircam_instrument_id",
                 "JWST_NIRSPEC": "nirspec_instrument_id",
                 "JWST_NIRISS": "niriss_instrument_id",
             }
-            jwst_planned_query = query_jwst_planned_execution_schedule(instruments_info)
+            jwst_planned_query = task.query_jwst_planned_execution_schedule(
+                instruments_info
+            )
             calculated = jwst_planned_query.to_dict(orient="records")
-            expected = mock_jwst_plan_query.to_dict(orient="records")
+            expected = fake_jwst_plan.to_dict(orient="records")
             assert calculated == expected
 
-    def test_query_jwst_planned_execution_schedule_should_return_empty_df_on_exception(
-        self,
-    ):
-        """Should return correct dataframe from file result"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.jwst.low_fidelity_planned.get_most_recent_jwst_planned_url",
-            return_value="mock_url",
-        ), patch(
-            "httpx.get",
-            return_value=mock_response(
-                text=schedule_file_response, raise_response=True
-            ),
-        ), patch(
-            "across_data_ingestion.tasks.schedules.jwst.low_fidelity_planned.read_mast_observations",
-            return_value=mock_mast_query_response,
+        def test_query_jwst_planned_execution_schedule_should_return_empty_df_on_exception(
+            self, monkeypatch: pytest.MonkeyPatch
         ):
-            instruments_info = {
-                "JWST_MIRI": "miri_instrument_id",
-                "JWST_NIRCAM": "nircam_instrument_id",
-                "JWST_NIRSPEC": "nirspec_instrument_id",
-                "JWST_NIRISS": "niriss_instrument_id",
-            }
-            jwst_planned_query = query_jwst_planned_execution_schedule(instruments_info)
+            """Should return empty dataframe from get that raises response"""
+
+            monkeypatch.setattr(
+                task,
+                "get_most_recent_jwst_planned_url",
+                MagicMock(return_value="mock_url"),
+            )
+            monkeypatch.setattr(
+                httpx,
+                "get",
+                MagicMock(return_value=mock_response(text="", raise_response=True)),
+            )
+
+            jwst_planned_query = task.query_jwst_planned_execution_schedule({})
             assert jwst_planned_query.empty
 
-    def test_read_mast_observations_should_return_result(self):
-        current_dir = os.path.dirname(__file__)
-        # files for testing ingestion of orbits observations for each schedule
-        mock_mast_astropy_table = os.path.join(
-            current_dir, "mocks", "mock_mast_astropy_table.ecsv"
-        )
-
-        with patch(
-            "astroquery.mast.Observations.query_criteria",
-            return_value=ascii.read(mock_mast_astropy_table),
+        def test_read_mast_observations_should_return_result(
+            self, monkeypatch: pytest.MonkeyPatch
         ):
-            calculated = read_mast_observations([])
+            """Should return correct dataframe from mast query observations"""
+            current_dir = os.path.dirname(__file__)
+            fake_mast_astropy_table = os.path.join(
+                current_dir, "mocks", "fake_mast_astropy_table.ecsv"
+            )
+
+            mock_mast_astropy_table = MagicMock(
+                return_value=ascii.read(fake_mast_astropy_table)
+            )
+            monkeypatch.setattr(Observations, "query_criteria", mock_mast_astropy_table)
+
+            calculated = task.read_mast_observations([])
             expected = pd.DataFrame(
                 {
                     "instrument_name": {"0": "NIRISS/IMAGE"},
@@ -134,54 +130,64 @@ class TestJWSTLowFidelityScheduleIngestionTask:
                 orient="records"
             )
 
-    def test_parse_science_execution_page_should_return_result(self):
-        """Should return a string url when parsing the jwst science execution page"""
-        with patch(
-            "httpx.get",
-            return_value=mock_response(text=science_execution_response_text),
+        def test_parse_science_execution_page_should_return_result(
+            self, monkeypatch: pytest.MonkeyPatch
         ):
-            calculated = get_most_recent_jwst_planned_url()
+            """Should return a string url when parsing the jwst science execution page"""
+
+            mock_get = MagicMock(
+                return_value=mock_response(text=fake_science_execution_response_text)
+            )
+            monkeypatch.setattr(httpx, "get", mock_get)
+
+            calculated = task.get_most_recent_jwst_planned_url()
             expected = "/files/live/sites/www/files/home/jwst/science-execution/observing-schedules/_documents/20250804_report_20250802.txt"
             assert calculated == expected
 
-    def test_should_log_error_when_query_swift_catalog_returns_none(self):
-        """Should log an error when Swift query returns None"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.jwst.low_fidelity_planned.logger"
-        ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.jwst.low_fidelity_planned.query_jwst_planned_execution_schedule",
-            return_value=pd.DataFrame({}),
+        def test_should_log_error_when_query_swift_catalog_returns_none(
+            self, mock_logger, monkeypatch: pytest.MonkeyPatch
         ):
-            ingest()
-            assert (
-                "Failed to read JWST observation data"
-                in log_mock.warn.call_args.args[0]
+            """Should log an error when Swift query returns None"""
+
+            monkeypatch.setattr(
+                task,
+                "query_jwst_planned_execution_schedule",
+                MagicMock(return_value=pd.DataFrame({})),
             )
 
-    def test_should_log_info_when_success(self):
-        """Should log info with ran at when success"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.jwst.low_fidelity_planned.query_jwst_planned_execution_schedule",
-            return_value=mock_jwst_plan_query,
-        ), patch(
-            "across_data_ingestion.util.across_api.telescope.get",
-            return_value=mock_telescope_get(),
-        ), patch(
-            "across_data_ingestion.util.across_api.schedule.post", return_value=None
-        ), patch(
-            "across_data_ingestion.tasks.schedules.jwst.low_fidelity_planned.logger"
-        ) as log_mock:
-            entrypoint()
-            assert "Schedule ingestion completed." in log_mock.info.call_args.args[0]
+            task.ingest()
+            assert (
+                "Failed to read JWST observation data"
+                in mock_logger.warn.call_args.args[0]
+            )
 
-    def test_should_log_error_when_schedule_ingestion_fails(self):
-        """Should log an error when schedule ingestion fails"""
-        with patch(
-            "across_data_ingestion.tasks.schedules.jwst.low_fidelity_planned.logger"
-        ) as log_mock, patch(
-            "across_data_ingestion.tasks.schedules.jwst.low_fidelity_planned.ingest",
-            return_value=None,
-            side_effect=Exception(),
+        def test_should_log_info_when_success(
+            self,
+            mock_logger,
+            mock_telescope_api,
+            mock_schedule_api,
+            monkeypatch: pytest.MonkeyPatch,
         ):
-            entrypoint()
-            assert "encountered an unknown error" in log_mock.error.call_args.args[0]
+            """Should log info with ran at when success"""
+            monkeypatch.setattr(
+                task,
+                "query_jwst_planned_execution_schedule",
+                MagicMock(return_value=fake_jwst_plan),
+            )
+
+            task.entrypoint()  # type: ignore
+            assert "Schedule ingestion completed." in mock_logger.info.call_args.args[0]
+
+        def test_should_log_error_when_schedule_ingestion_fails(
+            self, mock_logger, monkeypatch: pytest.MonkeyPatch
+        ):
+            """Should log an error when schedule ingestion fails"""
+            monkeypatch.setattr(
+                task, "ingest", MagicMock(return_value=None, side_effect=Exception())
+            )
+
+            task.entrypoint()  # type: ignore
+            assert (
+                "Schedule ingestion encountered an unknown error."
+                in mock_logger.error.call_args.args[0]
+            )

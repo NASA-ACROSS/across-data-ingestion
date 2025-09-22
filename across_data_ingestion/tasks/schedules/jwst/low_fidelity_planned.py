@@ -19,7 +19,7 @@ JWST_SCIENCE_EXECUTION_PLAN_URL = (
 )
 
 
-def gen_proposal_id(row) -> str:
+def gen_proposal_id(row: pd.Series) -> str:
     """
     Pandas apply function
     Generates a proposal ID based on the VISIT_ID
@@ -30,7 +30,7 @@ def gen_proposal_id(row) -> str:
 
 
 def find_missing_params_from_mast_result(
-    row, mast_observations: pd.DataFrame, instruments_info: dict
+    row: pd.Series, mast_observations: pd.DataFrame, instruments_info: dict
 ) -> pd.Series:
     """
     Pandas apply function:
@@ -384,6 +384,7 @@ def ingest() -> None:
 @repeat_every(seconds=SECONDS_IN_A_WEEK)  # Weekly
 def entrypoint():
     try:
+        logger.info("Schedule ingestion started.")
         ingest()
         logger.info("Schedule ingestion completed.")
     except Exception as e:

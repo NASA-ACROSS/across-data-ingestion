@@ -1,6 +1,6 @@
 import pandas as pd
 
-mock_jwst_plan_query = pd.DataFrame(
+fake_jwst_plan = pd.DataFrame(
     [
         {
             "VISIT_ID": "7615:5:1",
@@ -517,9 +517,9 @@ mock_jwst_plan_query = pd.DataFrame(
         },
     ]
 )
-mock_jwst_plan_query["SCHEDULED_START_TIME"] = pd.to_datetime(
-    mock_jwst_plan_query["SCHEDULED_START_TIME"]
+fake_jwst_plan["SCHEDULED_START_TIME"] = pd.to_datetime(
+    fake_jwst_plan["SCHEDULED_START_TIME"]
 )
-mock_jwst_plan_query["SCHEDULED_END_TIME"] = pd.to_datetime(
-    mock_jwst_plan_query["SCHEDULED_END_TIME"]
+fake_jwst_plan["SCHEDULED_END_TIME"] = pd.to_datetime(
+    fake_jwst_plan["SCHEDULED_END_TIME"]
 )
