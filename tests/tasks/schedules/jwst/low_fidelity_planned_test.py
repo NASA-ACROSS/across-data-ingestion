@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 
 import httpx
 import pandas as pd
-import pytest  # type: ignore
+import pytest
 from astropy.io import ascii  # type: ignore
 from astroquery.mast import Observations  # type: ignore
 
@@ -36,7 +36,6 @@ class Test:
             monkeypatch: pytest.MonkeyPatch,
         ):
             """Should generate ACROSS schedules"""
-
             monkeypatch.setattr(
                 task,
                 "query_jwst_planned_execution_schedule",
@@ -50,7 +49,6 @@ class Test:
             self, monkeypatch: pytest.MonkeyPatch
         ):
             """Should return correct dataframe from file result"""
-
             monkeypatch.setattr(
                 task,
                 "get_most_recent_jwst_planned_url",
@@ -84,7 +82,6 @@ class Test:
             self, monkeypatch: pytest.MonkeyPatch
         ):
             """Should return empty dataframe from get that raises response"""
-
             monkeypatch.setattr(
                 task,
                 "get_most_recent_jwst_planned_url",
@@ -108,10 +105,11 @@ class Test:
                 current_dir, "mocks", "fake_mast_astropy_table.ecsv"
             )
 
-            mock_mast_astropy_table = MagicMock(
-                return_value=ascii.read(fake_mast_astropy_table)
+            monkeypatch.setattr(
+                Observations,
+                "query_criteria",
+                MagicMock(return_value=ascii.read(fake_mast_astropy_table)),
             )
-            monkeypatch.setattr(Observations, "query_criteria", mock_mast_astropy_table)
 
             calculated = task.read_mast_observations([])
             expected = pd.DataFrame(
@@ -134,11 +132,15 @@ class Test:
             self, monkeypatch: pytest.MonkeyPatch
         ):
             """Should return a string url when parsing the jwst science execution page"""
-
-            mock_get = MagicMock(
-                return_value=mock_response(text=fake_science_execution_response_text)
+            monkeypatch.setattr(
+                httpx,
+                "get",
+                MagicMock(
+                    return_value=mock_response(
+                        text=fake_science_execution_response_text
+                    )
+                ),
             )
-            monkeypatch.setattr(httpx, "get", mock_get)
 
             calculated = task.get_most_recent_jwst_planned_url()
             expected = "/files/live/sites/www/files/home/jwst/science-execution/observing-schedules/_documents/20250804_report_20250802.txt"
@@ -148,7 +150,6 @@ class Test:
             self, mock_logger, monkeypatch: pytest.MonkeyPatch
         ):
             """Should log an error when Swift query returns None"""
-
             monkeypatch.setattr(
                 task,
                 "query_jwst_planned_execution_schedule",
