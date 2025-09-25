@@ -1,6 +1,6 @@
 from asyncio import create_task
 
-from .example import check_server, example_task
+from .example import check_server
 from .schedules.chandra.high_fidelity_planned import (
     entrypoint as chandra_high_fidelity_planned_schedule_ingestion_task,
 )
@@ -39,7 +39,6 @@ async def init_tasks():
     Each task definition contains its own configuration using a repeat_every decorator
     For more information see https://fastapiutils.github.io/fastapi-utils//user-guide/repeated-tasks/
     """
-    create_task(example_task())
     create_task(check_server())
     await TESS_low_fidelity_schedule_ingestion_task()
     await fermi_planned_schedule_ingestion_task()

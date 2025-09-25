@@ -4,9 +4,8 @@ from typing import Any
 import pandas as pd
 import structlog
 from astropy.time import Time  # type: ignore[import-untyped]
-from fastapi_utils.tasks import repeat_every
+from fastapi_utilities import repeat_at  # type: ignore
 
-from ....core.constants import SECONDS_IN_A_WEEK
 from ....util.across_server import client, sdk
 
 logger: structlog.stdlib.BoundLogger = structlog.getLogger()
@@ -192,7 +191,7 @@ def ingest():
     return schedules
 
 
-@repeat_every(seconds=SECONDS_IN_A_WEEK)  # Weekly
+@repeat_at(cron="12 22 * 8 *", logger=logger)
 def entrypoint():
     try:
         logger.info("Schedule ingestion started.")

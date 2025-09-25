@@ -4,11 +4,9 @@ import httpx
 import pandas as pd
 import structlog
 from astropy.time import Time  # type: ignore[import-untyped]
-from fastapi_utils.tasks import repeat_every
+from fastapi_utilities import repeat_at  # type: ignore
 
 from across_data_ingestion.util.across_server import client, sdk
-
-from ....core.constants import SECONDS_IN_A_WEEK
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
@@ -171,7 +169,7 @@ def ingest() -> None:
             logger.info("Schedule already exists.", schedule_name=schedule.name)
 
 
-@repeat_every(seconds=SECONDS_IN_A_WEEK)  # Weekly
+@repeat_at(cron="29 0 * * 2", logger=logger)
 def entrypoint():
     try:
         ingest()

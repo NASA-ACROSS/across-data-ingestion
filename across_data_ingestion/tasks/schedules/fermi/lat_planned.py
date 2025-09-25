@@ -12,9 +12,8 @@ import structlog
 from astropy.io import fits  # type: ignore[import-untyped]
 from astropy.table import Table  # type: ignore[import-untyped]
 from astropy.time import Time  # type: ignore[import-untyped]
-from fastapi_utils.tasks import repeat_every
+from fastapi_utilities import repeat_at  # type: ignore
 
-from ....core.constants import SECONDS_IN_A_WEEK
 from ....util.across_server import client, sdk
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
@@ -362,7 +361,7 @@ def ingest() -> None:
     )
 
 
-@repeat_every(seconds=SECONDS_IN_A_WEEK)  # Weekly
+@repeat_at(cron="22 2 * * *", logger=logger)
 def entrypoint() -> None:
     try:
         ingest()

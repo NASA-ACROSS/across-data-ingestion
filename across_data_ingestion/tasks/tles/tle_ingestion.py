@@ -3,10 +3,9 @@ from datetime import datetime
 import pydantic
 import structlog
 from across.tools import tle as tle_tool
-from fastapi_utils.tasks import repeat_every
+from fastapi_utilities import repeat_at  # type: ignore
 
 from ...core import config
-from ...core.constants import SECONDS_IN_A_DAY
 from ...util.across_server import client, sdk
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
@@ -83,7 +82,7 @@ def ingest() -> None:
             logger.warning("Could not fetch TLE", satellite=satellite.model_dump())
 
 
-@repeat_every(seconds=SECONDS_IN_A_DAY)
+@repeat_at(cron="34 4 * * *", logger=logger)
 def entrypoint() -> None:
     try:
         ingest()

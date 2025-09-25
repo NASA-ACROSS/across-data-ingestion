@@ -3,9 +3,8 @@ from datetime import datetime, timedelta, timezone
 import structlog
 from astropy.table import Row, Table, join  # type: ignore[import-untyped]
 from astropy.time import Time  # type: ignore[import-untyped]
-from fastapi_utils.tasks import repeat_every
+from fastapi_utilities import repeat_at  # type: ignore
 
-from ....core.constants import SECONDS_IN_A_DAY
 from ....util.across_server import client, sdk
 from ....util.vo_service import VOService
 
@@ -267,7 +266,7 @@ async def ingest() -> None:
             logger.info("Schedule already exists.", schedule_name=schedule.name)
 
 
-@repeat_every(seconds=SECONDS_IN_A_DAY)  # Daily
+@repeat_at(cron="13 2 * * 2", logger=logger)
 async def entrypoint() -> None:
     try:
         await ingest()
