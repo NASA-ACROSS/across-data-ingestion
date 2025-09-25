@@ -397,7 +397,7 @@ def ingest(days_in_future: int = 4) -> None:
 
 
 @repeat_at(cron="44 22 * * *", logger=logger)
-def entrypoint() -> None:
+async def entrypoint() -> None:
     try:
         ingest()
         logger.info("Swift low fidelity planned schedule ingestion completed.")

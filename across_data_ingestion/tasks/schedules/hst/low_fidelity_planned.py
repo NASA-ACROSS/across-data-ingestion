@@ -474,7 +474,7 @@ def ingest() -> None:
 
 
 @repeat_at(cron="59 22 * * *", logger=logger)
-def entrypoint():
+async def entrypoint():
     try:
         ingest()
         logger.info("HST schedule ingestion ran successfully")

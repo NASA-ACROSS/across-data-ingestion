@@ -83,7 +83,7 @@ def ingest() -> None:
 
 
 @repeat_at(cron="34 4 * * *", logger=logger)
-def entrypoint() -> None:
+async def entrypoint() -> None:
     try:
         ingest()
         logger.info("Completed TLE ingestion.")

@@ -192,7 +192,7 @@ def ingest():
 
 
 @repeat_at(cron="12 22 * 8 *", logger=logger)
-def entrypoint():
+async def entrypoint():
     try:
         logger.info("Schedule ingestion started.")
         schedules = ingest()

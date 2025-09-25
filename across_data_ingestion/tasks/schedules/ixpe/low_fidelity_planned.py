@@ -170,7 +170,7 @@ def ingest() -> None:
 
 
 @repeat_at(cron="29 0 * * 2", logger=logger)
-def entrypoint():
+async def entrypoint():
     try:
         ingest()
         logger.info("Schedule ingestion completed.")

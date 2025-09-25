@@ -362,7 +362,7 @@ def ingest() -> None:
 
 
 @repeat_at(cron="22 2 * * *", logger=logger)
-def entrypoint() -> None:
+async def entrypoint() -> None:
     try:
         ingest()
         logger.info("Task completed successfully")
