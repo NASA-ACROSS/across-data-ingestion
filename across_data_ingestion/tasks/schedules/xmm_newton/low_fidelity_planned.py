@@ -212,9 +212,11 @@ def extract_om_exposures_from_timeline_data(timeline_df: pd.DataFrame) -> dict:
 
 
 def transform_to_across_schedule(
-    start_datetime: str, end_datetime: str, telescope_id: str
+    schedule_data: pd.DataFrame, telescope_id: str
 ) -> sdk.ScheduleCreate:
     """Format the schedule data in the ACROSS format"""
+    start_datetime = min(schedule_data["UTC Obs Start yyyy-mm-dd hh:mm:ss"].values)
+    end_datetime = max(schedule_data["UTC Obs End yyyy-mm-dd hh:mm:ss"].values)
     return sdk.ScheduleCreate(
         name=f"XMM_Newton_planned_{start_datetime.split()[0]}_{end_datetime.split()[0]}",
         telescope_id=telescope_id,
@@ -338,6 +340,63 @@ def create_pn_observations(
     ]
 
 
+def aggregate_observations(
+    schedule_data: pd.DataFrame, instrument_id_dict: dict
+) -> list[sdk.ObservationCreate]:
+    """
+    Iterate over the planned schedule data by unique revolution ID,
+    getting OM observations from the revolution timeline file, and
+    constructing observations using the schedule data + OM exposure data
+    """
+    across_observations: list[sdk.ObservationCreate] = []
+    unique_rev_ids = schedule_data["Revn #"].unique()
+    for rev_id in unique_rev_ids:
+        # Read the revolution timeline for this revolution
+        revolution_timeline_df = read_revolution_timeline_file(rev_id)
+
+        # Filter the dataframe for the current revolution
+        current_revolution_observations_df = schedule_data[
+            schedule_data["Revn #"] == rev_id
+        ]
+
+        # Create observations for each instrument
+        across_mos_observations = create_mos_observations(
+            current_revolution_observations_df, instrument_id_dict
+        )
+        across_observations.extend(across_mos_observations)
+
+        across_rgs_observations = create_rgs_observations(
+            current_revolution_observations_df, instrument_id_dict
+        )
+        across_observations.extend(across_rgs_observations)
+
+        across_pn_observations = create_pn_observations(
+            current_revolution_observations_df, instrument_id_dict
+        )
+        across_observations.extend(across_pn_observations)
+
+        if len(revolution_timeline_df):
+            # Get OM exposure info from the revolution timeline df
+            om_exposures = extract_om_exposures_from_timeline_data(
+                revolution_timeline_df
+            )
+            across_om_observations = [
+                transform_to_across_observation(
+                    row,
+                    exposure["start_time"],
+                    exposure["exposure_time"],
+                    instrument_id_dict["OM"],
+                    sdk.ObservationType.IMAGING,
+                    sdk.Bandpass(XMM_BANDPASSES[exposure["filter"]]),
+                )
+                for _, row in current_revolution_observations_df.iterrows()
+                for exposure in om_exposures["0" + str(row["Obs Id."])]
+            ]
+            across_observations.extend(across_om_observations)
+
+    return across_observations
+
+
 def ingest() -> None:
     """
     Ingests low fidelity planned XMM-Newton schedules.
@@ -359,63 +418,13 @@ def ingest() -> None:
     if not len(raw_planned_schedule_data):
         return
 
-    start_datetime = min(
-        raw_planned_schedule_data["UTC Obs Start yyyy-mm-dd hh:mm:ss"].values
-    )
-    end_datetime = max(
-        raw_planned_schedule_data["UTC Obs End yyyy-mm-dd hh:mm:ss"].values
-    )
     across_schedule = transform_to_across_schedule(
-        start_datetime, end_datetime, telescope.id
+        raw_planned_schedule_data, telescope.id
     )
 
-    # Iterate over the planned schedule data by unique revolution ID,
-    # getting OM observations from the revolution timeline file, and
-    # constructing observations using the schedule data + OM exposure data
-    unique_rev_ids = raw_planned_schedule_data["Revn #"].unique()
-    for rev_id in unique_rev_ids:
-        # Read the revolution timeline for this revolution
-        revolution_timeline_df = read_revolution_timeline_file(rev_id)
-
-        # Filter the dataframe for the current revolution
-        current_revolution_observations_df = raw_planned_schedule_data[
-            raw_planned_schedule_data["Revn #"] == rev_id
-        ]
-
-        # Create observations for each instrument
-        across_mos_observations = create_mos_observations(
-            current_revolution_observations_df, instrument_id_dict
-        )
-        across_schedule.observations.extend(across_mos_observations)
-
-        across_rgs_observations = create_rgs_observations(
-            current_revolution_observations_df, instrument_id_dict
-        )
-        across_schedule.observations.extend(across_rgs_observations)
-
-        across_pn_observations = create_pn_observations(
-            current_revolution_observations_df, instrument_id_dict
-        )
-        across_schedule.observations.extend(across_pn_observations)
-
-        if len(revolution_timeline_df):
-            # Get OM exposure info from the revolution timeline df
-            om_exposures = extract_om_exposures_from_timeline_data(
-                revolution_timeline_df
-            )
-            across_om_observations = [
-                transform_to_across_observation(
-                    row,
-                    exposure["start_time"],
-                    exposure["exposure_time"],
-                    instrument_id_dict["OM"],
-                    sdk.ObservationType.IMAGING,
-                    sdk.Bandpass(XMM_BANDPASSES[exposure["filter"]]),
-                )
-                for _, row in current_revolution_observations_df.iterrows()
-                for exposure in om_exposures["0" + str(row["Obs Id."])]
-            ]
-            across_schedule.observations.extend(across_om_observations)
+    across_schedule.observations = aggregate_observations(
+        raw_planned_schedule_data, instrument_id_dict
+    )
 
     try:
         sdk.ScheduleApi(client).create_schedule(across_schedule)
