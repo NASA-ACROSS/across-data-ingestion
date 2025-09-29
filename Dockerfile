@@ -6,8 +6,6 @@ RUN apt-get update && apt-get install -y make
 # install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Configure SSH to use the forwarded agent
-RUN echo "Host github.com\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null" >> /etc/ssh/ssh_config
 
 ARG BUILD_ENV=local
 
@@ -18,6 +16,18 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 # Turns off buffering for container logging
 ENV PYTHONUNBUFFERED=1
+
+# see https://github.com/webfactory/ssh-agent/tree/v0.9.0/?tab=readme-ov-file#building-docker-images-andor-using-the-dockerbuild-push-action-action
+# Flatten contents of root-config* into /root
+COPY root-config*/. /root/
+
+RUN mkdir -p /root/.ssh
+
+RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
+
+RUN if [ -f /root/.ssh/config ] && { [ "$BUILD_ENV" = "deploy" ] || [ "$BUILD_ENV" = "action" ]; }; then \
+    sed 's|/home/runner|/root|g' -i.bak /root/.ssh/config; \
+    fi
 
 # Copy only the necessary files for dependency installation first
 COPY ./Makefile ./

@@ -11,7 +11,6 @@ from ....util.vo_service import VOService
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
-
 # Chandra has multiple instruments with different bandpasses
 CHANDRA_ACIS_BANDPASS = sdk.Bandpass(
     sdk.EnergyBandpass(

@@ -1,6 +1,6 @@
 # Define env variables
 ENV ?= local
-RUNTIME_ENVS = local dev staging prod
+RUNTIME_ENVS = local feat1 dev staging prod
 BUILD_ENV ?= local
 BUILD_ENVS = local action deploy
 IS_BUILD_ENV_VALID := $(filter $(BUILD_ENV), $(BUILD_ENVS))
@@ -54,7 +54,7 @@ define ask
 endef
 
 # Tasks
-.PHONY: list_targets help init install_uv install install_hooks lock configure venv_dir venv check_env install_deps start run stop build dev restart reset tail_logs temp_run test lint rev seed migrate prod clean prune rm_imgs
+.PHONY: list_targets help init install_uv install install_hooks lock configure venv_dir venv check_env check_prod local_only install_deps start dev stop stop_all build restart reset hard_reset tail_logs temp_run test lint types run push build_deploy clean prune rm_imgs
 
 list_targets: ### Internal command used for getting a list of commands for .PHONY
 	@awk '/^[a-zA-Z_\-]+:/ {sub(/:/, ""); printf "%s ", $$1} END {print ""}' $(MAKEFILE_LIST)
@@ -150,7 +150,7 @@ install_deps: ### Install dependencies
 	@echo "Installed dependencies";
 
 # Group: Development
-start: check_prod run migrate seed ## Start the application containers (includes migrating and seeding)
+start: check_prod run ## Start the application containers (includes migrating and seeding)
 
 dev: local_only ## Start the server in the terminal
 	@$(VENV_BIN)/fastapi dev across_data_ingestion/main.py --host 0.0.0.0 --port 8001

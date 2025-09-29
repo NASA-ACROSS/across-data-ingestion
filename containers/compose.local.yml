@@ -6,6 +6,8 @@ services:
       context: ..
       dockerfile: Dockerfile
       target: local
+      ssh:
+        - default
     volumes:
       - ../across_data_ingestion/main.py:/app/across_data_ingestion/main.py
       - ../across_data_ingestion:/app/across_data_ingestion
