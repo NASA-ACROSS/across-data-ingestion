@@ -162,7 +162,8 @@ class Test:
                 in mock_logger.warn.call_args.args[0]
             )
 
-        def test_should_log_info_when_success(
+        @pytest.mark.asyncio
+        async def test_should_log_info_when_success(
             self,
             mock_logger,
             mock_telescope_api,
@@ -176,10 +177,11 @@ class Test:
                 MagicMock(return_value=fake_jwst_plan),
             )
 
-            task.entrypoint()  # type: ignore
+            await task.entrypoint()  # type: ignore
             assert "Schedule ingestion completed." in mock_logger.info.call_args.args[0]
 
-        def test_should_log_error_when_schedule_ingestion_fails(
+        @pytest.mark.asyncio
+        async def test_should_log_error_when_schedule_ingestion_fails(
             self, mock_logger, monkeypatch: pytest.MonkeyPatch
         ):
             """Should log an error when schedule ingestion fails"""
@@ -187,7 +189,7 @@ class Test:
                 task, "ingest", MagicMock(return_value=None, side_effect=Exception())
             )
 
-            task.entrypoint()  # type: ignore
+            await task.entrypoint()  # type: ignore
             assert (
                 "Schedule ingestion encountered an unknown error."
                 in mock_logger.error.call_args.args[0]
