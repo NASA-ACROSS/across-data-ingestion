@@ -1,0 +1,2 @@
+,Revn #,Obs Id.,Target Name,RA hh:mm:ss,DEC dd:mm:ss,PA ddd.dd,UTC Obs Start yyyy-mm-dd hh:mm:ss,UTC Obs End yyyy-mm-dd hh:mm:ss,Prime Instr.,PN Dur Ks,MOS1 Dur. Ks,MOS2 Dur. Ks,RGS1 Dur. Ks,RGS2 Dur. Ks,OM Dur. Ks,PI
+3,4714,811026501,Crab,05:34:32,+22:00:52,85.49,2025-09-04 13:36:52,2025-09-04 16:56:52,EPIC,8.6,10.6,10.6,11.0,11.0,7.9,Peter Kretschmar XMM-Newton MM
