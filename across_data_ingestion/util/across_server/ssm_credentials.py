@@ -1,13 +1,14 @@
 import threading
 from typing import Literal
 
+from across.sdk.v1.abstract_credential_storage import CredentialStorage
+
 from across_data_ingestion.core import config
 
 from ..ssm import SSM
-from .abstract_credential_storage import CredentialStorage as ICredStorage
 
 
-class SSMCredentials(ICredStorage):
+class SSMCredentials(CredentialStorage):
     _id: str = ""
     _secret: str = ""
 
@@ -15,6 +16,10 @@ class SSMCredentials(ICredStorage):
         self._lock = threading.Lock()
         self._id = self._get_param("id")
         self._secret = self._get_param("secret")
+
+    @property
+    def days_before_exp(self) -> int:
+        return 1
 
     def id(self, force: bool = False) -> str:
         return self._get_param("id", force)

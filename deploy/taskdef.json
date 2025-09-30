@@ -1,0 +1,8 @@
+{
+    "containerDefinitions": [
+        {
+            "name": "data-ingestion",
+            "image": "{{ must_env `IMAGE` }}"
+        }
+    ]
+}
