@@ -38,6 +38,7 @@ jobs:
         ${{ secrets.OPENAPI_SDK_SSH_KEY }}
 
   release-please:
+    needs: [ci]
     runs-on: "ubuntu-latest"
     steps:
       - uses: googleapis/release-please-action@v4
