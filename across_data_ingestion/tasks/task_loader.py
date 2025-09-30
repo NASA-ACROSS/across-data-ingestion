@@ -53,4 +53,4 @@ async def init_tasks():
     create_task(tle_ingestion_task())
     create_task(chandra_high_fidelity_planned_schedule_ingestion_task())
     create_task(swift_low_fidelity_schedule_ingestion_task())
-    await jwst_low_fidelity_schedule_ingestion_task()
+    create_task(jwst_low_fidelity_schedule_ingestion_task())
