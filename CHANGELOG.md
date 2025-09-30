@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/ACROSS-Team/across-data-ingestion/compare/v0.1.0...v0.1.1) (2025-09-30)
+
+
+### Bug Fixes
+
+* release-please PR merge triggers release-please action ([#83](https://github.com/ACROSS-Team/across-data-ingestion/issues/83)) ([49b3ba5](https://github.com/ACROSS-Team/across-data-ingestion/commit/49b3ba500fee7ebdece6b9184491167133963ac0))
+
 ## 0.1.0 (2025-09-30)
 
 
