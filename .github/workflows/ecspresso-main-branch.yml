@@ -54,11 +54,16 @@ on:
         description: "Image name (excluding registry). Defaults to {{$organization/$repository}}."
         required: false
         type: string
-        default: ''
+        default: ""
       app:
         description: "Application name. Used with monorepo pattern when there are several applications in the repo"
         required: false
         type: string
+      output_web_url:
+        description: "output web url for ecs service"
+        required: false
+        type: boolean
+        default: false
     secrets:
       secret-outputs-passphrase:
         description: "Passphrase to encrypt/decrypt secret outputs with gpg. For more information [read](https://github.com/cloudposse/github-action-secret-outputs)"
@@ -97,7 +102,7 @@ jobs:
 
   cd:
     uses: ./.github/workflows/workflow-cd-ecspresso.yml
-    needs: [ ci ]
+    needs: [ci]
     with:
       image: ${{ needs.ci.outputs.image }}
       tag: ${{ needs.ci.outputs.tag }}
