@@ -11,6 +11,7 @@
     "colnames",
     "colspecs",
     "creds",
+    "dockerized",
     "ephemerides",
     "ephems",
     "excepthook",
