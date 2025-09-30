@@ -8,9 +8,8 @@ import pandas as pd
 import pydantic
 import structlog
 from astropy.coordinates import SkyCoord  # type: ignore[import-untyped]
-from fastapi_utils.tasks import repeat_every
+from fastapi_utilities import repeat_at  # type: ignore
 
-from ....core.constants import SECONDS_IN_A_WEEK
 from ....util.across_server import client, sdk
 from ..types import Position
 
@@ -474,8 +473,8 @@ def ingest() -> None:
             raise err
 
 
-@repeat_every(seconds=SECONDS_IN_A_WEEK)  # Weekly
-def entrypoint():
+@repeat_at(cron="59 22 * * *", logger=logger)
+async def entrypoint():
     try:
         ingest()
         logger.info("HST schedule ingestion ran successfully")

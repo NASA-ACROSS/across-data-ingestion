@@ -3,12 +3,11 @@ from typing import Any, Callable
 
 import structlog
 from astropy.time import Time  # type: ignore[import-untyped]
-from fastapi_utils.tasks import repeat_every
+from fastapi_utilities import repeat_at  # type: ignore
 from swifttools import swift_too  # type: ignore
 from swifttools.swift_too.swift_planquery import PPSTEntry  # type: ignore
 from swifttools.swift_too.swift_uvot import UVOTModeEntry  # type: ignore
 
-from ....core.constants import SECONDS_IN_A_DAY
 from ....util.across_server import client, sdk
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
@@ -397,8 +396,8 @@ def ingest(days_in_future: int = 4) -> None:
     sdk.ScheduleApi(client).create_schedule(swift_uvot_schedule)
 
 
-@repeat_every(seconds=1 * SECONDS_IN_A_DAY)  # daily
-def entrypoint() -> None:
+@repeat_at(cron="44 22 * * *", logger=logger)
+async def entrypoint() -> None:
     try:
         ingest()
         logger.info("Swift low fidelity planned schedule ingestion completed.")
