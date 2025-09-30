@@ -380,7 +380,7 @@ def ingest() -> None:
             raise err
 
 
-@repeat_at(cron="* * * * *", logger=logger)  # Weekly
+@repeat_at(cron="33 22 * * *", logger=logger)  # Weekly
 async def entrypoint():
     try:
         logger.info("Schedule ingestion started.")
