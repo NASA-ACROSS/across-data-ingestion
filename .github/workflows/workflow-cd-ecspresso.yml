@@ -72,6 +72,11 @@ on:
         description: "Matrix key - matrix output workaround. [Read more](https://github.com/cloudposse/github-action-matrix-outputs-write#introduction)"
         required: false
         type: string
+      output_web_url:
+        description: "output web url for ecs service"
+        required: false
+        type: boolean
+        default: false
     secrets:
       secret-outputs-passphrase:
         description: "Passphrase to encrypt/decrypt secret outputs with gpg. For more information [read](https://github.com/cloudposse/github-action-secret-outputs)"
@@ -144,7 +149,7 @@ jobs:
           application: ${{ steps.environment.outputs.name }}
           taskdef-path: ${{ inputs.path }}
           mirror_to_s3_bucket: ${{ steps.environment.outputs.s3-bucket }}
-          use_partial_taskdefinition: 'true'
+          use_partial_taskdefinition: "true"
           overrides: |-
             {
               "containerOverrides":[
@@ -155,8 +160,8 @@ jobs:
               ]
             }
         env:
-          STAGE:  ${{ steps.environment.outputs.stage }}
-          AWS_ACCOUNT_ID:  ${{ steps.environment.outputs.account-id }}
+          STAGE: ${{ steps.environment.outputs.stage }}
+          AWS_ACCOUNT_ID: ${{ steps.environment.outputs.account-id }}
           ECS_SERVICE_NAME: ${{ steps.environment.outputs.name }}
           ECS_SERVICE_TASK_ROLE: ${{ steps.environment.outputs.role }}-task
           ECS_SERVICE_EXECUTION_ROLE: ${{ steps.environment.outputs.role }}-exec
@@ -176,11 +181,11 @@ jobs:
           application: ${{ steps.environment.outputs.name }}
           taskdef-path: ${{ inputs.path }}
           mirror_to_s3_bucket: ${{ steps.environment.outputs.s3-bucket }}
-          use_partial_taskdefinition: 'true'
+          use_partial_taskdefinition: "true"
           timeout: 35m
         env:
-          STAGE:  ${{ steps.environment.outputs.stage }}
-          AWS_ACCOUNT_ID:  ${{ steps.environment.outputs.account-id }}
+          STAGE: ${{ steps.environment.outputs.stage }}
+          AWS_ACCOUNT_ID: ${{ steps.environment.outputs.account-id }}
           ECS_SERVICE_NAME: ${{ steps.environment.outputs.name }}
           ECS_SERVICE_TASK_ROLE: ${{ steps.environment.outputs.role }}-task
           ECS_SERVICE_EXECUTION_ROLE: ${{ steps.environment.outputs.role }}-exec
@@ -215,8 +220,8 @@ jobs:
               ]
             }
         env:
-          STAGE:  ${{ steps.environment.outputs.stage }}
-          AWS_ACCOUNT_ID:  ${{ steps.environment.outputs.account-id }}
+          STAGE: ${{ steps.environment.outputs.stage }}
+          AWS_ACCOUNT_ID: ${{ steps.environment.outputs.account-id }}
           ECS_SERVICE_NAME: ${{ steps.environment.outputs.name }}
           ECS_SERVICE_TASK_ROLE: ${{ steps.environment.outputs.role }}-task
           ECS_SERVICE_EXECUTION_ROLE: ${{ steps.environment.outputs.role }}-exec
@@ -226,12 +231,14 @@ jobs:
         uses: cutenode/action-always-fail@v1.0.0
 
       - uses: Produce8/actions-aws-ssm-params-to-env@1.1.0
+        if: ${{ inputs.output_web_url }}
         with:
           ssm-path: ${{ steps.environment.outputs.ssm-path }}
           prefix: SSM_URL_
           decryption: true
 
       - name: Output web app url
+        if: ${{ inputs.output_web_url }}
         id: result
         run: |
           echo "webapp-url=${SSM_URL_0}" >> $GITHUB_OUTPUT
