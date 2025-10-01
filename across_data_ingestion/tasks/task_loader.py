@@ -13,6 +13,9 @@ from .schedules.hst.low_fidelity_planned import (
 from .schedules.ixpe.low_fidelity_planned import (
     entrypoint as ixpe_low_fidelity_schedule_ingestion_task,
 )
+from .schedules.jwst.low_fidelity_planned import (
+    entrypoint as jwst_low_fidelity_schedule_ingestion_task,
+)
 from .schedules.nicer.low_fidelity_planned import (
     entrypoint as nicer_low_fidelity_schedule_ingestion_task,
 )
@@ -54,3 +57,4 @@ async def init_tasks():
     create_task(chandra_high_fidelity_planned_schedule_ingestion_task())
     create_task(XMM_Newton_low_fidelity_schedule_ingestion_task())
     create_task(swift_low_fidelity_schedule_ingestion_task())
+    create_task(jwst_low_fidelity_schedule_ingestion_task())

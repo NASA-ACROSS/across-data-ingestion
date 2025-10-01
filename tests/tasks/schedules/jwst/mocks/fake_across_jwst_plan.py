@@ -1,0 +1,691 @@
+import across.sdk.v1 as sdk
+
+fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
+    {
+        "telescope_id": "jwst_telescope_id",
+        "name": "jwst_low_fidelity_planned_2025-08-04_2025-08-10",
+        "date_range": {
+            "begin": "2025-08-04T04:51:40.000",
+            "end": "2025-08-10T23:52:16.000",
+        },
+        "status": "planned",
+        "fidelity": "low",
+        "observations": [
+            {
+                "instrument_id": "nircam_instrument_id",
+                "object_name": "P330-E",
+                "pointing_position": {"ra": 247.890885, "dec": 30.14622222},
+                "object_position": {"ra": 247.890885, "dec": 30.14622222},
+                "date_range": {
+                    "begin": "2025-08-04T04:51:40.000",
+                    "end": "2025-08-04T06:49:06.000",
+                },
+                "external_observation_id": "7615:5:1",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 7046.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 1755.0,
+                            "max": 3980.0,
+                            "unit": "nm",
+                            "filter_name": "F200W;F356W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "nircam_instrument_id",
+                "object_name": "P330-E",
+                "pointing_position": {"ra": 247.890885, "dec": 30.14622222},
+                "object_position": {"ra": 247.890885, "dec": 30.14622222},
+                "date_range": {
+                    "begin": "2025-08-04T06:56:31.000",
+                    "end": "2025-08-04T09:20:01.000",
+                },
+                "external_observation_id": "7615:7:1",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 8610.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 1755.0,
+                            "max": 3980.0,
+                            "unit": "nm",
+                            "filter_name": "F200W;F356W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "nirspec_instrument_id",
+                "object_name": "3I_ATLAS",
+                "pointing_position": {"ra": 5.971e-05, "dec": 3.4e-06},
+                "object_position": {"ra": 5.971e-05, "dec": 3.4e-06},
+                "date_range": {
+                    "begin": "2025-08-06T10:15:55.000",
+                    "end": "2025-08-06T10:53:28.000",
+                },
+                "external_observation_id": "5094:2:1",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 2253.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 600.0,
+                            "max": 5300.0,
+                            "unit": "nm",
+                            "filter_name": "CLEAR;PRISM",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "nirspec_instrument_id",
+                "object_name": "3I_ATLAS",
+                "pointing_position": {"ra": 5.971e-05, "dec": 3.4e-06},
+                "object_position": {"ra": 5.971e-05, "dec": 3.4e-06},
+                "date_range": {
+                    "begin": "2025-08-06T11:03:52.000",
+                    "end": "2025-08-06T11:41:25.000",
+                },
+                "external_observation_id": "5094:1:1",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 2253.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 600.0,
+                            "max": 5300.0,
+                            "unit": "nm",
+                            "filter_name": "CLEAR;PRISM",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "miri_instrument_id",
+                "object_name": "UDS-2",
+                "pointing_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "object_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "date_range": {
+                    "begin": "2025-08-06T22:59:15.000",
+                    "end": "2025-08-07T00:42:45.000",
+                },
+                "external_observation_id": "7814:2:17",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 6210.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 11600.0,
+                            "max": 14000.0,
+                            "unit": "nm",
+                            "filter_name": "F1280W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "miri_instrument_id",
+                "object_name": "UDS-2",
+                "pointing_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "object_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "date_range": {
+                    "begin": "2025-08-07T00:47:36.000",
+                    "end": "2025-08-07T02:28:03.000",
+                },
+                "external_observation_id": "7814:2:16",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 6027.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 11600.0,
+                            "max": 14000.0,
+                            "unit": "nm",
+                            "filter_name": "F1280W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "miri_instrument_id",
+                "object_name": "UDS-2",
+                "pointing_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "object_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "date_range": {
+                    "begin": "2025-08-07T02:33:33.000",
+                    "end": "2025-08-07T04:14:00.000",
+                },
+                "external_observation_id": "7814:2:18",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 6027.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 11600.0,
+                            "max": 14000.0,
+                            "unit": "nm",
+                            "filter_name": "F1280W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "miri_instrument_id",
+                "object_name": "UDS-2",
+                "pointing_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "object_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "date_range": {
+                    "begin": "2025-08-07T04:21:27.000",
+                    "end": "2025-08-07T06:04:57.000",
+                },
+                "external_observation_id": "7814:2:23",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 6210.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 11600.0,
+                            "max": 14000.0,
+                            "unit": "nm",
+                            "filter_name": "F1280W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "miri_instrument_id",
+                "object_name": "UDS-2",
+                "pointing_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "object_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "date_range": {
+                    "begin": "2025-08-07T06:10:27.000",
+                    "end": "2025-08-07T07:50:54.000",
+                },
+                "external_observation_id": "7814:2:22",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 6027.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 11600.0,
+                            "max": 14000.0,
+                            "unit": "nm",
+                            "filter_name": "F1280W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "nirspec_instrument_id",
+                "object_name": "QSO-J0443-5332",
+                "pointing_position": {"ra": 70.85945, "dec": -53.53748056},
+                "object_position": {"ra": 70.85945, "dec": -53.53748056},
+                "date_range": {
+                    "begin": "2025-08-07T08:26:46.000",
+                    "end": "2025-08-07T09:42:40.000",
+                },
+                "external_observation_id": "9180:40:1",
+                "type": "spectroscopy",
+                "status": "planned",
+                "exposure_time": 4554.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 700.0,
+                            "max": 5000.0,
+                            "unit": "nm",
+                            "filter_name": "F070LP;G140H",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "miri_instrument_id",
+                "object_name": "UDS-2",
+                "pointing_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "object_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "date_range": {
+                    "begin": "2025-08-07T10:18:32.000",
+                    "end": "2025-08-07T12:02:02.000",
+                },
+                "external_observation_id": "7814:2:15",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 6210.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 11600.0,
+                            "max": 14000.0,
+                            "unit": "nm",
+                            "filter_name": "F1280W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "nirspec_instrument_id",
+                "object_name": "TOI-4010",
+                "pointing_position": {"ra": 20.2148325, "dec": 66.07219722},
+                "object_position": {"ra": 20.2148325, "dec": 66.07219722},
+                "date_range": {
+                    "begin": "2025-08-07T12:41:43.000",
+                    "end": "2025-08-07T19:16:37.000",
+                },
+                "external_observation_id": "5894:2:1",
+                "type": "spectroscopy",
+                "status": "planned",
+                "exposure_time": 23694.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 600.0,
+                            "max": 5300.0,
+                            "unit": "nm",
+                            "filter_name": "CLEAR;PRISM",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "nirspec_instrument_id",
+                "object_name": "HIP-99770",
+                "pointing_position": {"ra": 303.63346833, "dec": 36.80630556},
+                "object_position": {"ra": 303.63346833, "dec": 36.80630556},
+                "date_range": {
+                    "begin": "2025-08-08T05:19:13.000",
+                    "end": "2025-08-08T06:59:01.000",
+                },
+                "external_observation_id": "6362:2:1",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 5988.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 2870.0,
+                            "max": 5140.0,
+                            "unit": "nm",
+                            "filter_name": "F290LP;G395H",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "nirspec_instrument_id",
+                "object_name": "TOI-2525",
+                "pointing_position": {"ra": 86.85078333, "dec": -60.52140833},
+                "object_position": {"ra": 86.85078333, "dec": -60.52140833},
+                "date_range": {
+                    "begin": "2025-08-08T08:07:02.000",
+                    "end": "2025-08-08T19:23:46.000",
+                },
+                "external_observation_id": "4938:2:1",
+                "type": "spectroscopy",
+                "status": "planned",
+                "exposure_time": 40604.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 600.0,
+                            "max": 5300.0,
+                            "unit": "nm",
+                            "filter_name": "CLEAR;PRISM",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "niriss_instrument_id",
+                "object_name": "HAT-P-11",
+                "pointing_position": {"ra": 297.70936375, "dec": 48.08086111},
+                "object_position": {"ra": 297.70936375, "dec": 48.08086111},
+                "date_range": {
+                    "begin": "2025-08-08T20:30:30.000",
+                    "end": "2025-08-09T02:37:24.000",
+                },
+                "external_observation_id": "5924:1:1",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 22014.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 600.0,
+                            "max": 2800.0,
+                            "unit": "nm",
+                            "filter_name": "CLEAR;GR700XD",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "miri_instrument_id",
+                "object_name": "UDS-2",
+                "pointing_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "object_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "date_range": {
+                    "begin": "2025-08-09T03:25:19.000",
+                    "end": "2025-08-09T05:08:49.000",
+                },
+                "external_observation_id": "7814:2:24",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 6210.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 11600.0,
+                            "max": 14000.0,
+                            "unit": "nm",
+                            "filter_name": "F1280W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "miri_instrument_id",
+                "object_name": "UDS-2",
+                "pointing_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "object_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "date_range": {
+                    "begin": "2025-08-09T05:16:17.000",
+                    "end": "2025-08-09T06:59:47.000",
+                },
+                "external_observation_id": "7814:2:19",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 6210.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 11600.0,
+                            "max": 14000.0,
+                            "unit": "nm",
+                            "filter_name": "F1280W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "miri_instrument_id",
+                "object_name": "UDS-2",
+                "pointing_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "object_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "date_range": {
+                    "begin": "2025-08-09T07:06:26.000",
+                    "end": "2025-08-09T08:46:53.000",
+                },
+                "external_observation_id": "7814:2:21",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 6027.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 11600.0,
+                            "max": 14000.0,
+                            "unit": "nm",
+                            "filter_name": "F1280W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "miri_instrument_id",
+                "object_name": "UDS-2",
+                "pointing_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "object_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "date_range": {
+                    "begin": "2025-08-09T08:52:23.000",
+                    "end": "2025-08-09T10:32:50.000",
+                },
+                "external_observation_id": "7814:2:20",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 6027.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 11600.0,
+                            "max": 14000.0,
+                            "unit": "nm",
+                            "filter_name": "F1280W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "miri_instrument_id",
+                "object_name": "UDS-2",
+                "pointing_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "object_position": {"ra": 34.37777625, "dec": -5.27114444},
+                "date_range": {
+                    "begin": "2025-08-09T10:41:44.000",
+                    "end": "2025-08-09T12:25:14.000",
+                },
+                "external_observation_id": "7814:2:12",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 6210.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 11600.0,
+                            "max": 14000.0,
+                            "unit": "nm",
+                            "filter_name": "F1280W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "nirspec_instrument_id",
+                "object_name": "catalog_J0100_phaseII_v1",
+                "pointing_position": {"ra": 15.05354375, "dec": 28.04043056},
+                "object_position": {"ra": 15.05354375, "dec": 28.04043056},
+                "date_range": {
+                    "begin": "2025-08-09T12:55:51.000",
+                    "end": "2025-08-09T16:27:57.000",
+                },
+                "external_observation_id": "4713:2:1",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 12726.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 700.0,
+                            "max": 5000.0,
+                            "unit": "nm",
+                            "filter_name": "F070LP;G140M",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "nircam_instrument_id",
+                "object_name": "DRACO-F1",
+                "pointing_position": {"ra": 260.19702125, "dec": 57.91138056},
+                "object_position": {"ra": 260.19702125, "dec": 57.91138056},
+                "date_range": {
+                    "begin": "2025-08-09T17:10:16.000",
+                    "end": "2025-08-09T17:36:24.000",
+                },
+                "external_observation_id": "9225:1:1",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 1568.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 1755.0,
+                            "max": 3127.0,
+                            "unit": "nm",
+                            "filter_name": "F200W;F277W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "nirspec_instrument_id",
+                "object_name": "NGC-0315",
+                "pointing_position": {"ra": 14.45368, "dec": 30.35245},
+                "object_position": {"ra": 14.45368, "dec": 30.35245},
+                "date_range": {
+                    "begin": "2025-08-10T03:51:21.000",
+                    "end": "2025-08-10T11:29:54.000",
+                },
+                "external_observation_id": "5716:1:1",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 27513.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 1660.0,
+                            "max": 5000.0,
+                            "unit": "nm",
+                            "filter_name": "F170LP;G235H",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "nircam_instrument_id",
+                "object_name": "P330-E",
+                "pointing_position": {"ra": 247.890885, "dec": 30.14622222},
+                "object_position": {"ra": 247.890885, "dec": 30.14622222},
+                "date_range": {
+                    "begin": "2025-08-10T12:17:58.000",
+                    "end": "2025-08-10T15:20:15.000",
+                },
+                "external_observation_id": "7615:6:1",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 10937.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 1755.0,
+                            "max": 3980.0,
+                            "unit": "nm",
+                            "filter_name": "F200W;F356W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "nircam_instrument_id",
+                "object_name": "P330-E",
+                "pointing_position": {"ra": 247.890885, "dec": 30.14622222},
+                "object_position": {"ra": 247.890885, "dec": 30.14622222},
+                "date_range": {
+                    "begin": "2025-08-10T15:27:51.000",
+                    "end": "2025-08-10T16:22:06.000",
+                },
+                "external_observation_id": "8882:47:1",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 3255.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 1755.0,
+                            "max": 3980.0,
+                            "unit": "nm",
+                            "filter_name": "F200W;F356W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "nircam_instrument_id",
+                "object_name": "P330-E",
+                "pointing_position": {"ra": 247.890885, "dec": 30.14622222},
+                "object_position": {"ra": 247.890885, "dec": 30.14622222},
+                "date_range": {
+                    "begin": "2025-08-10T16:27:31.000",
+                    "end": "2025-08-10T17:20:53.000",
+                },
+                "external_observation_id": "8882:48:1",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 3202.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 1755.0,
+                            "max": 3980.0,
+                            "unit": "nm",
+                            "filter_name": "F200W;F356W",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+            {
+                "instrument_id": "niriss_instrument_id",
+                "object_name": "LHS-1140",
+                "pointing_position": {"ra": 11.24721208, "dec": -15.27153889},
+                "object_position": {"ra": 11.24721208, "dec": -15.27153889},
+                "date_range": {
+                    "begin": "2025-08-10T18:23:40.000",
+                    "end": "2025-08-10T23:52:16.000",
+                },
+                "external_observation_id": "7073:21:1",
+                "type": "imaging",
+                "status": "planned",
+                "exposure_time": 19716.0,
+                "bandpass": sdk.Bandpass(
+                    sdk.WavelengthBandpass.model_validate(
+                        {
+                            "min": 600.0,
+                            "max": 2800.0,
+                            "unit": "nm",
+                            "filter_name": "CLEAR;GR700XD",
+                        }
+                    )
+                ),
+                "pointing_angle": 0.0,
+            },
+        ],
+    }
+)
