@@ -37,7 +37,13 @@ class Config(BaseConfig):
 
     @property
     def ACROSS_SERVER_URL(self):
-        return f"{self.ACROSS_SERVER_HOST}:{self.ACROSS_SERVER_PORT}{self.ACROSS_SERVER_ROOT_PATH}{self.ACROSS_SERVER_VERSION}"
+        url = f"{self.ACROSS_SERVER_HOST}:{self.ACROSS_SERVER_PORT}{self.ACROSS_SERVER_ROOT_PATH}{self.ACROSS_SERVER_VERSION}"
+
+        # add protocol if DNE
+        if not url.startswith(("http://", "https://")):
+            url = f"http://{url}"
+
+        return url
 
     def is_local(self):
         return self.RUNTIME_ENV == Environments.LOCAL
