@@ -263,10 +263,11 @@ def fake_fermi_telescope() -> sdk.Telescope:
         short_name="fermi_lat",
         created_on=datetime.now(),
         instruments=[
-            sdk.IDNameSchema(
+            sdk.TelescopeInstrument(
                 id="fermi_lat_instrument_uuid",
                 name="Large Area Telescope",
                 short_name="LAT",
+                created_on=datetime.now(),
             )
         ],
     )

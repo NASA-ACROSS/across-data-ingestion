@@ -75,8 +75,8 @@ CHANDRA_TAP_URL = "https://cda.cfa.harvard.edu/cxctap/async"
 
 
 def match_instrument_from_tap_observation(
-    instruments_by_short_name: dict[str, sdk.IDNameSchema], tap_obs: Row
-) -> sdk.IDNameSchema:
+    instruments_by_short_name: dict[str, sdk.TelescopeInstrument], tap_obs: Row
+) -> sdk.TelescopeInstrument:
     """
     Constructs the instrument name from the observation parameters and
     returns both the name and the instrument id in across-server
@@ -104,7 +104,9 @@ def match_instrument_from_tap_observation(
             "Could not parse observation parameters for correct instrument",
             tap_observation=tap_obs,
         )
-        return sdk.IDNameSchema(id="", name="", short_name=None)
+        return sdk.TelescopeInstrument(
+            id="", name="", short_name="", created_on=datetime.now()
+        )
 
     return instruments_by_short_name[short_name]
 
@@ -191,7 +193,7 @@ async def get_observation_data_from_tap() -> Table:
 
 
 def transform_to_observation(
-    tap_obs: Row, instrument: sdk.IDNameSchema
+    tap_obs: Row, instrument: sdk.TelescopeInstrument
 ) -> sdk.ObservationCreate:
     begin = tap_obs["start_date"]
     end = (

@@ -1,5 +1,6 @@
 {
   "cSpell.words": [
+    "Abell",
     "ASGI",
     "astropy",
     "astroquery",
@@ -29,10 +30,15 @@
     "isot",
     "ivoa",
     "ixpe",
+    "jwst",
     "LETG",
     "LIVETIME",
     "MCILWAIN",
+    "miri",
     "mypy",
+    "nircam",
+    "NIRISS",
+    "NIRSPEC",
     "NPOLE",
     "NUMASTER",
     "nustar",
