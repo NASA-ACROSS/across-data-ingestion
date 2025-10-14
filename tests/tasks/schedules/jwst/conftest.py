@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -12,7 +13,6 @@ from across_data_ingestion.util.across_server import sdk
 def set_telescope(
     mock_telescope_api: MagicMock,
     fake_jwst_telescope: sdk.Telescope,
-    mock_instrument_api: MagicMock,
 ) -> None:
     mock_telescope_api.get_telescopes.return_value = [fake_jwst_telescope]
 
@@ -31,7 +31,7 @@ def mock_logger() -> Generator[MagicMock]:
 ## FAKE DATA ##
 @pytest.fixture
 def fake_jwst_telescope(
-    fake_telescope: sdk.Telescope, fake_jwst_instruments: list[sdk.IDNameSchema]
+    fake_telescope: sdk.Telescope, fake_jwst_instruments: list[sdk.TelescopeInstrument]
 ) -> sdk.Telescope:
     fake_telescope.id = "jwst_telescope_id"
 
@@ -41,42 +41,30 @@ def fake_jwst_telescope(
 
 
 @pytest.fixture
-def fake_jwst_instruments() -> list[sdk.IDNameSchema]:
+def fake_jwst_instruments() -> list[sdk.TelescopeInstrument]:
     return [
-        sdk.IDNameSchema(
+        sdk.TelescopeInstrument(
             id="miri_instrument_id",
             name="MIRI",
             short_name="JWST_MIRI",
+            created_on=datetime.now(),
         ),
-        sdk.IDNameSchema(
+        sdk.TelescopeInstrument(
             id="nircam_instrument_id",
             name="NIRCAM",
             short_name="JWST_NIRCAM",
+            created_on=datetime.now(),
         ),
-        sdk.IDNameSchema(
+        sdk.TelescopeInstrument(
             id="niriss_instrument_id",
             name="NIRISS",
             short_name="JWST_NIRISS",
+            created_on=datetime.now(),
         ),
-        sdk.IDNameSchema(
+        sdk.TelescopeInstrument(
             id="nirspec_instrument_id",
             name="NIRSPEC",
             short_name="JWST_NIRSPEC",
+            created_on=datetime.now(),
         ),
     ]
-
-
-# @pytest.fixture
-# def fake_create_many_schedules(
-#     fake_tess_telescope: sdk.Telescope,
-# ) -> dict[str, sdk.ScheduleCreateMany]:
-#     return {
-#         "placeholder_observations": sdk.ScheduleCreateMany(
-#             schedules=mocks.placeholder_observations.ACROSS_schedule_output.expected,
-#             telescope_id=fake_tess_telescope.id,
-#         ),
-#         "orbit_observations": sdk.ScheduleCreateMany(
-#             schedules=mocks.orbit_observations.ACROSS_schedule_output.expected,
-#             telescope_id=fake_tess_telescope.id,
-#         ),
-#     }

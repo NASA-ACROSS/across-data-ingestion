@@ -24,10 +24,11 @@ def fake_telescope() -> sdk.Telescope:
         short_name="chandra",
         created_on=datetime.now(),
         instruments=[
-            sdk.IDNameSchema(
+            sdk.TelescopeInstrument(
                 id="instrument_uuid",
                 name="CHANDRA ACIS",
                 short_name="ACIS",
+                created_on=datetime.now(),
             )
         ],
     )
@@ -121,57 +122,65 @@ def mock_vo_service_cls(mock_vo_service: AsyncMock) -> Generator[AsyncMock]:
 
 
 @pytest.fixture
-def fake_instruments() -> list[sdk.IDNameSchema]:
+def fake_instruments() -> list[sdk.TelescopeInstrument]:
     instruments = [
         {
             "name": "Instrument Name - ACIS",
             "short_name": "ACIS",
             "id": "acis-mock-id",
+            "created_on": "2025-10-09 00:00:00",
         },
         {
             "name": "Instrument Name - ACIS-HETG",
             "short_name": "ACIS-HETG",
             "id": "acis-hetg-mock-id",
+            "created_on": "2025-10-09 00:00:00",
         },
         {
             "name": "Instrument Name - ACIS-LETG",
             "short_name": "ACIS-LETG",
             "id": "acis-letg-mock-id",
+            "created_on": "2025-10-09 00:00:00",
         },
         {
             "name": "Instrument Name - ACIS-CC",
             "short_name": "ACIS-CC",
             "id": "acis-cc-mock-id",
+            "created_on": "2025-10-09 00:00:00",
         },
         {
             "name": "Instrument Name - HRC",
             "short_name": "HRC",
             "id": "hrc-mock-id",
+            "created_on": "2025-10-09 00:00:00",
         },
         {
             "name": "Instrument Name - HRC-HETG",
             "short_name": "HRC-HETG",
             "id": "hrc-hetg-mock-id",
+            "created_on": "2025-10-09 00:00:00",
         },
         {
             "name": "Instrument Name - HRC-LETG",
             "short_name": "HRC-LETG",
             "id": "hrc-letg-mock-id",
+            "created_on": "2025-10-09 00:00:00",
         },
         {
             "name": "Instrument Name - HRC-Timing",
             "short_name": "HRC-Timing",
             "id": "hrc-timing-mock-id",
+            "created_on": "2025-10-09 00:00:00",
         },
     ]
 
-    return [sdk.IDNameSchema(**info) for info in instruments]
+    return [sdk.TelescopeInstrument.model_validate(info) for info in instruments]
 
 
 @pytest.fixture
 def fake_instruments_by_short_name(
-    fake_instruments: list[sdk.IDNameSchema],
-) -> dict[str, sdk.IDNameSchema]:
+    fake_instruments: list[sdk.TelescopeInstrument],
+) -> dict[str, sdk.TelescopeInstrument]:
     return {
         (instrument.short_name or ""): instrument for instrument in fake_instruments
     }

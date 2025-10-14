@@ -38,25 +38,29 @@ def fake_telescope() -> sdk.Telescope:
         short_name="XMM-Newton",
         created_on=datetime.now(),
         instruments=[
-            sdk.IDNameSchema(
+            sdk.TelescopeInstrument(
                 id="epic-mos_instrument_uuid",
                 name="European Photon Imaging Camera - MOS",
                 short_name="EPIC-MOS",
+                created_on=datetime.now(),
             ),
-            sdk.IDNameSchema(
+            sdk.TelescopeInstrument(
                 id="epic-pn_instrument_uuid",
                 name="European Photon Imaging Camera - pn",
                 short_name="EPIC-PN",
+                created_on=datetime.now(),
             ),
-            sdk.IDNameSchema(
+            sdk.TelescopeInstrument(
                 id="rgs_instrument_uuid",
                 name="Reflection Grating Spectrometer",
                 short_name="RGS",
+                created_on=datetime.now(),
             ),
-            sdk.IDNameSchema(
+            sdk.TelescopeInstrument(
                 id="om_instrument_uuid",
                 name="Optical Monitor",
                 short_name="OM",
+                created_on=datetime.now(),
             ),
         ],
     )

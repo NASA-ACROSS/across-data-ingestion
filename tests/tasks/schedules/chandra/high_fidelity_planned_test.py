@@ -67,23 +67,23 @@ class TestChandraHighFidelityPlannedScheduleIngestionTask:
             ),
             (
                 {"instrument": "ACIS", "grating": "BAD_GRATING", "exposure_mode": ""},
-                None,
+                "",
             ),
             (
                 {"instrument": "HRC", "grating": "BAD_GRATING", "exposure_mode": ""},
-                None,
+                "",
             ),
             (
                 {"instrument": "BAD_INSTRUMENT", "grating": "", "exposure_mode": ""},
-                None,
+                "",
             ),
         ],
     )
     def test_should_match_instrument_from_tap_observation(
         self,
         mock_tap_row: dict,
-        expected_instrument_short_name: tuple,
-        fake_instruments_by_short_name: dict[str, sdk.IDNameSchema],
+        expected_instrument_short_name: str,
+        fake_instruments_by_short_name: dict[str, sdk.TelescopeInstrument],
     ) -> None:
         """Should return correct instrument name and id from observation row"""
         instrument = match_instrument_from_tap_observation(

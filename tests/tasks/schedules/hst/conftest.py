@@ -144,10 +144,11 @@ def fake_telescope() -> sdk.Telescope:
         short_name="hst",
         created_on=datetime.now(),
         instruments=[
-            sdk.IDNameSchema(
+            sdk.TelescopeInstrument(
                 id="instrument_uuid",
                 name="Wide Field Camera 3 - Infrared Channel",
                 short_name="HST_WFC3_IR",
+                created_on=datetime.now(),
             )
         ],
     )

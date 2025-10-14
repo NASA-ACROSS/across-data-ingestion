@@ -96,10 +96,11 @@ def fake_telescope() -> sdk.Telescope:
         name="Test Telescope",
         short_name="tt",
         instruments=[
-            sdk.IDNameSchema(
+            sdk.TelescopeInstrument(
                 id="test-instrument-id",
                 name="Test Instrument",
                 short_name="ti",
+                created_on=datetime.now(),
             )
         ],
     )
@@ -131,8 +132,13 @@ def fake_observatory() -> sdk.Observatory:
         name="Treedome Space Observatory",
         short_name="MT",
         type=sdk.ObservatoryType.SPACE_BASED,
+        reference_url=None,
         telescopes=[
-            sdk.IDNameSchema(id="uuid", name="Treedome Telescope", short_name="tree")
+            sdk.IDNameSchema(
+                id="uuid",
+                name="Treedome Telescope",
+                short_name="tree",
+            )
         ],
         ephemeris_types=[
             sdk.ObservatoryEphemerisType(
