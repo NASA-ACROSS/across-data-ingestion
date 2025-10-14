@@ -75,9 +75,20 @@ def ingest() -> None:
                 tle2=tle.tle2,
             )
 
-            sdk.TLEApi(client).create_tle(across_tle)
+            try:
+                sdk.TLEApi(client).create_tle(across_tle)
+                logger.info("Created new TLE", satellite=satellite.model_dump())
+            except sdk.ApiException as err:
+                if err.status == 409:
+                    logger.warning(
+                        "TLE Already Exists",
+                        name=across_tle.satellite_name,
+                        norad_id=across_tle.norad_id,
+                        epoch=tle.epoch,
+                    )
+                else:
+                    raise err
 
-            logger.info("Create new TLE", satellite=satellite.model_dump())
         else:
             logger.warning("Could not fetch TLE", satellite=satellite.model_dump())
 
