@@ -5,8 +5,8 @@ import structlog
 from across.tools import tle as tle_tool
 from fastapi_utilities import repeat_at  # type: ignore
 
-from ...core import config
 from ...util.across_server import client, sdk
+from .config import spacetrack_config
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
@@ -63,8 +63,8 @@ def ingest() -> None:
         tle = tle_tool.get_tle(
             norad_id=satellite.id,
             epoch=datetime.now(),
-            spacetrack_user=config.SPACETRACK_USER,
-            spacetrack_pwd=config.SPACETRACK_PWD,
+            spacetrack_user=spacetrack_config.SPACETRACK_USER,
+            spacetrack_pwd=spacetrack_config.SPACETRACK_PWD,
         )
 
         if tle:
@@ -93,7 +93,7 @@ def ingest() -> None:
             logger.warning("Could not fetch TLE", satellite=satellite.model_dump())
 
 
-@repeat_at(cron="34 4 * * *", logger=logger)
+@repeat_at(cron="34 4,16 * * *", logger=logger)
 async def entrypoint() -> None:
     try:
         ingest()

@@ -27,9 +27,6 @@ class Config(BaseConfig):
     AWS_REGION: str = "us-east-2"
     AWS_PROFILE: str | None = None
 
-    SPACETRACK_USER: str = "spacetrack-username"
-    SPACETRACK_PWD: str = "spacetrack-pwd"
-
     # Logging
     LOG_LEVEL: str = "DEBUG"
     # Adjusts the output being rendered as JSON (False for dev with pretty-print).
