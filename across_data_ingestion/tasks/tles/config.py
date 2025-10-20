@@ -16,12 +16,17 @@ class Config(BaseConfig):
         if not core_config.is_local():
             logger.debug("Getting spacetrack credentials from SSM...")
 
-            self.SPACETRACK_USER = str(
-                SSM.get_parameter("spacetrack/username", core_config.APP_ENV)
+            user_param = SSM.get_parameter("spacetrack/username", core_config.APP_ENV)
+            self.SPACETRACK_USER = str(user_param.get("Value"))
+
+            logger.debug(
+                "Loaded spacetrack username from SSM", username=self.SPACETRACK_USER
             )
-            self.SPACETRACK_PWD = str(
-                SSM.get_parameter("spacetrack/password", core_config.APP_ENV)
+
+            password_param = SSM.get_parameter(
+                "spacetrack/password", core_config.APP_ENV
             )
+            self.SPACETRACK_PWD = str(password_param.get("Value"))
 
             logger.debug("Retrieved spacetrack credentials from SSM!")
         else:
