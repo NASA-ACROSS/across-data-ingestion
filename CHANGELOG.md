@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.2.0](https://github.com/ACROSS-Team/across-data-ingestion/compare/v0.1.2...v0.2.0) (2025-10-20)
+
+
+### Features
+
+* add task to ingest XMM-Newton planned schedules ([#66](https://github.com/ACROSS-Team/across-data-ingestion/issues/66)) ([204c340](https://github.com/ACROSS-Team/across-data-ingestion/commit/204c340043b39c6644f0e8ef7c628fbfc46652b1))
+* adding an ingestion layer for JWST ([#64](https://github.com/ACROSS-Team/across-data-ingestion/issues/64)) ([33f36f7](https://github.com/ACROSS-Team/across-data-ingestion/commit/33f36f774969b2d0658d90de4eb845a729531d24))
+* **TLE:** add spacetrack config, load user/pwd from aws ssm in deployed env ([#96](https://github.com/ACROSS-Team/across-data-ingestion/issues/96)) ([cc1f753](https://github.com/ACROSS-Team/across-data-ingestion/commit/cc1f75354b706d502e7521d89c8e530ad8b0443c))
+
+
+### Bug Fixes
+
+* add http/https if missing, set check_server cron to every 30 mins ([#91](https://github.com/ACROSS-Team/across-data-ingestion/issues/91)) ([961e495](https://github.com/ACROSS-Team/across-data-ingestion/commit/961e49575fb5a7abb0c38714b5df6e452d9c12c2))
+* log warning for 409 duplicate TLE response ([#95](https://github.com/ACROSS-Team/across-data-ingestion/issues/95)) ([88688ee](https://github.com/ACROSS-Team/across-data-ingestion/commit/88688eed5d95c097361ceff33ea54d93a00ecf43))
+* **release:** release-please needs ci ([#87](https://github.com/ACROSS-Team/across-data-ingestion/issues/87)) ([cffb549](https://github.com/ACROSS-Team/across-data-ingestion/commit/cffb5491130c98bd14e3cab311496cd7d942972d))
+* set seeded service account client credentials when running locally ([#90](https://github.com/ACROSS-Team/across-data-ingestion/issues/90)) ([7e032d9](https://github.com/ACROSS-Team/across-data-ingestion/commit/7e032d90406b23fdfb847c0be9c495bc9f02a6aa))
+* tle config properly sets space-track credentials ([#98](https://github.com/ACROSS-Team/across-data-ingestion/issues/98)) ([4e41a34](https://github.com/ACROSS-Team/across-data-ingestion/commit/4e41a344c038c2781164bbd1511ffb1dbe527d63))
+* update dep versions for tools and sdk ([6eb3024](https://github.com/ACROSS-Team/across-data-ingestion/commit/6eb30248e0d71cd528a84d38afd1b422e92cbcd5))
+* update sdk version ([b46f329](https://github.com/ACROSS-Team/across-data-ingestion/commit/b46f329f3143f1fcd30d5f7539bba4fed5e166d2))
+* use TelescopeInstrument schema ([#93](https://github.com/ACROSS-Team/across-data-ingestion/issues/93)) ([c86dadc](https://github.com/ACROSS-Team/across-data-ingestion/commit/c86dadc94fd1f5f7021cd106167dc4c4cb7283c2))
+
 ## [0.1.2](https://github.com/ACROSS-Team/across-data-ingestion/compare/v0.1.1...v0.1.2) (2025-09-30)
 
 
