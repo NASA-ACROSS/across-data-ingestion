@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.0](https://github.com/ACROSS-Team/across-data-ingestion/compare/v0.2.0...v1.0.0) (2025-10-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* release v1
+
+### Features
+
+* release for v1 ([#101](https://github.com/ACROSS-Team/across-data-ingestion/issues/101)) ([72e3044](https://github.com/ACROSS-Team/across-data-ingestion/commit/72e3044fad5ea8fffe19db59f9499ac21412821e))
+* release v1 ([2cb471c](https://github.com/ACROSS-Team/across-data-ingestion/commit/2cb471c9e6ebe1850eadb3ea408af48fce568cd4))
+
 ## [0.2.0](https://github.com/ACROSS-Team/across-data-ingestion/compare/v0.1.2...v0.2.0) (2025-10-20)
 
 
