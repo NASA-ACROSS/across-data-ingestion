@@ -5,7 +5,7 @@ import pydantic
 import pytest
 from swifttools import swift_too  # type:ignore
 
-import across_data_ingestion.tasks.schedules.swift.low_fidelity_planned as task
+import across_data_ingestion.tasks.schedules.swift.util as task
 
 from .mocks import fake_swift_plan
 
@@ -115,9 +115,11 @@ def mock_swift_too(
 ):
     mock_too = MagicMock()
     mock_too.PlanQuery = MagicMock(return_value=fake_swift_ppst_entries)
+    mock_too.ObsQuery = MagicMock(return_value=fake_swift_ppst_entries)
     mock_too.UVOTMode = mock_uvot_mode_cls
 
     monkeypatch.setattr(swift_too, "PlanQuery", mock_too.PlanQuery)
+    monkeypatch.setattr(swift_too, "ObsQuery", mock_too.ObsQuery)
     monkeypatch.setattr(swift_too, "UVOTMode", mock_too.UVOTMode)
 
     return mock_too
