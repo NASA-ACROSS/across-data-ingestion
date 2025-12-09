@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 import structlog
-from astropy.table import Row, Table, join  # type: ignore[import-untyped]
+from astropy.table import Row, Table  # type: ignore[import-untyped]
 from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore
 
@@ -13,22 +13,27 @@ logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
 
 async def get_observation_data_from_tap() -> Table:
-    """Query Chandra TAP service to get most of the observation parameters"""
+    """Query Chandra TAP service to get observation parameters"""
     async with VOService(chandra_util.CHANDRA_TAP_URL) as vo_service:
         # Query for initial parameters
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
         observations_query = (
             "SELECT "
             "   o.obsid, "
+            "   o.target_name, "
             "   o.start_date, "
             "   o.ra, "
             "   o.dec, "
             "   o.instrument, "
             "   o.grating, "
-            "   o.exposure_mode "
+            "   o.exposure_mode, "
+            "   o.exposure_time, "
+            "   o.proposal_number "
             "FROM cxc.observation o "
             "WHERE "
-            f"  o.start_date > '{now}' AND o.status='scheduled' "
+            f"  o.start_date > '{week_ago}' AND o.status='observed' "
             "ORDER BY "
             "   o.start_date DESC"
         )
@@ -38,43 +43,7 @@ async def get_observation_data_from_tap() -> Table:
             logger.warning("No observations found.")
             return Table()
 
-        # Query for exposure times needs ids to be strings, since
-        # they are VARCHARs in from TAP Schema
-        obs_ids = "', '".join(str(obsid["obsid"]) for obsid in observations_table)
-
-        exposure_times_query = (
-            "SELECT "
-            "   obs_id, "
-            "   target_name, "
-            "   t_plan_exptime "
-            "FROM ivoa.obsplan "
-            "WHERE "
-            f"   obs_id in ('{obs_ids}')"
-        )
-        exposure_times_table = await vo_service.query(exposure_times_query)
-
-        if not exposure_times_table:
-            logger.warning("No exposure times for observations found")
-            return Table()
-
-        if len(exposure_times_table) != len(observations_table):
-            logger.warning(
-                "Mismatched number of exposure time records to actual observation records.",
-            )
-
-        # convert both id cols to strings for joining the tables
-        exposure_times_table["obs_id"] = exposure_times_table["obs_id"].astype(str)
-        observations_table["obsid"] = observations_table["obsid"].astype(str)
-
-        joined_table = join(
-            observations_table,
-            exposure_times_table,
-            keys_left="obsid",
-            keys_right="obs_id",
-            join_type="left",
-        )
-
-        return joined_table
+        return observations_table
 
 
 def transform_to_observation(
@@ -82,7 +51,8 @@ def transform_to_observation(
 ) -> sdk.ObservationCreate:
     begin = tap_obs["start_date"]
     end = (
-        Time(begin, format="isot") + timedelta(seconds=tap_obs["t_plan_exptime"])
+        Time(begin, format="isot")
+        + timedelta(seconds=tap_obs["exposure_time"] * 1000.0)
     ).isot
 
     return sdk.ObservationCreate(
@@ -100,21 +70,21 @@ def transform_to_observation(
             begin=begin,
             end=end,
         ),
-        external_observation_id=tap_obs["obs_id"],
+        external_observation_id=str(tap_obs["obsid"]),
         type=chandra_util.CHANDRA_OBSERVATION_TYPES[instrument.short_name or ""],
-        status=sdk.ObservationStatus.SCHEDULED,
+        status=sdk.ObservationStatus.PERFORMED,
         pointing_angle=0.0,
-        exposure_time=float(tap_obs["t_plan_exptime"]),
+        exposure_time=float(tap_obs["exposure_time"]) * 1000.0,
         bandpass=chandra_util.CHANDRA_BANDPASSES[instrument.short_name or ""],
+        proposal_reference=str(tap_obs["proposal_number"]),
     )
 
 
 async def ingest() -> None:
     """
-    Ingests all scheduled Chandra observations by submitting a TAP query using
-    the Chandra VO service.
+    Ingests all executed Chandra observations within the past week
+    by submitting a TAP query using the Chandra VO service.
 
-    Performs queries of two different tables to retrieve all required parameters.
     Transforms the data into ACROSS ScheduleCreate and ObservationCreate interfaces,
     matches the correct Chandra instrument given the observation parameters,
     and pushes the schedule to the across-server create schedule endpoint.
@@ -133,8 +103,8 @@ async def ingest() -> None:
     schedule = chandra_util.create_schedule(
         telescope_id=telescope.id,
         tap_observations=tap_observation_table,
-        schedule_type="high_fidelity_planned",
-        schedule_status=sdk.ScheduleStatus.SCHEDULED,
+        schedule_type="as_flown",
+        schedule_status=sdk.ScheduleStatus.PERFORMED,
         schedule_fidelity=sdk.ScheduleFidelity.HIGH,
     )
 
@@ -158,16 +128,16 @@ async def ingest() -> None:
             logger.info("Schedule already exists.", schedule_name=schedule.name)
 
 
-@repeat_at(cron="13 2 * * 2", logger=logger)
+@repeat_at(cron="13 4 * * 7", logger=logger)
 async def entrypoint() -> None:
     try:
         await ingest()
-        logger.info("Chandra high-fidelity planned schedule ingestion completed.")
+        logger.info("Chandra as-flown schedule ingestion completed.")
         return
     except Exception as e:
         # Surface the error through logging, if we do not catch everything and log, the errors get voided
         logger.error(
-            "Chandra high-fidelity planned schedule ingestion encountered an error",
+            "Chandra as-flown schedule ingestion encountered an error",
             err=e,
             exc_info=True,
         )
