@@ -38,7 +38,7 @@ General documentation for other project commands can be found with `make help`.
 
 ### Development
 
-The across-server is assumed to be running locally alongside the ingestion server. The across-server can be run through a standard docker container in the background. Please see the [across-server documentation](https://github.com/ACROSS-Team/across-server/blob/main/README.md) for more information.
+The across-server is assumed to be running locally alongside the ingestion server. The across-server can be run through a standard docker container in the background. Please see the [across-server documentation](https://github.com/NASA-ACROSS/across-server/blob/main/README.md) for more information.
 
 In order to run the server through the CLI run
 

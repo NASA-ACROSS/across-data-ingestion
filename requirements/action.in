@@ -5,5 +5,5 @@
 -r test.in
 -r lint.in
 
-# across-tools @ git+ssh://git@across-tools:ACROSS-Team/across-tools.git@main
-# across-server-openapi-python @ git+ssh://openapi-server-sdk:ACROSS-Team/across-server-openapi-python.git@main
+# across-tools @ git+ssh://git@across-tools:NASA-ACROSS/across-tools.git@main
+# across-server-openapi-python @ git+ssh://openapi-server-sdk:NASA-ACROSS/across-server-openapi-python.git@main
