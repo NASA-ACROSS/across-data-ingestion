@@ -1,7 +1,7 @@
 # Core dependencies
 
-across-tools @ git+ssh://git@github.com/ACROSS-Team/across-tools.git@main
-across-server-openapi-python @ git+ssh://git@github.com/ACROSS-Team/across-server-openapi-python.git@main
+across-tools @ git+ssh://git@github.com/NASA-ACROSS/across-tools.git@main
+across-server-openapi-python @ git+ssh://git@github.com/NASA-ACROSS/across-server-openapi-python.git@main
 alembic >=1.13.2,<2
 asyncer >=0.0.8,<0.0.9
 astropy >=7.0.0
