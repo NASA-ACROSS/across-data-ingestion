@@ -38,7 +38,7 @@ on:
         description: "Image name (excluding registry). Defaults to {{$organization/$repository}}."
         required: false
         type: string
-        default: ''
+        default: ""
       build-args:
         description: "Build args for Docker build."
         type: string
@@ -56,13 +56,6 @@ on:
       registry:
         description: "ECR Docker registry"
         required: true
-      ssh:
-        description: "List of SSH agent socket or keys to expose to the build"
-        required: false
-      ssh-private-key:
-        description: "ssh private key(s) to expose to the build"
-        required: false
-
     outputs:
       image:
         description: "Docker Image"
@@ -93,33 +86,20 @@ jobs:
         id: lowercase
         uses: cloudposse/github-action-string-transformer@main
         with:
-          operation: 'lowercase'
+          operation: "lowercase"
           input-string: ${{ inputs.organization }}
-
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.ssh-private-key }}
-
-      # https://github.com/webfactory/ssh-agent/tree/v0.9.0/?tab=readme-ov-file#using-multiple-deploy-keys-inside-docker-builds
-      - name: Collect Git and SSH config files in a directory that is part of the Docker build context
-        run: |
-          mkdir root-config
-          cp -r ~/.gitconfig  ~/.ssh root-config/
 
       - name: Build
         id: build
         uses: cloudposse/github-action-docker-build-push@1.13.0
         with:
-          cache-to: ''
-          cache-from: ''
+          cache-to: ""
+          cache-from: ""
           organization: ${{ steps.lowercase.outputs.output-string }}
           repository: ${{ inputs.repository }}
           registry: ${{ secrets.registry }}
           image_name: ${{inputs.image-name}}
           build-args: ${{inputs.build-args}}
-          ssh: |
-            default=${{ env.SSH_AUTH_SOCK }}
           # provenance is needed so there's not 'blank' entries in ecr as `-`
           # AWS handles metadata as a separate image entry.
           provenance: false

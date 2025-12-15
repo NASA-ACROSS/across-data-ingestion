@@ -80,8 +80,6 @@ on:
       ecr-iam-role:
         description: "IAM Role ARN provide ECR write/read access"
         required: true
-      ssh-private-key:
-        required: false
       release-please-token:
         required: true
 
@@ -98,7 +96,6 @@ jobs:
       ecr-iam-role: ${{ secrets.ecr-iam-role }}
       registry: ${{ secrets.registry }}
       secret-outputs-passphrase: ${{ secrets.secret-outputs-passphrase }}
-      ssh-private-key: ${{ secrets.ssh-private-key }}
 
   cd:
     uses: ./.github/workflows/workflow-cd-ecspresso.yml
