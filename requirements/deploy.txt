@@ -80,6 +80,8 @@ fastapi-utils==0.8.0
     # via -r requirements/base.in
 geoalchemy2==0.15.2
     # via -r requirements/base.in
+greenlet==3.3.0
+    # via sqlalchemy
 h11==0.14.0
     # via
     #   httpcore
