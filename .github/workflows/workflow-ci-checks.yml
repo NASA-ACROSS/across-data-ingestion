@@ -12,11 +12,6 @@ on:
         default: true
         type: boolean
 
-    secrets:
-      ssh-private-key:
-        required: true
-
-
 jobs:
   format:
     runs-on: ubuntu-latest
@@ -39,8 +34,6 @@ jobs:
 
       - name: Setup
         uses: ./.github/actions/setup
-        with:
-          ssh-private-key: ${{secrets.ssh-private-key}}
 
       - name: Run Unit Tests
         run: make test
@@ -53,8 +46,6 @@ jobs:
 
       - name: Setup
         uses: ./.github/actions/setup
-        with:
-          ssh-private-key: ${{secrets.ssh-private-key}}
 
       - name: Run Type Checking
         run: make types

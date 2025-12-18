@@ -2,7 +2,7 @@
 name: Release PR Checks
 on:
   pull_request:
-    branches: [ 'main' ]
+    branches: ["main"]
     types: [opened, synchronize, reopened]
     # look for the specific files that are changed in a release-pr
     paths:
@@ -23,7 +23,3 @@ jobs:
     uses: ./.github/workflows/workflow-ci-checks.yml
     with:
       format-changed-files: false
-    secrets:
-      ssh-private-key: |
-        ${{ secrets.ACROSS_TOOLS_SSH_KEY }}
-        ${{ secrets.OPENAPI_SDK_SSH_KEY }}
