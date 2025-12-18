@@ -33,9 +33,6 @@ jobs:
       ecr-iam-role: "${{ secrets.ECR_IAM_ROLE }}"
       registry: "${{ secrets.ECR_REGISTRY }}"
       secret-outputs-passphrase: "${{ secrets.GHA_SECRET_OUTPUT_PASSPHRASE }}"
-      ssh-private-key: |
-        ${{ secrets.ACROSS_TOOLS_SSH_KEY }}
-        ${{ secrets.OPENAPI_SDK_SSH_KEY }}
 
   release-please:
     needs: [ci]

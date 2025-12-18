@@ -73,7 +73,7 @@ on:
         description: "Image name (excluding registry). Defaults to {{$organization/$repository}}."
         required: false
         type: string
-        default: ''
+        default: ""
       app:
         description: "Application name. Used with monorepo pattern when there are several applications in the repo"
         required: false
@@ -98,14 +98,10 @@ on:
       ecr-iam-role:
         description: "IAM Role ARN provide ECR write/read access"
         required: true
-      ssh-private-key:
-        required: true
 
 jobs:
   ci-checks:
     uses: ./.github/workflows/workflow-ci-checks.yml
-    secrets:
-      ssh-private-key: ${{secrets.ssh-private-key}}
 
   ci-build:
     uses: ./.github/workflows/workflow-ci-dockerized-app-build.yml
@@ -119,11 +115,10 @@ jobs:
       ecr-iam-role: ${{ secrets.ecr-iam-role }}
       registry: ${{ secrets.registry }}
       secret-outputs-passphrase: ${{ secrets.secret-outputs-passphrase }}
-      ssh-private-key: ${{secrets.ssh-private-key}}
 
   cd:
     uses: ./.github/workflows/workflow-cd-preview-ecspresso.yml
-    needs: [ ci-build ]
+    needs: [ci-build]
     if: ${{ always() }}
     with:
       image: ${{ needs.ci-build.outputs.image }}
