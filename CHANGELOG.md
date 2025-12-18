@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.1.0](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.0.0...v1.1.0) (2025-12-18)
+
+
+### Features
+
+* **legal:** add NASA copyright notices ([#108](https://github.com/NASA-ACROSS/across-data-ingestion/issues/108)) ([ee9334d](https://github.com/NASA-ACROSS/across-data-ingestion/commit/ee9334dd508aed68a0dd7498f09667f2f0f310d7))
+* **license:** apache 2.0 license ([#116](https://github.com/NASA-ACROSS/across-data-ingestion/issues/116)) ([b475eae](https://github.com/NASA-ACROSS/across-data-ingestion/commit/b475eaebe2baebaadbd159d4867a69b3f25ef4ee))
+
+
+### Bug Fixes
+
+* **cicd:** remove ssh for build and across deps ([#113](https://github.com/NASA-ACROSS/across-data-ingestion/issues/113)) ([64ed7e7](https://github.com/NASA-ACROSS/across-data-ingestion/commit/64ed7e752e6dee8a804c5056164eaa66f3b08609))
+* **cicd:** rm ssh from cicd ([#119](https://github.com/NASA-ACROSS/across-data-ingestion/issues/119)) ([fead0dc](https://github.com/NASA-ACROSS/across-data-ingestion/commit/fead0dc1a5b282455bb595c30fccecb463fa3f3b))
+* **org-name:** update organization name ([#110](https://github.com/NASA-ACROSS/across-data-ingestion/issues/110)) ([ca92f9e](https://github.com/NASA-ACROSS/across-data-ingestion/commit/ca92f9e338f8a05a60beb770856be00023049838))
+* use pypi deps ([#118](https://github.com/NASA-ACROSS/across-data-ingestion/issues/118)) ([ac5b44c](https://github.com/NASA-ACROSS/across-data-ingestion/commit/ac5b44c43c02f06bf109886982739e1e1e2fd896))
+
 ## [1.0.0](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v0.2.0...v1.0.0) (2025-10-27)
 
 
