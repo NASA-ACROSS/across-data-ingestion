@@ -74,8 +74,8 @@ def ixpe_to_across_schedule(
     Creates a IXPE schedule from the provided data.
     """
 
-    begin = Time(f"{min(data["Start"])}", format="iso").isot
-    end = Time(f"{max(data["Stop"])}", format="iso").isot
+    begin = Time(f"{min(data['Start'])}", format="iso").isot
+    end = Time(f"{max(data['Stop'])}", format="iso").isot
 
     return sdk.ScheduleCreate(
         telescope_id=telescope_id,
@@ -101,11 +101,11 @@ def ixpe_to_across_observation(instrument_id: str, row: dict) -> sdk.Observation
 
     exposure_time = obs_end_at - obs_start_at
 
-    external_id = f"{str.replace(row["P S"], " ", "_")}_obs_{row['Pnum']}"
+    external_id = f"{str.replace(row['P S'], ' ', '_')}_obs_{row['Pnum']}"
 
     return sdk.ObservationCreate(
         instrument_id=instrument_id,
-        object_name=f"{row["Name"]}",
+        object_name=f"{row['Name']}",
         pointing_position=sdk.Coordinate(
             ra=float(row["RA"]),
             dec=float(row["Dec"]),

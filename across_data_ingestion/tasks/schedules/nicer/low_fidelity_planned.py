@@ -45,8 +45,8 @@ def transform_to_across_schedule(
     Creates a NICER schedule from the provided data.
     """
 
-    begin = Time(f"{min(data["Start"])}", format="isot").isot
-    end = Time(f"{max(data["Stop"])}", format="isot").isot
+    begin = Time(f"{min(data['Start'])}", format="isot").isot
+    end = Time(f"{max(data['Stop'])}", format="isot").isot
 
     return sdk.ScheduleCreate(
         telescope_id=telescope_id,
