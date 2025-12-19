@@ -244,14 +244,14 @@ def extract_observation_pointing_coordinates(
         return None
 
     ra = (
-        f"{planned_observation_data["ra_h"].values[0]}:"
-        f"{planned_observation_data["ra_m"].values[0]}:"
-        f"{planned_observation_data["ra_s"].values[0]}"
+        f"{planned_observation_data['ra_h'].values[0]}:"
+        f"{planned_observation_data['ra_m'].values[0]}:"
+        f"{planned_observation_data['ra_s'].values[0]}"
     )
     dec = (
-        f"{planned_observation_data["dec_d"].values[0]}:"
-        f"{planned_observation_data["dec_m"].values[0]}:"
-        f"{planned_observation_data["dec_s"].values[0]}"
+        f"{planned_observation_data['dec_d'].values[0]}:"
+        f"{planned_observation_data['dec_m'].values[0]}:"
+        f"{planned_observation_data['dec_s'].values[0]}"
     )
 
     return Position(ra=ra, dec=dec)

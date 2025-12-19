@@ -54,9 +54,9 @@ def fake_fermi_html(fake_fermi_week: int) -> str:
         "<hr>\n"
         '<img src="/icons/back.gif" alt="[DIR]"><a href="/ssc/observations/timeline/ft2/">Parent Directory</a>-<img src="/icons/unknown.gif" alt="[   ]"> \n'
         f'<a href="FERMI_POINTING_FINAL_{fake_fermi_week}_2025065_2025072_00.fits">FERMI_POINTING_FINAL_{fake_fermi_week}_2025065_2025072_00.fits</a> 19-May-2010 13:19  970K  <img src="/icons/unknown.gif" alt="[   ]">\n'
-        f'<a href="FERMI_POINTING_FINAL_{fake_fermi_week+1}_2025072_2025079_00.fits">FERMI_POINTING_FINAL_{fake_fermi_week+1}_2025072_2025079_00.fits</a> 25-May-2010 13:19  970K  <img src="/icons/unknown.gif" alt="[   ]">\n'
-        f'<a href="FERMI_POINTING_PRELIM_{fake_fermi_week+3}_2025086_2025093_00.fits">FERMI_POINTING_PRELIM_{fake_fermi_week+3}_2025086_2025093_00.fits</a> 20-May-2010 13:19  970K  <img src="/icons/unknown.gif" alt="[   ]">\n'
-        f'<a href="FERMI_POINTING_PRELIM_{fake_fermi_week+3}_2025086_2025093_00.fits">FERMI_POINTING_PRELIM_{fake_fermi_week+3}_2025086_2025093_01.fits</a> 21-May-2010 13:19  970K  <img src="/icons/unknown.gif" alt="[   ]">\n'
+        f'<a href="FERMI_POINTING_FINAL_{fake_fermi_week + 1}_2025072_2025079_00.fits">FERMI_POINTING_FINAL_{fake_fermi_week + 1}_2025072_2025079_00.fits</a> 25-May-2010 13:19  970K  <img src="/icons/unknown.gif" alt="[   ]">\n'
+        f'<a href="FERMI_POINTING_PRELIM_{fake_fermi_week + 3}_2025086_2025093_00.fits">FERMI_POINTING_PRELIM_{fake_fermi_week + 3}_2025086_2025093_00.fits</a> 20-May-2010 13:19  970K  <img src="/icons/unknown.gif" alt="[   ]">\n'
+        f'<a href="FERMI_POINTING_PRELIM_{fake_fermi_week + 3}_2025086_2025093_00.fits">FERMI_POINTING_PRELIM_{fake_fermi_week + 3}_2025086_2025093_01.fits</a> 21-May-2010 13:19  970K  <img src="/icons/unknown.gif" alt="[   ]">\n'
         "<hr>\n"
         "</pre>\n"
         "</body>\n"
@@ -77,7 +77,7 @@ def fake_pointing_files(fake_fermi_week: int) -> list[PointingFile]:
             rev=0,
         ),
         PointingFile(
-            name=f"FERMI_POINTING_FINAL_{fake_fermi_week+1}_2025072_2025079_00.fits",
+            name=f"FERMI_POINTING_FINAL_{fake_fermi_week + 1}_2025072_2025079_00.fits",
             fidelity="FINAL",
             week=fake_fermi_week + 1,
             start="2025072",
@@ -86,7 +86,7 @@ def fake_pointing_files(fake_fermi_week: int) -> list[PointingFile]:
             rev=0,
         ),
         PointingFile(
-            name=f"FERMI_POINTING_PRELIM_{fake_fermi_week+3}_2025086_2025093_00.fits",
+            name=f"FERMI_POINTING_PRELIM_{fake_fermi_week + 3}_2025086_2025093_00.fits",
             fidelity="PRELIM",
             week=fake_fermi_week + 3,
             start="2025086",
@@ -95,7 +95,7 @@ def fake_pointing_files(fake_fermi_week: int) -> list[PointingFile]:
             rev=0,
         ),
         PointingFile(
-            name=f"FERMI_POINTING_PRELIM_{fake_fermi_week+3}_2025086_2025093_01.fits",
+            name=f"FERMI_POINTING_PRELIM_{fake_fermi_week + 3}_2025086_2025093_01.fits",
             fidelity="PRELIM",
             week=fake_fermi_week + 3,
             start="2025086",

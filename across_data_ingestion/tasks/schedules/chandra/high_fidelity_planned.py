@@ -87,7 +87,7 @@ def match_instrument_from_tap_observation(
         if tap_obs["grating"] == "NONE" and tap_obs["exposure_mode"] != "CC":
             short_name = "ACIS"
         elif tap_obs["grating"] in ["HETG", "LETG"]:
-            short_name = f"ACIS-{tap_obs["grating"]}"
+            short_name = f"ACIS-{tap_obs['grating']}"
         elif tap_obs["exposure_mode"] == "CC":
             short_name = "ACIS-CC"
 
@@ -97,7 +97,7 @@ def match_instrument_from_tap_observation(
         elif tap_obs["grating"] == "NONE":
             short_name = "HRC"
         elif tap_obs["grating"] in ["HETG", "LETG"]:
-            short_name = f"HRC-{tap_obs["grating"]}"
+            short_name = f"HRC-{tap_obs['grating']}"
 
     if not short_name:
         logger.warning(
@@ -112,8 +112,8 @@ def match_instrument_from_tap_observation(
 
 
 def create_schedule(telescope_id: str, tap_observations: Table) -> sdk.ScheduleCreate:
-    begin = f"{min([data["start_date"] for data in tap_observations])}"
-    end = f"{max([data["start_date"] for data in tap_observations])}"
+    begin = f"{min([data['start_date'] for data in tap_observations])}"
+    end = f"{max([data['start_date'] for data in tap_observations])}"
 
     return sdk.ScheduleCreate(
         telescope_id=telescope_id,
