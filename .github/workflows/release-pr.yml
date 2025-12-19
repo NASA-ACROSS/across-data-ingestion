@@ -7,7 +7,7 @@ on:
     # look for the specific files that are changed in a release-pr
     paths:
       - CHANGELOG.md
-      - across_server/__init__.py
+      - across_data_ingestion/__init__.py
       - .release-please-manifest.json
 
 concurrency:
@@ -20,6 +20,6 @@ permissions:
 
 jobs:
   ci-checks:
-    uses: ./.github/workflows/workflow-ci-checks.yml
+    uses: NASA-ACROSS/github-action-workflows/.github/workflows/workflow-ci-checks.yml@main
     with:
       format-changed-files: false
