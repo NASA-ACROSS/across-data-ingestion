@@ -25,6 +25,9 @@ from .schedules.nustar.as_flown import (
 from .schedules.nustar.low_fidelity_planned import (
     entrypoint as nustar_low_fidelity_schedule_ingestion_task,
 )
+from .schedules.swift.as_flown import (
+    entrypoint as swift_as_flown_ingestion_task,
+)
 from .schedules.swift.low_fidelity_planned import (
     entrypoint as swift_low_fidelity_schedule_ingestion_task,
 )
@@ -57,4 +60,5 @@ async def init_tasks():
     create_task(chandra_high_fidelity_planned_schedule_ingestion_task())
     create_task(XMM_Newton_low_fidelity_schedule_ingestion_task())
     create_task(swift_low_fidelity_schedule_ingestion_task())
+    create_task(swift_as_flown_ingestion_task())
     create_task(jwst_low_fidelity_schedule_ingestion_task())
