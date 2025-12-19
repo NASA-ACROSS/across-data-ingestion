@@ -159,11 +159,11 @@ def get_latest_timeline_file() -> str:
     html_content = response.text
     soup = bs4.BeautifulSoup(html_content, "html.parser")
     a_tags = list(soup.find_all("a"))
-    href_links = [
-        tag.get("href")  # type: ignore[attr-defined]
-        for tag in a_tags
-        if tag.get("href") and "timeline_" in tag.get("href")  # type: ignore[attr-defined]
-    ]
+    href_links: list[str] = []
+    for tag in a_tags:
+        href = tag.get("href")
+        if isinstance(href, str) and "timeline_" in href:
+            href_links.append(href)
 
     # Sort the links by ascending chronological order, grab latest
     href_links.sort(
