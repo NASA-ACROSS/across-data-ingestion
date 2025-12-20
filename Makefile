@@ -223,7 +223,6 @@ build_deploy: ## Build the containers for deployment -- does not use docker-comp
 		-t data-ingestion:$(TAG) \
 		--no-cache \
 		--platform linux/amd64 \
-		--ssh default \
 		--provenance false \
 		--build-arg BUILD_ENV=deploy .
 

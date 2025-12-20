@@ -11,6 +11,7 @@
     "CALIB",
     "colnames",
     "colspecs",
+    "commitlint",
     "creds",
     "dockerized",
     "ephemerides",

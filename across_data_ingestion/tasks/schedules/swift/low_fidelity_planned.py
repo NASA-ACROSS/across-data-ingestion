@@ -89,9 +89,9 @@ class CustomUVOTModeEntry:
             setattr(self, key, value)
 
     def __eq__(self, value):
-        assert isinstance(
-            value, CustomUVOTModeEntry
-        ), "Can only compare with another CustomUVOTModeEntry"
+        assert isinstance(value, CustomUVOTModeEntry), (
+            "Can only compare with another CustomUVOTModeEntry"
+        )
         return self.filter_name == value.filter_name and self.weight == value.weight
 
     @classmethod

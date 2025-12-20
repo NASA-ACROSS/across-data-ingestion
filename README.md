@@ -38,7 +38,7 @@ General documentation for other project commands can be found with `make help`.
 
 ### Development
 
-The across-server is assumed to be running locally alongside the ingestion server. The across-server can be run through a standard docker container in the background. Please see the [across-server documentation](https://github.com/ACROSS-Team/across-server/blob/main/README.md) for more information.
+The across-server is assumed to be running locally alongside the ingestion server. The across-server can be run through a standard docker container in the background. Please see the [across-server documentation](https://github.com/NASA-ACROSS/across-server/blob/main/README.md) for more information.
 
 In order to run the server through the CLI run
 
@@ -113,3 +113,23 @@ across-data-ingestion # Your named directory where the repo lives
 ├── Makefile
 ├── README.md
 └── ...
+
+## Notice
+
+NASA Docket No. GSC-19,469-1, and identified as "Astrophysics Cross-Observatory
+Science Support (ACROSS) System
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.“
+
+Copyright © 2025 United States Government as represented by the Administrator
+of the National Aeronautics and Space Administration and The Penn State
+Research Foundation.  All rights reserved. This software is licensed under the
+Apache 2.0 License.
