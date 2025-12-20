@@ -1,6 +1,9 @@
 from asyncio import create_task
 
 from .example import check_server
+from .schedules.chandra.as_flown import (
+    entrypoint as chandra_as_flown_schedule_ingestion_task,
+)
 from .schedules.chandra.high_fidelity_planned import (
     entrypoint as chandra_high_fidelity_planned_schedule_ingestion_task,
 )
@@ -58,3 +61,4 @@ async def init_tasks():
     create_task(XMM_Newton_low_fidelity_schedule_ingestion_task())
     create_task(swift_low_fidelity_schedule_ingestion_task())
     create_task(jwst_low_fidelity_schedule_ingestion_task())
+    create_task(chandra_as_flown_schedule_ingestion_task())
