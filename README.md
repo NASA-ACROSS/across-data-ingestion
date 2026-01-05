@@ -83,6 +83,7 @@ This should handle any project specific configuration that is needed along with 
 ### Project Structure
 
 The data-ingestion server is as follows:
+```
 across-data-ingestion # Your named directory where the repo lives
 ├── .github/    # Contains GH actions and workflows for CI/CD
 ├── across-data-ingestion
@@ -113,7 +114,7 @@ across-data-ingestion # Your named directory where the repo lives
 ├── Makefile
 ├── README.md
 └── ...
-
+```
 ## Notice
 
 NASA Docket No. GSC-19,469-1, and identified as "Astrophysics Cross-Observatory
