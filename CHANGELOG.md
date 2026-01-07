@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.1.0...v1.1.1) (2026-01-07)
+
+
+### Bug Fixes
+
+* add debug logs for ssm creds ([#126](https://github.com/NASA-ACROSS/across-data-ingestion/issues/126)) ([c8241fd](https://github.com/NASA-ACROSS/across-data-ingestion/commit/c8241fd2698f3129bebd9a834205103199446896))
+
 ## [1.1.0](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.0.0...v1.1.0) (2026-01-06)
 
 
