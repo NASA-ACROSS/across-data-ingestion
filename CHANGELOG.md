@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.1.1...v1.2.0) (2026-01-08)
+
+
+### Features
+
+* configure Dependabot for pip package updates ([4bd4b36](https://github.com/NASA-ACROSS/across-data-ingestion/commit/4bd4b3646f4bbf9dfe6ca86f463c7c23efb855f3))
+
 ## [1.1.1](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.1.0...v1.1.1) (2026-01-07)
 
 
