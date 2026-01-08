@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 import structlog
 from astropy.table import Row, Table  # type: ignore[import-untyped]
 from astropy.time import Time  # type: ignore[import-untyped]
-from fastapi_utilities import repeat_at  # type: ignore
+from fastapi_utilities import repeat_at  # type: ignore[import-untyped]
 
 from ....util.across_server import client, sdk
 from ....util.vo_service import VOService
