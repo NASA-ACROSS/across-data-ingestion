@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.2.0...v1.2.1) (2026-01-09)
+
+
+### Bug Fixes
+
+* bump openapi version to resolve no secret_key attr error ([#139](https://github.com/NASA-ACROSS/across-data-ingestion/issues/139)) ([f41eaf5](https://github.com/NASA-ACROSS/across-data-ingestion/commit/f41eaf5a900ad67a547ebc8c773ec4082ce91a0e))
+
 ## [1.2.0](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.1.1...v1.2.0) (2026-01-08)
 
 
