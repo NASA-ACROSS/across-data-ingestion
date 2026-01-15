@@ -1,7 +1,7 @@
 # Core dependencies
 
 across-tools >= 0.0.1
-across-server-openapi-python >= 1.1.0
+across-server-openapi-python >= 1.1.1
 alembic >=1.13.2,<2
 asyncer >=0.0.8,<0.0.9
 astropy >=7.0.0
