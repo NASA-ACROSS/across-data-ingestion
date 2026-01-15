@@ -93,8 +93,8 @@ fastapi-utils==0.8.0
     # via -r base.in
 filelock==3.20.3
     # via virtualenv
-geoalchemy2==0.15.2
-    # via -r base.in
+geoalchemy2==0.18.1
+    # via -r requirements/base.in
 greenlet==3.3.0
     # via sqlalchemy
 h11==0.16.0
