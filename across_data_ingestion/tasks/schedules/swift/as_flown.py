@@ -5,12 +5,13 @@ from fastapi_utilities import repeat_at  # type: ignore
 from swifttools import swift_too  # type: ignore
 
 from ....util.across_server import sdk
-from .util import CustomSwiftObsEntry, SwiftScheduleHandler
+from .swift_observation_entry import SwiftObservationEntry
+from .util import SwiftScheduleHandler, observation_in_saa
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
 
-def query_swift_as_flown(days_in_past: int = 1) -> list[CustomSwiftObsEntry]:
+def query_swift_as_flown(days_in_past: int = 1) -> list[SwiftObservationEntry]:
     """
     Queries the Swift catalog for all Swift completed observations from the past day interval.
     """
@@ -19,11 +20,11 @@ def query_swift_as_flown(days_in_past: int = 1) -> list[CustomSwiftObsEntry]:
 
     query = swift_too.ObsQuery(begin=start_time, end=end_time)
 
-    non_saa_query = [
-        CustomSwiftObsEntry.from_entry(observation)
-        for observation in query
-        if observation.uvot not in ["0x0009"]
+    observations = [
+        SwiftObservationEntry.from_entry(observation) for observation in query
     ]
+
+    non_saa_query = [obs for obs in observations if not observation_in_saa(obs)]
 
     return non_saa_query
 

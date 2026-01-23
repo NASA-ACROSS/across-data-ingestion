@@ -80,9 +80,10 @@ def fake_swift_ppst_entries() -> list[FakePPSTEntry]:
 @pytest.fixture
 def fake_swift_obs_entries(
     fake_swift_ppst_entries: list[FakePPSTEntry],
-) -> list[task.CustomSwiftObsEntry]:
+) -> list[task.SwiftObservationEntry]:
     return [
-        task.CustomSwiftObsEntry.from_entry(entry) for entry in fake_swift_ppst_entries
+        task.SwiftObservationEntry.from_entry(entry)
+        for entry in fake_swift_ppst_entries
     ]
 
 

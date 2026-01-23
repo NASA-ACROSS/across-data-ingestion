@@ -32,7 +32,7 @@ class TestBuildUVOTModeDict:
 
 class TestCreateUVOTObservations:
     def test_should_return_list_of_across_uvot_observations(
-        self, fake_swift_obs_entries: list[task_util.CustomSwiftObsEntry]
+        self, fake_swift_obs_entries: list[task_util.SwiftObservationEntry]
     ):
         observations = task_util.create_uvot_observations(
             instrument_id="instrument-id",
@@ -44,7 +44,7 @@ class TestCreateUVOTObservations:
 
     def test_should_log_warning_when_obs_not_created_for_unmatched_filter(
         self,
-        fake_swift_obs_entries: list[task_util.CustomSwiftObsEntry],
+        fake_swift_obs_entries: list[task_util.SwiftObservationEntry],
         fake_uvot_mode_entries: dict[str, list[dict]],
         mock_logger: MagicMock,
     ):
@@ -67,7 +67,7 @@ class TestCreateUVOTObservations:
 
     def test_should_continue_creating_observations_for_all_matched_filters(
         self,
-        fake_swift_obs_entries: list[task_util.CustomSwiftObsEntry],
+        fake_swift_obs_entries: list[task_util.SwiftObservationEntry],
         fake_uvot_mode_entries: dict[str, list[dict]],
     ):
         # make the filters unmatchable for the first observation
@@ -91,7 +91,7 @@ class TestCreateAcrossSchedule:
     def test_should_call_telescope_api_when_getting_telescope_data(
         self,
         mock_telescope_api: MagicMock,
-        fake_swift_obs_entries: list[task_util.CustomSwiftObsEntry],
+        fake_swift_obs_entries: list[task_util.SwiftObservationEntry],
     ):
         task_util.create_swift_across_schedule(
             telescope_name="some_telescope",
@@ -109,7 +109,7 @@ class TestCreateAcrossSchedule:
 
     def test_should_create_across_schedule(
         self,
-        fake_swift_obs_entries: list[task_util.CustomSwiftObsEntry],
+        fake_swift_obs_entries: list[task_util.SwiftObservationEntry],
     ):
         schedule = task_util.create_swift_across_schedule(
             telescope_name="some_telescope",
@@ -124,23 +124,3 @@ class TestCreateAcrossSchedule:
         )
 
         assert isinstance(schedule, sdk.ScheduleCreate)
-
-    # def test_should_create_observations_with_the_strategy(
-    #     self,
-    #     fake_swift_obs_entries: list[task_util.CustomSwiftObsEntry],
-    # ):
-    #     mock_create_observations = MagicMock(return_value=[])
-
-    #     task_util.create_swift_across_schedule(
-    #         telescope_name="some_telescope",
-    #         observation_data=fake_swift_obs_entries,
-    #         observation_status=sdk.ObservationStatus.PLANNED,
-    #         create_observations=task_util.create_observations,
-    #         observation_type=sdk.ObservationType.IMAGING,
-    #         bandpass=sdk.Bandpass(task_util.SWIFT_XRT_BANDPASS),
-    #         schedule_status=sdk.ScheduleStatus.PLANNED,
-    #         schedule_fidelity=sdk.ScheduleFidelity.LOW,
-    #         schedule_name_attr="low_fidelity_planned"
-    #     )
-
-    #     mock_create_observations.assert_called_once()

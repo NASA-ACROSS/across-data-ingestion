@@ -4,153 +4,26 @@ from typing import Any
 import structlog
 from astropy.time import Time  # type: ignore[import-untyped]
 from swifttools import swift_too  # type: ignore
-from swifttools.swift_too.swift_obsquery import Swift_AFST_Entry  # type: ignore
-from swifttools.swift_too.swift_planquery import PPSTEntry  # type: ignore
-from swifttools.swift_too.swift_uvot import UVOTModeEntry  # type: ignore
 
 from ....util.across_server import client, sdk
+from .constants import SWIFT_BAT_BANDPASS, SWIFT_UVOT_BANDPASS_DICT, SWIFT_XRT_BANDPASS
+from .custom_uvot_mode_entry import CustomUVOTModeEntry
+from .swift_observation_entry import SwiftObservationEntry
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
-SWIFT_XRT_BANDPASS = sdk.EnergyBandpass(
-    filter_name="Swift XRT",
-    min=0.3,
-    max=10.0,
-    unit=sdk.EnergyUnit.KEV,
-)
 
-SWIFT_BAT_BANDPASS = sdk.EnergyBandpass(
-    filter_name="Swift BAT",
-    min=15.0,
-    max=150.0,
-    unit=sdk.EnergyUnit.KEV,
-)
-
-SWIFT_UVOT_BANDPASS_DICT = {
-    "u": sdk.WavelengthBandpass(
-        filter_name="Swift UVOT u",
-        min=308,
-        max=385,
-        unit=sdk.WavelengthUnit.NM,
-    ),
-    "b": sdk.WavelengthBandpass(
-        filter_name="Swift UVOT b",
-        min=391,
-        max=487,
-        unit=sdk.WavelengthUnit.NM,
-    ),
-    "v": sdk.WavelengthBandpass(
-        filter_name="Swift UVOT v",
-        min=509,
-        max=585,
-        unit=sdk.WavelengthUnit.NM,
-    ),
-    "uvw1": sdk.WavelengthBandpass(
-        filter_name="Swift UVOT uvw1",
-        min=226,
-        max=294,
-        unit=sdk.WavelengthUnit.NM,
-    ),
-    "uvw2": sdk.WavelengthBandpass(
-        filter_name="Swift UVOT uvw2",
-        min=160,
-        max=225,
-        unit=sdk.WavelengthUnit.NM,
-    ),
-    "uvm2": sdk.WavelengthBandpass(
-        filter_name="Swift UVOT uvm2",
-        min=200,
-        max=249,
-        unit=sdk.WavelengthUnit.NM,
-    ),
-    "white": sdk.WavelengthBandpass(
-        filter_name="Swift UVOT white",
-        min=160,
-        max=800,
-        unit=sdk.WavelengthUnit.NM,
-    ),
-}
-
-
-class CustomUVOTModeEntry:
+def observation_in_saa(obs: SwiftObservationEntry) -> bool:
     """
-    Custom UVOTModeEntry to handle the UVOT mode as a string instead of a UVOTMode object.
-    This is necessary to avoid multiple HTTP requests to the Swift TOO catalog.
+    Determines if a Swift observation occurred during South Atlantic Anomaly (SAA) passage.
+    An observation is considered to be in the SAA if its target ID falls within known SAA target ID ranges
+    and its target name contains the substring "saa-cold".
     """
-
-    filter_name: str
-    weight: float
-
-    def __init__(self, **kwargs):
-        """
-        Initializes a CustomUVOTModeEntry from keyword arguments.
-        """
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-    def __eq__(self, value):
-        assert isinstance(
-            value, CustomUVOTModeEntry
-        ), "Can only compare with another CustomUVOTModeEntry"
-        return self.filter_name == value.filter_name and self.weight == value.weight
-
-    @classmethod
-    def from_entry(cls, entry: UVOTModeEntry) -> "CustomUVOTModeEntry":
-        """
-        Converts a UVOTModeEntry to a CustomUVOTModeEntry.
-        """
-        return cls(filter_name=str.lower(entry.filter_name), weight=entry.weight)
-
-
-class CustomSwiftObsEntry:
-    """
-    Custom Swift_PPST_Entry to handle the UVOT mode as a string instead of a UVOTMode object.
-    This is necessary to avoid multiple HTTP requests to the Swift TOO catalog.
-    """
-
-    obsid: str
-    targname: str
-    ra: str
-    dec: str
-    begin: str
-    end: str
-    exposure: float
-    roll: float
-    uvot: str
-    bat: str
-    xrt: str
-    fom: float
-    segment: int
-    target_id: str
-
-    def __init__(self, **kwargs):
-        """
-        Initializes a CustomSwiftEntry from keyword arguments.
-        """
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-    @classmethod
-    def from_entry(cls, entry: Swift_AFST_Entry | PPSTEntry) -> "CustomSwiftObsEntry":
-        """
-        Converts a PPSTEntry to a CustomSwiftEntry.
-        """
-        return cls(
-            obsid=entry.obsid,
-            targname=entry.targname,
-            ra=entry.ra,
-            dec=entry.dec,
-            begin=Time(entry.begin).isot,
-            end=Time(entry.end).isot,
-            exposure=entry.exposure.seconds,
-            roll=entry.roll,
-            uvot=entry.uvot,
-            bat=entry.bat,
-            xrt=entry.xrt,
-            fom=entry.fom,
-            segment=entry.segment,
-            target_id=entry.target_id,
-        )
+    target_id = int(obs.target_id)
+    in_saa_target_id_range = (target_id >= 70000 and target_id < 80000) or (
+        target_id >= 3600000 and target_id <= 3699999
+    )
+    return in_saa_target_id_range and "saa-cold" in str.lower(obs.targname)
 
 
 def build_uvot_mode_dict(modes: list[str]) -> dict[str, list[CustomUVOTModeEntry]]:
@@ -175,11 +48,12 @@ def build_uvot_mode_dict(modes: list[str]) -> dict[str, list[CustomUVOTModeEntry
 def swift_to_across_schedule(
     telescope_id: str,
     telescope_short_name: str,
-    data: list[CustomSwiftObsEntry],
+    data: list[SwiftObservationEntry],
     status: sdk.ScheduleStatus,
     fidelity: sdk.ScheduleFidelity,
     schedule_name_attr: str,
 ) -> sdk.ScheduleCreate:
+    """Converts a list of SwiftObservationEntry to an ACROSS ScheduleCreate object."""
     begins = [obs.begin for obs in data]
     ends = [obs.end for obs in data]
 
@@ -201,12 +75,13 @@ def swift_to_across_schedule(
 
 def swift_to_across_observation(
     instrument_id: str,
-    swift_obs: CustomSwiftObsEntry,
+    swift_obs: SwiftObservationEntry,
     bandpass: sdk.Bandpass,
     observation_type: sdk.ObservationType,
     exposure_time: float,
     observation_status: sdk.ObservationStatus,
 ) -> sdk.ObservationCreate:
+    """Converts a SwiftObservationEntry to an ACROSS ObservationCreate object."""
     return sdk.ObservationCreate(
         instrument_id=instrument_id,
         object_name=swift_obs.targname,
@@ -233,11 +108,12 @@ def swift_to_across_observation(
 
 def create_observations(
     instrument_id: str,
-    observation_data: list[CustomSwiftObsEntry],
+    observation_data: list[SwiftObservationEntry],
     observation_status: sdk.ObservationStatus,
     bandpass: sdk.Bandpass,
     observation_type: sdk.ObservationType,
 ) -> list[sdk.ObservationCreate]:
+    """Creates a list of ACROSS ObservationCreate objects from SwiftObservationEntry data."""
     return [
         swift_to_across_observation(
             instrument_id,
@@ -253,10 +129,11 @@ def create_observations(
 
 def create_uvot_observations(
     instrument_id: str,
-    observation_data: list[CustomSwiftObsEntry],
+    observation_data: list[SwiftObservationEntry],
     observation_status: sdk.ObservationStatus,
     *args: list[Any],
-):
+) -> list[sdk.ObservationCreate]:
+    """Creates a list of ACROSS ObservationCreate objects specifically for UVOT observations."""
     # Aggregate unique uvot modes
     uvot_modes = list(set([obs.uvot for obs in observation_data]))
 
@@ -317,7 +194,7 @@ def create_uvot_observations(
 
 def create_swift_across_schedule(
     telescope_name: str,
-    observation_data: list[CustomSwiftObsEntry],
+    observation_data: list[SwiftObservationEntry],
     observation_status: sdk.ObservationStatus,
     observation_type: sdk.ObservationType,
     schedule_status: sdk.ScheduleStatus,
@@ -347,7 +224,25 @@ def create_swift_across_schedule(
     return schedule
 
 
+class InstrumentConfig:
+    """
+    Configuration for a Swift instrument used in schedule creation.
+    """
+
+    def __init__(
+        self,
+        telescope_name: str,
+        observation_type: sdk.ObservationType,
+        bandpass: sdk.Bandpass | None = None,
+    ):
+        self.telescope_name = telescope_name
+        self.observation_type = observation_type
+        self.bandpass = bandpass
+
+
 class SwiftScheduleHandler:
+    """Handles the creation and posting of Swift schedules to the ACROSS API."""
+
     def __init__(
         self,
         observation_status: sdk.ObservationStatus,
@@ -359,47 +254,41 @@ class SwiftScheduleHandler:
         self.schedule_status = schedule_status
         self.schedule_fidelity = schedule_fidelity
         self.schedule_name_attr = schedule_name_attr
+        self.instrumnent_configs = [
+            InstrumentConfig(
+                telescope_name="swift_xrt",
+                bandpass=sdk.Bandpass(SWIFT_XRT_BANDPASS),
+                observation_type=sdk.ObservationType.SPECTROSCOPY,
+            ),
+            InstrumentConfig(
+                telescope_name="swift_bat",
+                bandpass=sdk.Bandpass(SWIFT_BAT_BANDPASS),
+                observation_type=sdk.ObservationType.IMAGING,
+            ),
+            InstrumentConfig(
+                telescope_name="swift_uvot",
+                observation_type=sdk.ObservationType.IMAGING,
+            ),
+        ]
 
-    def run(self, observation_data: list[CustomSwiftObsEntry]):
-        # XRT
-        swift_xrt_schedule = create_swift_across_schedule(
-            telescope_name="swift_xrt",
-            observation_data=observation_data,
-            observation_status=self.observation_status,
-            bandpass=sdk.Bandpass(SWIFT_XRT_BANDPASS),
-            observation_type=sdk.ObservationType.SPECTROSCOPY,
-            schedule_status=self.schedule_status,
-            schedule_fidelity=self.schedule_fidelity,
-            schedule_name_attr=self.schedule_name_attr,
-            create_observations=create_observations,
-        )
+    def run(self, observation_data: list[SwiftObservationEntry]):
+        # Create and post schedules for each instrument
+        for config in self.instrumnent_configs:
+            schedule = create_swift_across_schedule(
+                telescope_name=config.telescope_name,
+                observation_data=observation_data,
+                observation_status=self.observation_status,
+                bandpass=config.bandpass,
+                observation_type=config.observation_type,
+                schedule_status=self.schedule_status,
+                schedule_fidelity=self.schedule_fidelity,
+                schedule_name_attr=self.schedule_name_attr,
+                create_observations=(
+                    create_uvot_observations
+                    if config.telescope_name == "swift_uvot"
+                    else create_observations
+                ),
+            )
 
-        # BAT
-        swift_bat_schedule = create_swift_across_schedule(
-            telescope_name="swift_bat",
-            observation_data=observation_data,
-            observation_status=self.observation_status,
-            bandpass=sdk.Bandpass(SWIFT_BAT_BANDPASS),
-            observation_type=sdk.ObservationType.IMAGING,
-            schedule_status=self.schedule_status,
-            schedule_fidelity=self.schedule_fidelity,
-            schedule_name_attr=self.schedule_name_attr,
-            create_observations=create_observations,
-        )
-
-        # UVOT
-        swift_uvot_schedule = create_swift_across_schedule(
-            telescope_name="swift_uvot",
-            observation_data=observation_data,
-            observation_status=self.observation_status,
-            observation_type=sdk.ObservationType.IMAGING,
-            schedule_status=self.schedule_status,
-            schedule_fidelity=self.schedule_fidelity,
-            schedule_name_attr=self.schedule_name_attr,
-            create_observations=create_uvot_observations,
-        )
-
-        # Post the schedules to the ACROSS API
-        sdk.ScheduleApi(client).create_schedule(swift_xrt_schedule)
-        sdk.ScheduleApi(client).create_schedule(swift_bat_schedule)
-        sdk.ScheduleApi(client).create_schedule(swift_uvot_schedule)
+            # Post the schedules to the ACROSS API
+            sdk.ScheduleApi(client).create_schedule(schedule)

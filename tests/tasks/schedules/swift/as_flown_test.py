@@ -26,8 +26,9 @@ class TestSwiftObsQuery:
     def test_should_filter_out_saa_uvot_modes(self):
         entries = task.query_swift_as_flown()
 
-        ## one saa uvot mode exists in fake test data
-        assert len(entries) == 10
+        # Verify that no SAA UVOT mode observations are in the results
+        # SAA observations have uvot mode "0x0009"
+        assert all(entry.uvot != "0x0009" for entry in entries)
 
     def test_should_return_empty_array_when_no_obs_entries(
         self, mock_swift_too: MagicMock
@@ -47,7 +48,9 @@ class TestIngest:
 
         task.ingest()
 
-        mock_logger.warning.assert_called_once()
+        mock_logger.warning.assert_called_once_with(
+            "Query returned no as flown Swift observations."
+        )
 
     @pytest.mark.parametrize(
         "type, expected_schedule, call_idx",

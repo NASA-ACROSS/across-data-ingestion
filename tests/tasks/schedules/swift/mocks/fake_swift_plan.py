@@ -162,8 +162,8 @@ entries: list[dict] = [
         "target_id": 19876,
     },
     {
-        "obsid": "123456789",
-        "targname": "saa_uvot_mode",
+        "obsid": "3676767",
+        "targname": "saa-cold-test",
         "ra": 203.810476124553,
         "dec": 7.4570433418871,
         "begin": datetime.fromisoformat("2025-07-01T02:51:00.000"),
@@ -175,6 +175,6 @@ entries: list[dict] = [
         "xrt": "PC",
         "fom": 88.0,
         "segment": 49,
-        "target_id": 19876,
+        "target_id": 3676767,
     },
 ]
