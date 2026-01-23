@@ -17,24 +17,15 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for container logging
 ENV PYTHONUNBUFFERED=1
 
-# see https://github.com/webfactory/ssh-agent/tree/v0.9.0/?tab=readme-ov-file#building-docker-images-andor-using-the-dockerbuild-push-action-action
 # Flatten contents of root-config* into /root
 COPY root-config*/. /root/
-
-RUN mkdir -p /root/.ssh
-
-RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
-
-RUN if [ -f /root/.ssh/config ] && { [ "$BUILD_ENV" = "deploy" ] || [ "$BUILD_ENV" = "action" ]; }; then \
-    sed 's|/home/runner|/root|g' -i.bak /root/.ssh/config; \
-    fi
 
 # Copy only the necessary files for dependency installation first
 COPY ./Makefile ./
 COPY ./requirements/${BUILD_ENV}.txt ./requirements/
 
 # Install dependencies
-RUN --mount=type=ssh make install ENV=${BUILD_ENV}
+RUN make install ENV=${BUILD_ENV}
 
 
 FROM python:3.12-slim AS local

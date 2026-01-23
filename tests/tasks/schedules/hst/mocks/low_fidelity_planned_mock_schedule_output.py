@@ -40,7 +40,7 @@ hst_planned_schedule: dict = {
             },
             "exposure_time": 41.17,
             "status": "planned",
-            "" "type": "imaging",
+            "type": "imaging",
             "bandpass": {
                 "filter_name": "HST WFC3 F160W",
                 "min": 12685.999999999998,

@@ -133,6 +133,9 @@ def fake_observatory() -> sdk.Observatory:
         short_name="MT",
         type=sdk.ObservatoryType.SPACE_BASED,
         reference_url=None,
+        operational=sdk.NullableDateRange(
+            begin=datetime.fromisoformat("2025-07-15T00:00:00"), end=None
+        ),
         telescopes=[
             sdk.IDNameSchema(
                 id="uuid",
