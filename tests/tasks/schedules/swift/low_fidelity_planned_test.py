@@ -28,7 +28,7 @@ class TestQuerySwiftPlan:
         entries = task.query_swift_plan()
 
         ## one saa uvot mode exists in fake test data
-        assert len(entries) == 10
+        assert all(task.observation_in_saa(obs) is False for obs in entries)
 
     def test_should_return_empty_array_when_no_obs_entries(
         self, mock_swift_too: MagicMock

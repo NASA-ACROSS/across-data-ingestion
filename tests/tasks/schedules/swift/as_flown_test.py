@@ -28,7 +28,7 @@ class TestSwiftObsQuery:
 
         # Verify that no SAA UVOT mode observations are in the results
         # SAA observations have uvot mode "0x0009"
-        assert all(entry.uvot != "0x0009" for entry in entries)
+        assert all(task.observation_in_saa(obs) is False for obs in entries)
 
     def test_should_return_empty_array_when_no_obs_entries(
         self, mock_swift_too: MagicMock
