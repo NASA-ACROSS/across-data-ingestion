@@ -23,13 +23,6 @@ class TestSwiftObsQuery:
 
         mock_swift_too.ObsQuery.assert_called_once()
 
-    def test_should_filter_out_saa_uvot_modes(self):
-        entries = task.query_swift_as_flown()
-
-        # Verify that no SAA UVOT mode observations are in the results
-        # SAA observations have uvot mode "0x0009"
-        assert all(task.observation_in_saa(obs) is False for obs in entries)
-
     def test_should_return_empty_array_when_no_obs_entries(
         self, mock_swift_too: MagicMock
     ):

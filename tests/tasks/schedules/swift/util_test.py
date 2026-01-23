@@ -88,6 +88,22 @@ class TestCreateUVOTObservations:
 
 
 class TestCreateAcrossSchedule:
+    def test_observation_in_saa_should_return_true_for_saa_uvot_mode(self):
+        obs_entry = task_util.SwiftObservationEntry(
+            obsid="3676767",
+            targname="saa-cold-test",
+            ra=202.484375,
+            dec=47.2305555555556,
+            begin=None,
+            end=None,
+            uvot="0x0009",
+            xrt_mode=None,
+            bat_mode=None,
+            target_id=3676767,
+        )
+
+        assert task_util.observation_in_saa(obs_entry)
+
     def test_should_call_telescope_api_when_getting_telescope_data(
         self,
         mock_telescope_api: MagicMock,
