@@ -11,7 +11,7 @@ from .mocks.mock_rubin_obsloctap_query import result as rubin_obsloctap_result
 from .mocks.rubin_across_schedule import schedule as expected_schedule
 
 
-class TestNicerLowFidelityScheduleIngestionTask:
+class TestRubinLowFidelityScheduleIngestionTask:
     class TestIngest:
         @pytest.fixture(autouse=True)
         def patch_query_rubin_schedule(self, monkeypatch: pytest.MonkeyPatch):
