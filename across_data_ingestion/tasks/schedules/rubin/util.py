@@ -155,6 +155,4 @@ class RubinSchedulerHandler:
             observations=observations,
         )
 
-        print(schedule.model_dump())
-
         sdk.ScheduleApi(client).create_schedule(schedule)

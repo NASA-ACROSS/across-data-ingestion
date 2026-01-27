@@ -23,6 +23,14 @@ def get_low_fidelity_planned_schedules_data(execution_status: str) -> pd.DataFra
 
     df = df.query(f"execution_status == '{execution_status}'").reset_index(drop=True)
     df["filter_name"] = df.apply(designate_filter_name_key, axis=1)
+
+    unknown_filter_observations = df.query("filter_name == 'unknown'")
+    if not unknown_filter_observations.empty:
+        logger.warning(
+            "Some observations have unknown filter names and will be excluded.",
+            count=len(unknown_filter_observations),
+        )
+
     df = df.query("filter_name != 'unknown'").reset_index(drop=True)
 
     df["date_range_begin"] = df.apply(designate_mjd_to_datetime, axis=1, which="begin")
