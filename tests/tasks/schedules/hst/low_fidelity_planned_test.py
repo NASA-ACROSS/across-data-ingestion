@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 import across_data_ingestion.tasks.schedules.hst.low_fidelity_planned as task
+import across_data_ingestion.tasks.schedules.hst.util as hst_util
 from across_data_ingestion.tasks.schedules.hst.low_fidelity_planned import (
     extract_instrument_info,
     extract_observation_pointing_coordinates,
@@ -22,12 +23,12 @@ from across_data_ingestion.util.across_server import sdk
 class TestHSTLowFidelityPlannedScheduleIngestionTask:
     class TestIngest:
         @pytest.fixture(autouse=True)
-        def patch_read_timeline_file(
+        def setup(
             self,
             monkeypatch: pytest.MonkeyPatch,
             fake_instrument: sdk.Instrument,
         ) -> None:
-            """Should create ACROSS schedule"""
+            """Monkeypatch functions to extract coords and instrument"""
             monkeypatch.setattr(
                 task,
                 "extract_observation_pointing_coordinates",
@@ -43,7 +44,7 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
                 task,
                 "extract_instrument_info",
                 MagicMock(
-                    return_value=task.InstrumentInfo(
+                    return_value=hst_util.InstrumentInfo(
                         id=fake_instrument.id,
                         bandpass=sdk.Bandpass(
                             sdk.WavelengthBandpass(

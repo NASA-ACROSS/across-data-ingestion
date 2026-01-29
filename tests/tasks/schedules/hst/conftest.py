@@ -1,13 +1,16 @@
 import os
+from collections.abc import Generator
 from datetime import datetime
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import bs4
 import httpx
 import pandas as pd
 import pytest
 import structlog
+from astropy.table import Table  # type: ignore[import-untyped]
 
+import across_data_ingestion.tasks.schedules.hst.as_flown as as_flown_task
 import across_data_ingestion.tasks.schedules.hst.low_fidelity_planned as task
 from across_data_ingestion.util.across_server import sdk
 
@@ -18,6 +21,14 @@ def mock_logger(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
     mock = MagicMock(spec=structlog.stdlib.BoundLogger)
     monkeypatch.setattr(task, "logger", mock)
     return mock
+
+
+@pytest.fixture
+def mock_as_flown_logger() -> Generator[MagicMock]:
+    with patch(
+        "across_data_ingestion.tasks.schedules.hst.as_flown.logger"
+    ) as mock_logger:
+        yield mock_logger
 
 
 @pytest.fixture(autouse=True)
@@ -82,6 +93,136 @@ def mock_read_timeline_file(
 ) -> MagicMock:
     mock = MagicMock(return_value=fake_timeline_file_df)
     monkeypatch.setattr(task, "read_timeline_file", mock)
+    return mock
+
+
+@pytest.fixture
+def fake_observed_observation_data() -> dict:
+    """
+    Mock a dictionary of as-flown observation params
+    from the MAST TAP service
+    """
+    return {
+        "sci_pep_id": 10,
+        "sci_obset_id": 28845,
+        "sci_targname": "test target",
+        "sci_start_time": "2026-01-29T22:23:23",
+        "sci_stop_time": "2026-01-29T23:23:23",
+        "sci_ra": 39.96041666666667,
+        "sci_dec": -1.5856000000000001,
+        "sci_instrument_config": "WFC3/UVIS",
+        "sci_spec_1234": "F606W",
+        "sci_pa_aper": 90.0,
+        "sci_operating_mode": "ACCUM",
+        "sci_actual_duration": 3600,
+    }
+
+
+@pytest.fixture
+def fake_observed_observation_table(
+    fake_observed_observation_data: dict,
+) -> Table:
+    """
+    Fixture representing a Table of as-flown observation params
+    """
+    return Table([fake_observed_observation_data])
+
+
+@pytest.fixture
+def fake_observed_observation_row(
+    fake_observed_observation_table: Table,
+) -> pd.Series:
+    """
+    Fixture to mock a single row (corresponding to one observation)
+    from a Table of as-flown observations
+    """
+    return fake_observed_observation_table.to_pandas().iloc[0]
+
+
+@pytest.fixture
+def fake_invalid_observation_data() -> list[dict]:
+    """Observation data with ACQ and BIAS obs"""
+    return [
+        {
+            "sci_pep_id": 10,
+            "sci_obset_id": 28845,
+            "sci_targname": "BIAS",
+            "sci_start_time": "2026-01-29T22:23:23",
+            "sci_stop_time": "2026-01-29T23:23:23",
+            "sci_ra": 39.96041666666667,
+            "sci_dec": -1.5856000000000001,
+            "sci_instrument_config": "WFC3/UVIS",
+            "sci_spec_1234": "F606W",
+            "sci_pa_aper": 90.0,
+            "sci_operating_mode": "ACCUM",
+            "sci_actual_duration": 3600,
+        },
+        {
+            "sci_pep_id": 10,
+            "sci_obset_id": 28845,
+            "sci_targname": "Cas A",
+            "sci_start_time": "2026-01-29T22:23:23",
+            "sci_stop_time": "2026-01-29T23:23:23",
+            "sci_ra": 39.96041666666667,
+            "sci_dec": -1.5856000000000001,
+            "sci_instrument_config": "WFC3/UVIS",
+            "sci_spec_1234": "F606W",
+            "sci_pa_aper": 90.0,
+            "sci_operating_mode": "ACQ",
+            "sci_actual_duration": 3600,
+        },
+    ]
+
+
+@pytest.fixture
+def fake_invalid_observation_table(
+    fake_invalid_observation_data: dict,
+) -> Table:
+    """
+    Fixture representing a Table of invalid
+    as-flown observation params
+    """
+    return Table(fake_invalid_observation_data)
+
+
+@pytest.fixture
+def mock_vo_service_query(
+    fake_observed_observation_table: Table,
+) -> AsyncMock:
+    mock = AsyncMock()
+    mock.side_effect = [fake_observed_observation_table]
+
+    return mock
+
+
+@pytest.fixture
+def mock_vo_service(mock_vo_service_query: AsyncMock) -> AsyncMock:
+    mock_instance = AsyncMock()
+    mock_instance.query = mock_vo_service_query
+    # mock the context management so it actually returns the expected instance
+    mock_instance.__aenter__.return_value = mock_instance
+
+    return mock_instance
+
+
+@pytest.fixture(autouse=True)
+def mock_vo_service_cls(
+    mock_vo_service: AsyncMock,
+) -> Generator[AsyncMock]:
+    with patch(
+        "across_data_ingestion.tasks.schedules.hst.as_flown.VOService",
+        return_value=mock_vo_service,
+    ) as mock_vo_service_cls:
+        yield mock_vo_service_cls
+
+
+@pytest.fixture
+def mock_get_observation_data_from_tap(
+    monkeypatch: pytest.MonkeyPatch,
+    fake_observed_observation_table: Table,
+) -> AsyncMock:
+    mock = AsyncMock(return_value=fake_observed_observation_table)
+    monkeypatch.setattr(as_flown_task, "get_observation_data_from_tap", mock)
     return mock
 
 
