@@ -3,7 +3,7 @@
 across-tools >= 0.0.1
 across-server-openapi-python >= 1.1.1
 alembic >=1.13.2,<2
-asyncer >=0.0.8,<0.0.9
+asyncer >=0.0.8,<0.0.13
 astropy >=7.0.0
 astroquery >=0.4.10
 boto3 >=1.35.17,<2
