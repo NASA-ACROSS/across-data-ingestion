@@ -32,8 +32,8 @@ astroquery==0.4.11
     # via
     #   -r base.in
     #   across-tools
-asyncer==0.0.8
-    # via -r base.in
+asyncer==0.0.12
+    # via -r requirements/base.in
 asyncpg==0.31.0
     # via -r base.in
 attrs==25.4.0
@@ -89,7 +89,7 @@ email-validator==2.3.0
     #   -r base.in
     #   fastapi
     #   pydantic
-fastapi[standard]==0.125.0
+fastapi[standard]==0.128.0
     # via
     #   -r base.in
     #   -r local.in
@@ -109,7 +109,7 @@ fastar==0.8.0
 filelock==3.20.3
     # via virtualenv
 geoalchemy2==0.15.2
-    # via -r base.in
+    # via -r requirements/base.in
 greenlet==3.3.0
     # via sqlalchemy
 h11==0.16.0
@@ -238,13 +238,17 @@ pydantic[email]==2.12.5
     #   fastapi-cloud-cli
     #   fastapi-utilities
     #   fastapi-utils
+    #   pydantic-extra-types
     #   pydantic-settings
 pydantic-core==2.41.5
     # via pydantic
+pydantic-extra-types==2.11.0
+    # via fastapi
 pydantic-settings==2.12.0
     # via
     #   -r base.in
     #   across-tools
+    #   fastapi
 pyerfa==2.0.1.5
     # via astropy
 pygments==2.19.2
@@ -332,10 +336,11 @@ six==1.17.0
     # via
     #   html5lib
     #   python-dateutil
-skyfield==1.53
-    # via -r base.in
+skyfield==1.54
+    # via -r requirements/base.in
 sniffio==1.3.1
     # via
+    #   asyncer
     #   httpx
     #   spacetrack
 soupsieve==2.8.1
@@ -367,7 +372,7 @@ typer==0.20.1
 types-awscrt==0.30.0
     # via botocore-stubs
 types-boto3[ssm]==1.42.14
-    # via -r types.in
+    # via -r requirements/types.in
 types-boto3-ssm==1.42.3
     # via types-boto3
 types-cachetools==6.2.0.20251022
@@ -394,6 +399,8 @@ typing-extensions==4.15.0
     #   mypy
     #   pydantic
     #   pydantic-core
+    #   pydantic-extra-types
+    #   pytest-asyncio
     #   rich-toolkit
     #   sqlalchemy
     #   typer
@@ -422,7 +429,7 @@ uvicorn[standard]==0.40.0
     #   fastapi-cloud-cli
 uvloop==0.22.1
     # via uvicorn
-virtualenv==20.35.4
+virtualenv==20.36.1
     # via pre-commit
 watchfiles==1.1.1
     # via uvicorn
