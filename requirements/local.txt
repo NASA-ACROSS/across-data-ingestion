@@ -364,7 +364,7 @@ types-python-jose==3.5.0.20250531
     # via -r requirements/types.in
 types-pytz==2025.2.0.20251108
     # via pandas-stubs
-types-requests==2.32.4.20250913
+types-requests==2.32.4.20260107
     # via -r requirements/types.in
 types-s3transfer==0.16.0
     # via types-boto3
