@@ -422,7 +422,7 @@ uvicorn[standard]==0.40.0
     #   fastapi-cloud-cli
 uvloop==0.22.1
     # via uvicorn
-virtualenv==20.35.4
+virtualenv==20.36.1
     # via pre-commit
 watchfiles==1.1.1
     # via uvicorn
