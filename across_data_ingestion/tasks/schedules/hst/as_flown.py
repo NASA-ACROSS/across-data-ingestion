@@ -83,9 +83,17 @@ def extract_instrument_info(
         return None
 
     # Get the correct instrument model given the correct name
-    across_instrument = next(
-        (i for i in instruments if i.short_name == instrument_short_name)
-    )
+    try:
+        across_instrument = next(
+            (i for i in instruments if i.short_name == instrument_short_name)
+        )
+    except StopIteration:
+        logger.warning(
+            "Could not match data to ACROSS instrument.",
+            instruments=instruments,
+            obs_instrument=obs_instrument,
+        )
+        return None
 
     # Get the correct filter from the list of filter models by
     # matching to an element or aperture from the observation data

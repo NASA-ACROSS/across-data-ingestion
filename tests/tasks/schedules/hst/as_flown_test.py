@@ -250,6 +250,28 @@ class TestHSTAsFlownScheduleIngestionTask:
                 instrument="FAKE",
             )
 
+        def test_should_log_warning_when_no_across_instrument_found(
+            self,
+            fake_instrument: sdk.Instrument,
+            mock_as_flown_logger: MagicMock,
+            fake_observed_observation_row: pd.Series,
+            monkeypatch: pytest.MonkeyPatch,
+        ) -> None:
+            """Should log a warning when no ACROSS instrument found for the short name"""
+            monkeypatch.setattr(
+                hst_util,
+                "get_instrument_short_name_from_observation",
+                MagicMock(return_value="FAKE_INST"),
+            )
+
+            extract_instrument_info(fake_observed_observation_row, [fake_instrument])
+
+            mock_as_flown_logger.warning.assert_called_with(
+                "Could not match data to ACROSS instrument.",
+                instruments=[fake_instrument],
+                obs_instrument=fake_observed_observation_row.sci_instrument_config,
+            )
+
         def test_should_log_warning_when_no_filter_found(
             self,
             fake_instrument: sdk.Instrument,
