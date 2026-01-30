@@ -41,11 +41,11 @@ beautifulsoup4==4.14.3
     # via
     #   -r requirements/base.in
     #   astroquery
-boto3==1.42.14
+boto3==1.42.24
     # via
     #   -r requirements/base.in
     #   swifttools
-botocore==1.42.14
+botocore==1.42.24
     # via
     #   boto3
     #   s3transfer
@@ -326,7 +326,7 @@ types-python-jose==3.5.0.20250531
     # via -r requirements/types.in
 types-pytz==2025.2.0.20251108
     # via pandas-stubs
-types-requests==2.32.4.20250913
+types-requests==2.32.4.20260107
     # via -r requirements/types.in
 types-s3transfer==0.16.0
     # via types-boto3
@@ -362,7 +362,7 @@ urllib3==2.6.2
     #   botocore
     #   requests
     #   types-requests
-uvicorn==0.30.6
+uvicorn==0.40.0
     # via -r requirements/base.in
 virtualenv==20.35.4
     # via pre-commit

@@ -41,11 +41,11 @@ beautifulsoup4==4.14.3
     # via
     #   -r requirements/base.in
     #   astroquery
-boto3==1.42.14
+boto3==1.42.24
     # via
     #   -r requirements/base.in
     #   swifttools
-botocore==1.42.14
+botocore==1.42.24
     # via
     #   boto3
     #   s3transfer
@@ -298,7 +298,7 @@ urllib3==2.6.2
     #   across-server-openapi-python
     #   botocore
     #   requests
-uvicorn==0.30.6
+uvicorn==0.40.0
     # via -r requirements/base.in
 webencodings==0.5.1
     # via html5lib
