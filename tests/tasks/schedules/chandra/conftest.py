@@ -9,9 +9,17 @@ from across_data_ingestion.util.across_server import sdk
 
 
 @pytest.fixture
-def mock_logger() -> Generator[MagicMock]:
+def mock_planned_logger() -> Generator[MagicMock]:
     with patch(
         "across_data_ingestion.tasks.schedules.chandra.high_fidelity_planned.logger"
+    ) as mock_logger:
+        yield mock_logger
+
+
+@pytest.fixture
+def mock_as_flown_logger() -> Generator[MagicMock]:
+    with patch(
+        "across_data_ingestion.tasks.schedules.chandra.as_flown.logger"
     ) as mock_logger:
         yield mock_logger
 
@@ -40,7 +48,7 @@ def set_sdk_data(mock_telescope_api: MagicMock, fake_telescope: sdk.Telescope) -
 
 
 @pytest.fixture
-def fake_observation_data() -> dict:
+def fake_planned_observation_data() -> dict:
     return {
         "obsid": 28845,
         "start_date": "2025-06-30T22:23:23",
@@ -53,8 +61,8 @@ def fake_observation_data() -> dict:
 
 
 @pytest.fixture
-def fake_observation_table(
-    fake_observation_data: dict,
+def fake_planned_observation_table(
+    fake_planned_observation_data: dict,
     request: pytest.FixtureRequest,
 ) -> Table:
     param = getattr(request, "param", "default")
@@ -62,9 +70,40 @@ def fake_observation_table(
     if param is None:
         return None
     elif param == "default":
-        return Table([fake_observation_data])
+        return Table([fake_planned_observation_data])
     else:
-        return Table([fake_observation_data])
+        return Table([fake_planned_observation_data])
+
+
+@pytest.fixture
+def fake_observed_observation_data() -> dict:
+    return {
+        "obsid": 28845,
+        "target_name": "test target",
+        "start_date": "2025-06-30T22:23:23",
+        "ra": "39.96041666666667",
+        "dec": "-1.5856000000000001",
+        "instrument": "ACIS-I",
+        "grating": "NONE",
+        "exposure_mode": "NONE",
+        "exposure_time": 3600,
+        "proposal_number": "12345",
+    }
+
+
+@pytest.fixture
+def fake_observed_observation_table(
+    fake_observed_observation_data: dict,
+    request: pytest.FixtureRequest,
+) -> Table:
+    param = getattr(request, "param", "default")
+
+    if param is None:
+        return None
+    elif param == "default":
+        return Table([fake_observed_observation_data])
+    else:
+        return Table([fake_observed_observation_data])
 
 
 @pytest.fixture
@@ -92,20 +131,20 @@ def fake_exposure_times_table(
 
 
 @pytest.fixture
-def mock_vo_service_query(
-    fake_observation_table: Table, fake_exposure_times_table: Table
+def mock_vo_service_planned_query(
+    fake_planned_observation_table: Table, fake_exposure_times_table: Table
 ) -> AsyncMock:
     mock = AsyncMock()
     # ingest process queries for observations, then exposure times
-    mock.side_effect = [fake_observation_table, fake_exposure_times_table]
+    mock.side_effect = [fake_planned_observation_table, fake_exposure_times_table]
 
     return mock
 
 
 @pytest.fixture
-def mock_vo_service(mock_vo_service_query: AsyncMock) -> AsyncMock:
+def mock_vo_service_planned(mock_vo_service_planned_query: AsyncMock) -> AsyncMock:
     mock_instance = AsyncMock()
-    mock_instance.query = mock_vo_service_query
+    mock_instance.query = mock_vo_service_planned_query
     # mock the context management so it actually returns the expected instance
     mock_instance.__aenter__.return_value = mock_instance
 
@@ -113,10 +152,43 @@ def mock_vo_service(mock_vo_service_query: AsyncMock) -> AsyncMock:
 
 
 @pytest.fixture(autouse=True)
-def mock_vo_service_cls(mock_vo_service: AsyncMock) -> Generator[AsyncMock]:
+def mock_vo_service_planned_cls(
+    mock_vo_service_planned: AsyncMock,
+) -> Generator[AsyncMock]:
     with patch(
         "across_data_ingestion.tasks.schedules.chandra.high_fidelity_planned.VOService",
-        return_value=mock_vo_service,
+        return_value=mock_vo_service_planned,
+    ) as mock_vo_service_cls:
+        yield mock_vo_service_cls
+
+
+@pytest.fixture
+def mock_vo_service_observed_query(
+    fake_observed_observation_table: Table,
+) -> AsyncMock:
+    mock = AsyncMock()
+    mock.side_effect = [fake_observed_observation_table]
+
+    return mock
+
+
+@pytest.fixture
+def mock_vo_service_observed(mock_vo_service_observed_query: AsyncMock) -> AsyncMock:
+    mock_instance = AsyncMock()
+    mock_instance.query = mock_vo_service_observed_query
+    # mock the context management so it actually returns the expected instance
+    mock_instance.__aenter__.return_value = mock_instance
+
+    return mock_instance
+
+
+@pytest.fixture(autouse=True)
+def mock_vo_service_observed_cls(
+    mock_vo_service_observed: AsyncMock,
+) -> Generator[AsyncMock]:
+    with patch(
+        "across_data_ingestion.tasks.schedules.chandra.as_flown.VOService",
+        return_value=mock_vo_service_observed,
     ) as mock_vo_service_cls:
         yield mock_vo_service_cls
 
