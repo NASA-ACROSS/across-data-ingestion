@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.2.2](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.2.1...v1.2.2) (2026-01-15)
+
+
+### Bug Fixes
+
+* bump across-server-openapi-python 1.1.0 to 1.1.1 ([#146](https://github.com/NASA-ACROSS/across-data-ingestion/issues/146)) ([de79fbd](https://github.com/NASA-ACROSS/across-data-ingestion/commit/de79fbd0bccfc0016037d638f79ac297081730b4))
+
+## [1.2.1](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.2.0...v1.2.1) (2026-01-09)
+
+
+### Bug Fixes
+
+* bump openapi version to resolve no secret_key attr error ([#139](https://github.com/NASA-ACROSS/across-data-ingestion/issues/139)) ([f41eaf5](https://github.com/NASA-ACROSS/across-data-ingestion/commit/f41eaf5a900ad67a547ebc8c773ec4082ce91a0e))
+
+## [1.2.0](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.1.1...v1.2.0) (2026-01-08)
+
+
+### Features
+
+* configure Dependabot for pip package updates ([4bd4b36](https://github.com/NASA-ACROSS/across-data-ingestion/commit/4bd4b3646f4bbf9dfe6ca86f463c7c23efb855f3))
+
 ## [1.1.1](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.1.0...v1.1.1) (2026-01-07)
 
 
