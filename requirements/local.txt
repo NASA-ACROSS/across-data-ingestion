@@ -106,7 +106,7 @@ fastapi-utils==0.8.0
     # via -r base.in
 fastar==0.8.0
     # via fastapi-cloud-cli
-filelock==3.20.1
+filelock==3.20.3
     # via virtualenv
 geoalchemy2==0.15.2
     # via -r base.in
