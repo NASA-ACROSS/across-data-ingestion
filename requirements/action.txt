@@ -3,9 +3,9 @@
 across-server-openapi-python==1.1.1
     # via -r base.in
 across-tools==1.1.0
-    # via -r base.in
-alembic==1.17.2
-    # via -r base.in
+    # via -r requirements/base.in
+alembic==1.18.1
+    # via -r requirements/base.in
 annotated-doc==0.0.4
     # via fastapi
 annotated-types==0.7.0
@@ -109,7 +109,7 @@ html5lib==1.1
     # via astroquery
 httpcore==1.0.9
     # via httpx
-httpx==0.27.2
+httpx==0.28.1
     # via
     #   -r base.in
     #   across-tools
