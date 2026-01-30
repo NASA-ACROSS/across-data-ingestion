@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.2.1...v1.2.2) (2026-01-15)
+
+
+### Bug Fixes
+
+* bump across-server-openapi-python 1.1.0 to 1.1.1 ([#146](https://github.com/NASA-ACROSS/across-data-ingestion/issues/146)) ([de79fbd](https://github.com/NASA-ACROSS/across-data-ingestion/commit/de79fbd0bccfc0016037d638f79ac297081730b4))
+
 ## [1.2.1](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.2.0...v1.2.1) (2026-01-09)
 
 
