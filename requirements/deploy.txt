@@ -4,7 +4,7 @@ across-server-openapi-python==1.1.1
     # via -r requirements/base.in
 across-tools==1.1.0
     # via -r requirements/base.in
-alembic==1.17.2
+alembic==1.18.1
     # via -r requirements/base.in
 annotated-doc==0.0.4
     # via fastapi
@@ -17,40 +17,40 @@ anyio==4.12.0
     #   starlette
 astropy==7.2.0
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   across-tools
     #   astropy-healpix
     #   astroquery
     #   healpy
     #   pyvo
-astropy-healpix==1.1.2
+astropy-healpix==1.1.3
     # via -r requirements/base.in
 astropy-iers-data==0.2025.12.15.0.40.51
     # via astropy
 astroquery==0.4.11
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   across-tools
-asyncer==0.0.8
+asyncer==0.0.12
     # via -r requirements/base.in
 asyncpg==0.31.0
-    # via -r requirements/base.in
+    # via -r base.in
 attrs==25.4.0
     # via rush
 beautifulsoup4==4.14.3
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   astroquery
-boto3==1.42.14
+boto3==1.42.24
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   swifttools
-botocore==1.42.14
+botocore==1.42.24
     # via
     #   boto3
     #   s3transfer
 cachetools==5.5.2
-    # via -r requirements/base.in
+    # via -r base.in
 certifi==2025.11.12
     # via
     #   httpcore
@@ -73,16 +73,16 @@ dnspython==2.8.0
     # via email-validator
 email-validator==2.3.0
     # via -r requirements/base.in
-fastapi==0.125.0
+fastapi==0.128.0
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   fastapi-utilities
     #   fastapi-utils
 fastapi-utilities==0.3.1
-    # via -r requirements/base.in
+    # via -r base.in
 fastapi-utils==0.8.0
     # via -r requirements/base.in
-geoalchemy2==0.15.2
+geoalchemy2==0.18.1
     # via -r requirements/base.in
 greenlet==3.3.0
     # via sqlalchemy
@@ -92,15 +92,15 @@ h11==0.16.0
     #   uvicorn
 healpy==1.19.0
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   across-tools
 html5lib==1.1
     # via astroquery
 httpcore==1.0.9
     # via httpx
-httpx==0.27.2
+httpx==0.28.1
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   across-tools
     #   spacetrack
 idna==3.11
@@ -163,7 +163,7 @@ packaging==25.0
     #   pytest
 pandas==2.3.3
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   swifttools
 pandas-stubs==2.3.3.260113
     # via -r requirements/base.in
@@ -185,7 +185,7 @@ pydantic-core==2.41.5
     # via pydantic
 pydantic-settings==2.12.0
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   across-tools
 pyerfa==2.0.1.5
     # via astropy
@@ -193,12 +193,12 @@ pygments==2.19.2
     # via pytest
 pyjwt==2.10.1
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   swifttools
 pytest==9.0.2
     # via pytest-asyncio
 pytest-asyncio==1.3.0
-    # via -r requirements/base.in
+    # via -r base.in
 python-dateutil==2.9.0.post0
     # via
     #   across-server-openapi-python
@@ -228,43 +228,44 @@ secretstorage==3.5.0
     # via keyring
 sgp4==2.25
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   across-tools
     #   skyfield
 shapely==2.1.2
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   across-tools
 six==1.17.0
     # via
     #   html5lib
     #   python-dateutil
-skyfield==1.53
+skyfield==1.54
     # via -r requirements/base.in
 sniffio==1.3.1
     # via
+    #   asyncer
     #   httpx
     #   spacetrack
 soupsieve==2.8.1
     # via beautifulsoup4
 spacetrack==1.3.1
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   across-tools
 spiceypy==8.0.0
     # via across-tools
 sqlalchemy==2.0.45
     # via
-    #   -r requirements/base.in
+    #   -r base.in
     #   alembic
     #   fastapi-utilities
     #   geoalchemy2
 starlette==0.50.0
     # via fastapi
 structlog==25.5.0
-    # via -r requirements/base.in
+    # via -r base.in
 swifttools==3.0.24
-    # via -r requirements/base.in
+    # via -r base.in
 tabulate==0.9.0
     # via swifttools
 types-pytz==2025.2.0.20251108
@@ -273,31 +274,28 @@ typing-extensions==4.15.0
     # via
     #   across-server-openapi-python
     #   alembic
-    #   anyio
     #   beautifulsoup4
     #   fastapi
     #   logbook
     #   pydantic
     #   pydantic-core
-    #   pytest-asyncio
     #   sqlalchemy
-    #   starlette
     #   typing-inspect
     #   typing-inspection
 typing-inspect==0.9.0
-    # via -r requirements/base.in
+    # via -r base.in
 typing-inspection==0.4.2
     # via
     #   pydantic
     #   pydantic-settings
 tzdata==2025.3
     # via pandas
-urllib3==2.6.2
+urllib3==2.6.3
     # via
     #   across-server-openapi-python
     #   botocore
     #   requests
-uvicorn==0.30.6
+uvicorn==0.40.0
     # via -r requirements/base.in
 webencodings==0.5.1
     # via html5lib
