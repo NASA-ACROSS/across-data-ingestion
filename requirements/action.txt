@@ -271,7 +271,7 @@ requests==2.33.1
     #   astroquery
     #   pyvo
     #   swifttools
-ruff==0.14.13
+ruff==0.15.0
     # via -r requirements/lint.in
 rush==2021.4.0
     # via spacetrack
