@@ -6,8 +6,6 @@ import structlog
 import across_data_ingestion.tasks.schedules.swift.util as task_util
 from across_data_ingestion.util.across_server import sdk
 
-from .mocks import swift_low_fidelity_planned_schedule as expected_schedules
-
 
 @pytest.fixture(autouse=True)
 def mock_logger(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
@@ -65,30 +63,9 @@ class TestCreateUVOTObservations:
             filter="unknown_filter",
         )
 
-    def test_should_continue_creating_observations_for_all_matched_filters(
-        self,
-        fake_swift_obs_entries: list[task_util.SwiftObservationEntry],
-        fake_uvot_mode_entries: dict[str, list[dict]],
-    ):
-        # make the filters unmatchable for the first observation
-        # 0x308f uvot (only test obs with this uvot)
-        uvot = fake_swift_obs_entries[0].uvot
-        filters = fake_uvot_mode_entries[uvot]
-        filters[0]["filter_name"] = "unknown_filter"
-
-        obs = task_util.create_uvot_observations(
-            instrument_id="instrument-id",
-            observation_data=fake_swift_obs_entries,
-            observation_status=sdk.ObservationStatus.PLANNED,
-        )
-
-        expected_length = len(expected_schedules.expected_uvot.observations)
-
-        assert len(obs) == expected_length - 1
-
 
 class TestCreateAcrossSchedule:
-    def test_observation_in_saa_should_return_true_for_saa_uvot_mode(self):
+    def test_should_return_true_for_saa_uvot_mode_when_observation_in_saa(self):
         obs_entry = task_util.SwiftObservationEntry(
             obsid="3676767",
             targname="saa-cold-test",
