@@ -12,6 +12,7 @@ from astropy.table import Table  # type: ignore[import-untyped]
 
 import across_data_ingestion.tasks.schedules.hst.as_flown as as_flown_task
 import across_data_ingestion.tasks.schedules.hst.low_fidelity_planned as task
+from across_data_ingestion.tasks.schedules.hst.util import InstrumentInfo
 from across_data_ingestion.util.across_server import sdk
 
 
@@ -464,3 +465,19 @@ def fake_timeline_row() -> dict:
         "element": "F110W",
         "exp_time": 44.11,
     }
+
+
+@pytest.fixture
+def fake_instrument_info(fake_instrument: sdk.Instrument) -> InstrumentInfo:
+    return InstrumentInfo(
+        id=fake_instrument.id,
+        bandpass=sdk.Bandpass(
+            sdk.WavelengthBandpass(
+                filter_name="fake filter",
+                min=0,
+                max=100,
+                unit=sdk.WavelengthUnit.ANGSTROM,
+            )
+        ),
+        type=sdk.ObservationType.IMAGING,
+    )

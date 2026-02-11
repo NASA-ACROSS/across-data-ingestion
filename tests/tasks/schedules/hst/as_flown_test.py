@@ -21,26 +21,13 @@ class TestHSTAsFlownScheduleIngestionTask:
         def setup(
             self,
             monkeypatch: pytest.MonkeyPatch,
-            fake_instrument: sdk.Instrument,
+            fake_instrument_info: hst_util.InstrumentInfo,
         ) -> None:
             """Monkeypatch function to extract instrument info"""
             monkeypatch.setattr(
                 task,
                 "extract_instrument_info",
-                MagicMock(
-                    return_value=hst_util.InstrumentInfo(
-                        id=fake_instrument.id,
-                        bandpass=sdk.Bandpass(
-                            sdk.WavelengthBandpass(
-                                filter_name="fake filter",
-                                min=0,
-                                max=100,
-                                unit=sdk.WavelengthUnit.ANGSTROM,
-                            )
-                        ),
-                        type=sdk.ObservationType.IMAGING,
-                    )
-                ),
+                MagicMock(return_value=fake_instrument_info),
             )
 
         @pytest.mark.asyncio
@@ -55,7 +42,7 @@ class TestHSTAsFlownScheduleIngestionTask:
             mock_schedule_api.create_schedule.assert_called_once()
 
         @pytest.mark.asyncio
-        async def test_should_call_across_create_schedule_with_schedule_create_instance(
+        async def test_should_make_schedule_create_instance_when_calling_create_schedule(
             self,
             mock_schedule_api: MagicMock,
             mock_vo_service_cls: AsyncMock,
@@ -68,7 +55,7 @@ class TestHSTAsFlownScheduleIngestionTask:
             assert isinstance(args[0], sdk.ScheduleCreate)
 
         @pytest.mark.asyncio
-        async def test_should_call_across_create_schedule_with_observation_create_instance(
+        async def test_should_make_observation_create_instance_when_creating_schedule(
             self, mock_schedule_api: MagicMock
         ) -> None:
             """Should create ACROSS schedule with ObservationCreate schemas"""
@@ -86,7 +73,7 @@ class TestHSTAsFlownScheduleIngestionTask:
             ],
         )
         @pytest.mark.asyncio
-        async def test_should_create_schedule_with_correct_schedule_params(
+        async def test_should_use_as_flown_schedule_params_when_creating_schedules(
             self,
             mock_schedule_api: AsyncMock,
             arg: str,
@@ -98,7 +85,7 @@ class TestHSTAsFlownScheduleIngestionTask:
             assert getattr(call[0], arg) == expected_input
 
         @pytest.mark.asyncio
-        async def test_should_not_call_create_schedule_with_invalid_observations(
+        async def test_should_not_call_schedule_when_invalid_observations_are_filtered_out(
             self,
             mock_get_observation_data_from_tap: AsyncMock,
             mock_schedule_api: MagicMock,
@@ -114,12 +101,12 @@ class TestHSTAsFlownScheduleIngestionTask:
             mock_schedule_api.create_schedule.assert_not_called()
 
         @pytest.mark.asyncio
-        async def test_should_return_if_cannot_read_observations_table(
+        async def test_should_not_create_schedules_when_no_observations_are_found(
             self,
             mock_get_observation_data_from_tap: AsyncMock,
             mock_schedule_api: MagicMock,
         ) -> None:
-            """Should return if cannot read observations from TAP service"""
+            """Should not create schedule if no observations are found from TAP service"""
             mock_get_observation_data_from_tap.return_value = None
 
             await ingest()

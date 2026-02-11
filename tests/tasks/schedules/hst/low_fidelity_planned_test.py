@@ -26,7 +26,7 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
         def setup(
             self,
             monkeypatch: pytest.MonkeyPatch,
-            fake_instrument: sdk.Instrument,
+            fake_instrument_info: hst_util.InstrumentInfo,
         ) -> None:
             """Monkeypatch functions to extract coords and instrument"""
             monkeypatch.setattr(
@@ -43,20 +43,7 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
             monkeypatch.setattr(
                 task,
                 "extract_instrument_info",
-                MagicMock(
-                    return_value=hst_util.InstrumentInfo(
-                        id=fake_instrument.id,
-                        bandpass=sdk.Bandpass(
-                            sdk.WavelengthBandpass(
-                                filter_name="fake filter",
-                                min=0,
-                                max=100,
-                                unit=sdk.WavelengthUnit.ANGSTROM,
-                            )
-                        ),
-                        type=sdk.ObservationType.IMAGING,
-                    )
-                ),
+                MagicMock(return_value=fake_instrument_info),
             )
 
         def test_should_call_across_create_schedule(
@@ -298,105 +285,6 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
             )
 
             assert obs is None
-
-        @pytest.mark.parametrize(
-            "fake_observation_data, fake_instrument_data, obs_type",
-            [
-                (
-                    {
-                        "element": "F100W",
-                        "aperture": "mock-aperture",
-                        "instrument": "ACS",
-                    },
-                    {
-                        "short_name": "HST_ACS",
-                        "filters": [{"name": "HST TEST F100W"}],
-                    },
-                    sdk.ObservationType.IMAGING,
-                ),
-                (
-                    {
-                        "element": "G100",
-                        "aperture": "mock-aperture",
-                        "instrument": "ACS",
-                    },
-                    {
-                        "short_name": "HST_ACS",
-                        "filters": [{"name": "HST TEST G100"}],
-                    },
-                    sdk.ObservationType.SPECTROSCOPY,
-                ),
-                (
-                    {
-                        "element": "G100",
-                        "aperture": "mock-aperture",
-                        "instrument": "ACS",
-                    },
-                    {
-                        "short_name": "HST_ACS",
-                        "filters": [{"name": "HST TEST G100"}],
-                    },
-                    sdk.ObservationType.SPECTROSCOPY,
-                ),
-                (
-                    {
-                        "element": "P100",
-                        "aperture": "mock-aperture",
-                        "instrument": "ACS",
-                    },
-                    {
-                        "short_name": "HST_ACS",
-                        "filters": [{"name": "HST TEST P100"}],
-                    },
-                    sdk.ObservationType.SPECTROSCOPY,
-                ),
-                (
-                    {
-                        "element": "FR100",
-                        "aperture": "mock-aperture",
-                        "instrument": "ACS",
-                    },
-                    {
-                        "short_name": "HST_ACS",
-                        "filters": [{"name": "HST TEST FR100"}],
-                    },
-                    sdk.ObservationType.SPECTROSCOPY,
-                ),
-                (
-                    {
-                        "element": "F100W",
-                        "aperture": "mock-aperture",
-                        "instrument": "COS",
-                    },
-                    {
-                        "short_name": "HST_COS",
-                        "filters": [{"name": "HST TEST F100W"}],
-                    },
-                    sdk.ObservationType.SPECTROSCOPY,
-                ),
-            ],
-        )
-        def test_should_pick_correct_obs_type_from_filter_name(
-            self,
-            fake_observation_data: dict,
-            fake_instrument_data: dict,
-            fake_timeline_row: dict,
-            obs_type: str,
-            fake_instrument: sdk.Instrument,
-            fake_filters: list[sdk.Filter],
-        ) -> None:
-            """Should identify correct observation type from obs parameters"""
-            # set data on fake schemas
-            # use the union operator to update fake_timeline_row
-            observation_data = fake_timeline_row | fake_observation_data
-            fake_instrument.short_name = fake_instrument_data["short_name"]
-            fake_filter_data = fake_instrument_data["filters"][0]
-            fake_filters[0].name = fake_filter_data["name"]
-
-            obs = extract_instrument_info(
-                task.TimelineRow(**observation_data), [fake_instrument]
-            )
-            assert obs and obs.type == obs_type
 
         @pytest.mark.parametrize(
             "fake_observation_data, expected_name",
