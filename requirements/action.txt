@@ -4,7 +4,7 @@ across-server-openapi-python==1.4.0
     # via -r requirements/base.in
 across-tools==1.6.1
     # via -r requirements/base.in
-alembic==1.18.1
+alembic==1.18.4
     # via -r requirements/base.in
 annotated-doc==0.0.4
     # via fastapi
