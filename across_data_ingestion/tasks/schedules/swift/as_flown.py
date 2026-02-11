@@ -50,7 +50,7 @@ def ingest(days_in_past: int = 1) -> None:
         observation_status=sdk.ObservationStatus.PERFORMED,
         schedule_status=sdk.ScheduleStatus.PERFORMED,
         schedule_fidelity=sdk.ScheduleFidelity.HIGH,
-        schedule_name_attr="as_flown",
+        schedule_name="as_flown",
     )
     handler.run(observation_data=swift_observation_data)
 

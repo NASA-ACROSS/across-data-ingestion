@@ -141,7 +141,7 @@ def create_uvot_observations(
     # doing it here over unique list to avoid multiple requests
     uvot_mode_dict = build_uvot_mode_dict(uvot_modes)
 
-    uvot_schedule_observations = []
+    across_observations = []
 
     # filter observations to match UVOT modes
     observations = [obs for obs in observation_data if obs.uvot in uvot_mode_dict]
@@ -178,7 +178,7 @@ def create_uvot_observations(
             # Calculate exposure time factor based on the weight of the observation
             exposure_time_factor = mode.weight / observation_total_weight
 
-            uvot_schedule_observations.append(
+            across_observations.append(
                 swift_to_across_observation(
                     instrument_id=instrument_id,
                     swift_obs=obs_data,
@@ -189,7 +189,7 @@ def create_uvot_observations(
                 )
             )
 
-    return uvot_schedule_observations
+    return across_observations
 
 
 def create_swift_across_schedule(
@@ -248,12 +248,12 @@ class SwiftScheduleHandler:
         observation_status: sdk.ObservationStatus,
         schedule_status: sdk.ScheduleStatus,
         schedule_fidelity: sdk.ScheduleFidelity,
-        schedule_name_attr: str,
+        schedule_name: str,
     ):
         self.observation_status = observation_status
         self.schedule_status = schedule_status
         self.schedule_fidelity = schedule_fidelity
-        self.schedule_name_attr = schedule_name_attr
+        self.schedule_name = schedule_name
         self.instrumnent_configs = [
             InstrumentConfig(
                 telescope_name="swift_xrt",
@@ -282,7 +282,7 @@ class SwiftScheduleHandler:
                 observation_type=config.observation_type,
                 schedule_status=self.schedule_status,
                 schedule_fidelity=self.schedule_fidelity,
-                schedule_name_attr=self.schedule_name_attr,
+                schedule_name_attr=self.schedule_name,
                 create_observations=(
                     create_uvot_observations
                     if config.telescope_name == "swift_uvot"

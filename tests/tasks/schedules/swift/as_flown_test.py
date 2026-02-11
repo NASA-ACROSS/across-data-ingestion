@@ -53,19 +53,10 @@ class TestIngest:
             ("uvot", expected_schedules.expected_uvot, 2),
         ],
     )
-    @pytest.mark.parametrize(
-        "field",
-        [
-            field
-            for field in sdk.ScheduleCreate.model_fields.keys()
-            if field != "observations"
-        ],
-    )
     def test_should_transform_to_expected_schedule_by_telescope(
         self,
         type: str,
         expected_schedule: sdk.ScheduleCreate,
-        field: str,
         call_idx: int,
         mock_schedule_api: MagicMock,
     ):
@@ -73,7 +64,7 @@ class TestIngest:
         call = mock_schedule_api.create_schedule.call_args_list[call_idx]
         created_sched = call.args[0]
 
-        assert getattr(created_sched, field) == getattr(expected_schedule, field)
+        assert created_sched == expected_schedule
 
     @pytest.mark.parametrize(
         "type, expected_obs, call_idx",
@@ -83,12 +74,10 @@ class TestIngest:
             ("uvot", expected_schedules.expected_uvot.observations[0], 2),
         ],
     )
-    @pytest.mark.parametrize("field", sdk.ObservationCreate.model_fields)
     def test_should_transform_to_expected_observation_by_telescope(
         self,
         type: str,
         expected_obs: sdk.ObservationCreate,
-        field: str,
         call_idx: int,
         mock_schedule_api: MagicMock,
     ):
@@ -96,4 +85,4 @@ class TestIngest:
         call = mock_schedule_api.create_schedule.call_args_list[call_idx]
         created_obs = call.args[0].observations[0]
 
-        assert getattr(created_obs, field) == getattr(expected_obs, field)
+        assert created_obs == expected_obs

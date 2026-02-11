@@ -50,7 +50,7 @@ def ingest(days_in_future: int = 4) -> None:
         observation_status=sdk.ObservationStatus.PLANNED,
         schedule_status=sdk.ScheduleStatus.PLANNED,
         schedule_fidelity=sdk.ScheduleFidelity.LOW,
-        schedule_name_attr="low_fidelity_planned",
+        schedule_name="low_fidelity_planned",
     )
     handler.run(observation_data=swift_observation_data)
 
