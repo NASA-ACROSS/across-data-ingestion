@@ -51,7 +51,7 @@ def swift_to_across_schedule(
     data: list[SwiftObservationEntry],
     status: sdk.ScheduleStatus,
     fidelity: sdk.ScheduleFidelity,
-    schedule_name_attr: str,
+    schedule_name: str,
 ) -> sdk.ScheduleCreate:
     """Converts a list of SwiftObservationEntry to an ACROSS ScheduleCreate object."""
     begins = [obs.begin for obs in data]
@@ -62,7 +62,7 @@ def swift_to_across_schedule(
 
     return sdk.ScheduleCreate(
         telescope_id=telescope_id,
-        name=f"{telescope_short_name}_{schedule_name_attr}_{begin.split('T')[0]}_{end.split('T')[0]}",
+        name=f"{telescope_short_name}_{schedule_name}_{begin.split('T')[0]}_{end.split('T')[0]}",
         date_range=sdk.DateRange(
             begin=begin,
             end=end,
@@ -214,7 +214,7 @@ def create_swift_across_schedule(
         data=observation_data,
         status=schedule_status,
         fidelity=schedule_fidelity,
-        schedule_name_attr=schedule_name,
+        schedule_name=schedule_name,
     )
 
     schedule.observations = create_observations(
