@@ -98,7 +98,7 @@ class TestCreateAcrossSchedule:
             bandpass=sdk.Bandpass(task_util.SWIFT_XRT_BANDPASS),
             schedule_status=sdk.ScheduleStatus.PLANNED,
             schedule_fidelity=sdk.ScheduleFidelity.LOW,
-            schedule_name_attr="low_fidelity_planned",
+            schedule_name="low_fidelity_planned",
         )
 
         mock_telescope_api.get_telescopes.assert_called_once()
@@ -116,7 +116,7 @@ class TestCreateAcrossSchedule:
             bandpass=sdk.Bandpass(task_util.SWIFT_XRT_BANDPASS),
             schedule_status=sdk.ScheduleStatus.PLANNED,
             schedule_fidelity=sdk.ScheduleFidelity.LOW,
-            schedule_name_attr="low_fidelity_planned",
+            schedule_name="low_fidelity_planned",
         )
 
         assert isinstance(schedule, sdk.ScheduleCreate)

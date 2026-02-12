@@ -199,7 +199,7 @@ def create_swift_across_schedule(
     observation_type: sdk.ObservationType,
     schedule_status: sdk.ScheduleStatus,
     schedule_fidelity: sdk.ScheduleFidelity,
-    schedule_name_attr: str,
+    schedule_name: str,
     create_observations: Callable = create_observations,
     bandpass: sdk.Bandpass | None = None,
 ) -> sdk.ScheduleCreate:
@@ -214,7 +214,7 @@ def create_swift_across_schedule(
         data=observation_data,
         status=schedule_status,
         fidelity=schedule_fidelity,
-        schedule_name_attr=schedule_name_attr,
+        schedule_name_attr=schedule_name,
     )
 
     schedule.observations = create_observations(
@@ -282,7 +282,7 @@ class SwiftScheduleHandler:
                 observation_type=config.observation_type,
                 schedule_status=self.schedule_status,
                 schedule_fidelity=self.schedule_fidelity,
-                schedule_name_attr=self.schedule_name,
+                schedule_name=self.schedule_name,
                 create_observations=(
                     create_uvot_observations
                     if config.telescope_name == "swift_uvot"
