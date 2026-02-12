@@ -5,7 +5,9 @@ import pydantic
 import pytest
 from swifttools import swift_too  # type:ignore
 
-import across_data_ingestion.tasks.schedules.swift.low_fidelity_planned as task
+import across_data_ingestion.tasks.schedules.swift.as_flown as as_flown_task
+import across_data_ingestion.tasks.schedules.swift.low_fidelity_planned as planned_task
+import across_data_ingestion.tasks.schedules.swift.util as task
 
 from .mocks import fake_swift_plan
 
@@ -80,9 +82,10 @@ def fake_swift_ppst_entries() -> list[FakePPSTEntry]:
 @pytest.fixture
 def fake_swift_obs_entries(
     fake_swift_ppst_entries: list[FakePPSTEntry],
-) -> list[task.CustomSwiftObsEntry]:
+) -> list[task.SwiftObservationEntry]:
     return [
-        task.CustomSwiftObsEntry.from_entry(entry) for entry in fake_swift_ppst_entries
+        task.SwiftObservationEntry.from_entry(entry)
+        for entry in fake_swift_ppst_entries
     ]
 
 
@@ -115,9 +118,31 @@ def mock_swift_too(
 ):
     mock_too = MagicMock()
     mock_too.PlanQuery = MagicMock(return_value=fake_swift_ppst_entries)
+    mock_too.ObsQuery = MagicMock(return_value=fake_swift_ppst_entries)
     mock_too.UVOTMode = mock_uvot_mode_cls
 
     monkeypatch.setattr(swift_too, "PlanQuery", mock_too.PlanQuery)
+    monkeypatch.setattr(swift_too, "ObsQuery", mock_too.ObsQuery)
     monkeypatch.setattr(swift_too, "UVOTMode", mock_too.UVOTMode)
 
     return mock_too
+
+
+@pytest.fixture
+def mock_swift_schedule_handler() -> MagicMock:
+    """Mock for SwiftScheduleHandler class."""
+    mock = MagicMock(spec=task.SwiftScheduleHandler)
+    mock.run = MagicMock()
+    return mock
+
+
+@pytest.fixture(autouse=True)
+def mock_swift_schedule_handler_cls(
+    monkeypatch: pytest.MonkeyPatch, mock_swift_schedule_handler: MagicMock
+) -> MagicMock:
+    """Mock for SwiftScheduleHandler class."""
+    mock_cls = MagicMock(return_value=mock_swift_schedule_handler)
+    monkeypatch.setattr(as_flown_task, "SwiftScheduleHandler", mock_cls)
+    monkeypatch.setattr(planned_task, "SwiftScheduleHandler", mock_cls)
+
+    return mock_cls
