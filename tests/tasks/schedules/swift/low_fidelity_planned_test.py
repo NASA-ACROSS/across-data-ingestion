@@ -7,8 +7,6 @@ import across_data_ingestion.tasks.schedules.swift.low_fidelity_planned as task
 import across_data_ingestion.tasks.schedules.swift.util as util
 from across_data_ingestion.util.across_server import sdk
 
-from .mocks import swift_low_fidelity_planned_schedule as expected_schedules
-
 
 @pytest.fixture(autouse=True)
 def mock_logger(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
@@ -84,44 +82,32 @@ class TestIngest:
 
         assert call.kwargs["observation_type"] == obs_type
 
-    @pytest.mark.parametrize(
-        "type, expected_schedule, call_idx",
-        [
-            ("xrt", expected_schedules.expected_xrt, 0),
-            ("bat", expected_schedules.expected_bat, 1),
-            ("uvot", expected_schedules.expected_uvot, 2),
-        ],
-    )
-    def test_should_transform_to_expected_schedule_by_telescope(
+    def test_should_run_handler(
         self,
-        type: str,
-        expected_schedule: sdk.ScheduleCreate,
-        call_idx: int,
-        mock_schedule_api: MagicMock,
+        monkeypatch: pytest.MonkeyPatch,
+        mock_swift_schedule_handler: MagicMock,
     ):
+        monkeypatch.setattr(
+            task,
+            "SwiftScheduleHandler",
+            MagicMock(return_value=mock_swift_schedule_handler),
+        )
         task.ingest()
-        call = mock_schedule_api.create_schedule.call_args_list[call_idx]
-        created_sched = call.args[0]
 
-        assert created_sched == expected_schedule
+        mock_swift_schedule_handler.run.assert_called_once()
 
-    @pytest.mark.parametrize(
-        "type, expected_obs, call_idx",
-        [
-            ("xrt", expected_schedules.expected_xrt.observations[0], 0),
-            ("bat", expected_schedules.expected_bat.observations[0], 1),
-            ("uvot", expected_schedules.expected_uvot.observations[0], 2),
-        ],
-    )
-    def test_should_transform_to_expected_observation_by_telescope(
+    def test_should_instantiate_handler_with_expected_args(
         self,
-        type: str,
-        expected_obs: sdk.ObservationCreate,
-        call_idx: int,
-        mock_schedule_api: MagicMock,
+        monkeypatch: pytest.MonkeyPatch,
+        mock_swift_schedule_handler: MagicMock,
     ):
+        mock_handler_class = MagicMock(return_value=mock_swift_schedule_handler)
+        monkeypatch.setattr(task, "SwiftScheduleHandler", mock_handler_class)
         task.ingest()
-        call = mock_schedule_api.create_schedule.call_args_list[call_idx]
-        created_obs = call.args[0].observations[0]
 
-        assert created_obs == expected_obs
+        mock_handler_class.assert_called_once_with(
+            observation_status=sdk.ObservationStatus.PLANNED,
+            schedule_status=sdk.ScheduleStatus.PLANNED,
+            schedule_name="low_fidelity_planned",
+            schedule_fidelity=sdk.ScheduleFidelity.LOW,
+        )

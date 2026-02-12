@@ -124,3 +124,11 @@ def mock_swift_too(
     monkeypatch.setattr(swift_too, "UVOTMode", mock_too.UVOTMode)
 
     return mock_too
+
+
+@pytest.fixture
+def mock_swift_schedule_handler() -> MagicMock:
+    """Mock for SwiftScheduleHandler class."""
+    mock = MagicMock(spec=task.SwiftScheduleHandler)
+    mock.run = MagicMock()
+    return mock

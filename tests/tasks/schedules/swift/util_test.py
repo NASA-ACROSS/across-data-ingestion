@@ -6,6 +6,9 @@ import structlog
 import across_data_ingestion.tasks.schedules.swift.util as task_util
 from across_data_ingestion.util.across_server import sdk
 
+from .mocks import swift_as_flown_schedule as expected_as_flown_schedule
+from .mocks import swift_low_fidelity_planned_schedule as expected_planned_schedule
+
 
 @pytest.fixture(autouse=True)
 def mock_logger(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
@@ -117,3 +120,135 @@ class TestCreateAcrossSchedule:
         )
 
         assert isinstance(schedule, sdk.ScheduleCreate)
+
+    @pytest.mark.parametrize(
+        "type, expected_schedule, call_idx",
+        [
+            ("xrt", expected_planned_schedule.expected_xrt, 0),
+            ("bat", expected_planned_schedule.expected_bat, 1),
+            ("uvot", expected_planned_schedule.expected_uvot, 2),
+        ],
+    )
+    def test_should_transform_to_expected_planned_schedule_by_telescope(
+        self,
+        type: str,
+        expected_schedule: sdk.ScheduleCreate,
+        call_idx: int,
+        mock_schedule_api: MagicMock,
+        fake_swift_obs_entries: list[task_util.SwiftObservationEntry],
+    ):
+        handler = task_util.SwiftScheduleHandler(
+            observation_status=sdk.ObservationStatus.PLANNED,
+            schedule_status=sdk.ScheduleStatus.PLANNED,
+            schedule_fidelity=sdk.ScheduleFidelity.LOW,
+            schedule_name="low_fidelity_planned",
+        )
+        non_saa_obs_entries = [
+            obs
+            for obs in fake_swift_obs_entries
+            if not task_util.observation_in_saa(obs)
+        ]
+        handler.run(observation_data=non_saa_obs_entries)
+        call = mock_schedule_api.create_schedule.call_args_list[call_idx]
+        created_sched = call.args[0]
+
+        assert created_sched == expected_schedule
+
+    @pytest.mark.parametrize(
+        "type, expected_obs, call_idx",
+        [
+            ("xrt", expected_planned_schedule.expected_xrt.observations[0], 0),
+            ("bat", expected_planned_schedule.expected_bat.observations[0], 1),
+            ("uvot", expected_planned_schedule.expected_uvot.observations[0], 2),
+        ],
+    )
+    def test_should_transform_to_expected_planned_observation_by_telescope(
+        self,
+        type: str,
+        expected_obs: sdk.ObservationCreate,
+        call_idx: int,
+        mock_schedule_api: MagicMock,
+        fake_swift_obs_entries: list[task_util.SwiftObservationEntry],
+    ):
+        handler = task_util.SwiftScheduleHandler(
+            observation_status=sdk.ObservationStatus.PLANNED,
+            schedule_status=sdk.ScheduleStatus.PLANNED,
+            schedule_fidelity=sdk.ScheduleFidelity.LOW,
+            schedule_name="low_fidelity_planned",
+        )
+        non_saa_obs_entries = [
+            obs
+            for obs in fake_swift_obs_entries
+            if not task_util.observation_in_saa(obs)
+        ]
+        handler.run(observation_data=non_saa_obs_entries)
+        call = mock_schedule_api.create_schedule.call_args_list[call_idx]
+        created_obs = call.args[0].observations[0]
+
+        assert created_obs == expected_obs
+
+    @pytest.mark.parametrize(
+        "type, expected_schedule, call_idx",
+        [
+            ("xrt", expected_as_flown_schedule.expected_xrt, 0),
+            ("bat", expected_as_flown_schedule.expected_bat, 1),
+            ("uvot", expected_as_flown_schedule.expected_uvot, 2),
+        ],
+    )
+    def test_should_transform_to_expected_as_flown_schedule_by_telescope(
+        self,
+        type: str,
+        expected_schedule: sdk.ScheduleCreate,
+        call_idx: int,
+        mock_schedule_api: MagicMock,
+        fake_swift_obs_entries: list[task_util.SwiftObservationEntry],
+    ):
+        handler = task_util.SwiftScheduleHandler(
+            observation_status=sdk.ObservationStatus.PERFORMED,
+            schedule_status=sdk.ScheduleStatus.PERFORMED,
+            schedule_fidelity=sdk.ScheduleFidelity.HIGH,
+            schedule_name="as_flown",
+        )
+        non_saa_obs_entries = [
+            obs
+            for obs in fake_swift_obs_entries
+            if not task_util.observation_in_saa(obs)
+        ]
+        handler.run(observation_data=non_saa_obs_entries)
+        call = mock_schedule_api.create_schedule.call_args_list[call_idx]
+        created_sched = call.args[0]
+
+        assert created_sched == expected_schedule
+
+    @pytest.mark.parametrize(
+        "type, expected_obs, call_idx",
+        [
+            ("xrt", expected_as_flown_schedule.expected_xrt.observations[0], 0),
+            ("bat", expected_as_flown_schedule.expected_bat.observations[0], 1),
+            ("uvot", expected_as_flown_schedule.expected_uvot.observations[0], 2),
+        ],
+    )
+    def test_should_transform_to_expected_as_flown_observation_by_telescope(
+        self,
+        type: str,
+        expected_obs: sdk.ObservationCreate,
+        call_idx: int,
+        mock_schedule_api: MagicMock,
+        fake_swift_obs_entries: list[task_util.SwiftObservationEntry],
+    ):
+        handler = task_util.SwiftScheduleHandler(
+            observation_status=sdk.ObservationStatus.PERFORMED,
+            schedule_status=sdk.ScheduleStatus.PERFORMED,
+            schedule_fidelity=sdk.ScheduleFidelity.HIGH,
+            schedule_name="as_flown",
+        )
+        non_saa_obs_entries = [
+            obs
+            for obs in fake_swift_obs_entries
+            if not task_util.observation_in_saa(obs)
+        ]
+        handler.run(observation_data=non_saa_obs_entries)
+        call = mock_schedule_api.create_schedule.call_args_list[call_idx]
+        created_obs = call.args[0].observations[0]
+
+        assert created_obs == expected_obs
