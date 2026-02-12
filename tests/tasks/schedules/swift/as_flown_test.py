@@ -46,27 +46,20 @@ class TestIngest:
     def test_should_run_handler(
         self,
         monkeypatch: pytest.MonkeyPatch,
-        mock_swift_schedule_handler: MagicMock,
+        mock_swift_schedule_handler_cls: MagicMock,
     ):
-        monkeypatch.setattr(
-            task,
-            "SwiftScheduleHandler",
-            MagicMock(return_value=mock_swift_schedule_handler),
-        )
         task.ingest()
 
-        mock_swift_schedule_handler.run.assert_called_once()
+        mock_swift_schedule_handler_cls.return_value.run.assert_called_once()
 
     def test_should_instantiate_handler_with_expected_args(
         self,
         monkeypatch: pytest.MonkeyPatch,
-        mock_swift_schedule_handler: MagicMock,
+        mock_swift_schedule_handler_cls: MagicMock,
     ):
-        mock_handler_class = MagicMock(return_value=mock_swift_schedule_handler)
-        monkeypatch.setattr(task, "SwiftScheduleHandler", mock_handler_class)
         task.ingest()
 
-        mock_handler_class.assert_called_once_with(
+        mock_swift_schedule_handler_cls.assert_called_once_with(
             observation_status=sdk.ObservationStatus.PERFORMED,
             schedule_status=sdk.ScheduleStatus.PERFORMED,
             schedule_name="as_flown",

@@ -68,6 +68,12 @@ class TestCreateUVOTObservations:
 
 
 class TestCreateAcrossSchedule:
+    @pytest.fixture
+    def mock_create_swift_across_schedule(self, monkeypatch: pytest.MonkeyPatch):
+        mock = MagicMock(side_effect=task_util.create_swift_across_schedule)
+        monkeypatch.setattr(task_util, "create_swift_across_schedule", mock)
+        return mock
+
     def test_should_return_true_for_saa_uvot_mode_when_observation_in_saa(self):
         obs_entry = task_util.SwiftObservationEntry(
             obsid="3676767",
@@ -252,3 +258,61 @@ class TestCreateAcrossSchedule:
         created_obs = call.args[0].observations[0]
 
         assert created_obs == expected_obs
+
+    @pytest.mark.parametrize(
+        "telescope_name, call_idx",
+        [("swift_xrt", 0), ("swift_bat", 1), ("swift_uvot", 2)],
+    )
+    def test_should_transform_swift_plan_to_across_schedule(
+        self,
+        telescope_name: str,
+        call_idx: int,
+        fake_swift_obs_entries: list[task_util.SwiftObservationEntry],
+        mock_create_swift_across_schedule: MagicMock,
+    ):
+        handler = task_util.SwiftScheduleHandler(
+            observation_status=sdk.ObservationStatus.PERFORMED,
+            schedule_status=sdk.ScheduleStatus.PERFORMED,
+            schedule_fidelity=sdk.ScheduleFidelity.HIGH,
+            schedule_name="as_flown",
+        )
+        non_saa_obs_entries = [
+            obs
+            for obs in fake_swift_obs_entries
+            if not task_util.observation_in_saa(obs)
+        ]
+        handler.run(observation_data=non_saa_obs_entries)
+        call = mock_create_swift_across_schedule.call_args_list[call_idx]
+
+        assert call.kwargs["telescope_name"] == telescope_name
+
+    @pytest.mark.parametrize(
+        "obs_type, call_idx",
+        [
+            (sdk.ObservationType.SPECTROSCOPY, 0),
+            (sdk.ObservationType.IMAGING, 1),
+            (sdk.ObservationType.IMAGING, 2),
+        ],
+    )
+    def test_should_use_expected_observation_type_for_each_telescope(
+        self,
+        obs_type: sdk.ObservationType,
+        call_idx: int,
+        fake_swift_obs_entries: list[task_util.SwiftObservationEntry],
+        mock_create_swift_across_schedule: MagicMock,
+    ):
+        handler = task_util.SwiftScheduleHandler(
+            observation_status=sdk.ObservationStatus.PERFORMED,
+            schedule_status=sdk.ScheduleStatus.PERFORMED,
+            schedule_fidelity=sdk.ScheduleFidelity.HIGH,
+            schedule_name="as_flown",
+        )
+        non_saa_obs_entries = [
+            obs
+            for obs in fake_swift_obs_entries
+            if not task_util.observation_in_saa(obs)
+        ]
+        handler.run(observation_data=non_saa_obs_entries)
+        call = mock_create_swift_across_schedule.call_args_list[call_idx]
+
+        assert call.kwargs["observation_type"] == obs_type

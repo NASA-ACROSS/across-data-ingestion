@@ -5,6 +5,8 @@ import pydantic
 import pytest
 from swifttools import swift_too  # type:ignore
 
+import across_data_ingestion.tasks.schedules.swift.as_flown as as_flown_task
+import across_data_ingestion.tasks.schedules.swift.low_fidelity_planned as planned_task
 import across_data_ingestion.tasks.schedules.swift.util as task
 
 from .mocks import fake_swift_plan
@@ -132,3 +134,15 @@ def mock_swift_schedule_handler() -> MagicMock:
     mock = MagicMock(spec=task.SwiftScheduleHandler)
     mock.run = MagicMock()
     return mock
+
+
+@pytest.fixture(autouse=True)
+def mock_swift_schedule_handler_cls(
+    monkeypatch: pytest.MonkeyPatch, mock_swift_schedule_handler: MagicMock
+) -> MagicMock:
+    """Mock for SwiftScheduleHandler class."""
+    mock_cls = MagicMock(return_value=mock_swift_schedule_handler)
+    monkeypatch.setattr(as_flown_task, "SwiftScheduleHandler", mock_cls)
+    monkeypatch.setattr(planned_task, "SwiftScheduleHandler", mock_cls)
+
+    return mock_cls
