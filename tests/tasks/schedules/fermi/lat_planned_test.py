@@ -315,21 +315,25 @@ class TestTransformObservations:
                 "begin",
                 lambda obs: [o.date_range.begin for o in obs],
                 lambda df: (
-                    lat_planned.FERMI_TIME_START_EPOCH
-                    + df["START"].to_numpy() * lat_planned.u.second
-                )
-                .to_datetime()
-                .tolist(),
+                    (
+                        lat_planned.FERMI_TIME_START_EPOCH
+                        + df["START"].to_numpy() * lat_planned.u.second
+                    )
+                    .to_datetime()
+                    .tolist()
+                ),
             ),
             (
                 "stop",
                 lambda obs: [o.date_range.end for o in obs],
                 lambda df: (
-                    lat_planned.FERMI_TIME_START_EPOCH
-                    + df["STOP"].to_numpy() * lat_planned.u.second
-                )
-                .to_datetime()
-                .tolist(),
+                    (
+                        lat_planned.FERMI_TIME_START_EPOCH
+                        + df["STOP"].to_numpy() * lat_planned.u.second
+                    )
+                    .to_datetime()
+                    .tolist()
+                ),
             ),
             (
                 "exposure",
