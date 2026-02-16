@@ -277,12 +277,14 @@ def create_mos_observations(
     observations_df: pd.DataFrame, instrument_id_dict: dict
 ) -> list[sdk.ObservationCreate]:
     observations_df["max_mos_exposure"] = observations_df.apply(
-        lambda row: max(
-            # "()" exposures signify closed filter, for our case we can ignore
-            float(str(row["MOS1 Dur. Ks"]).replace("( ", "").replace(")", "")),
-            float(str(row["MOS2 Dur. Ks"]).replace("( ", "").replace(")", "")),
-        )
-        * 1000.0,
+        lambda row: (
+            max(
+                # "()" exposures signify closed filter, for our case we can ignore
+                float(str(row["MOS1 Dur. Ks"]).replace("( ", "").replace(")", "")),
+                float(str(row["MOS2 Dur. Ks"]).replace("( ", "").replace(")", "")),
+            )
+            * 1000.0
+        ),
         axis=1,
     )
 
@@ -303,11 +305,13 @@ def create_rgs_observations(
     observations_df: pd.DataFrame, instrument_id_dict: dict
 ) -> list[sdk.ObservationCreate]:
     observations_df["max_rgs_exposure"] = observations_df.apply(
-        lambda row: max(
-            float(row["RGS1 Dur. Ks"]),
-            float(row["RGS2 Dur. Ks"]),
-        )
-        * 1000.0,
+        lambda row: (
+            max(
+                float(row["RGS1 Dur. Ks"]),
+                float(row["RGS2 Dur. Ks"]),
+            )
+            * 1000.0
+        ),
         axis=1,
     )
 
