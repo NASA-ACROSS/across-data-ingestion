@@ -21,7 +21,7 @@
                     "end": "2025-03-05T23:59:55.000"
                 },
                 "external_observation_id": "fermi_week_878_observation_0",
-                "type": "imaging",
+                "type": "slew",
                 "status": "planned",
                 "pointing_angle": 0,
                 "exposure_time": 60.0,
@@ -45,7 +45,7 @@
                     "end": "2025-03-06T00:00:55.000"
                 },
                 "external_observation_id": "fermi_week_878_observation_1",
-                "type": "imaging",
+                "type": "slew",
                 "status": "planned",
                 "pointing_angle": 0,
                 "exposure_time": 60.0,
@@ -69,7 +69,7 @@
                     "end": "2025-03-06T00:01:55.000"
                 },
                 "external_observation_id": "fermi_week_878_observation_2",
-                "type": "imaging",
+                "type": "slew",
                 "status": "planned",
                 "pointing_angle": 0,
                 "exposure_time": 60.0,
@@ -93,7 +93,7 @@
                     "end": "2025-03-06T00:02:55.000"
                 },
                 "external_observation_id": "fermi_week_878_observation_3",
-                "type": "imaging",
+                "type": "slew",
                 "status": "planned",
                 "pointing_angle": 0,
                 "exposure_time": 60.0,
@@ -117,7 +117,7 @@
                     "end": "2025-03-06T00:03:55.000"
                 },
                 "external_observation_id": "fermi_week_878_observation_4",
-                "type": "imaging",
+                "type": "slew",
                 "status": "planned",
                 "pointing_angle": 0,
                 "exposure_time": 60.0,
@@ -141,7 +141,7 @@
                     "end": "2025-03-06T00:04:55.000"
                 },
                 "external_observation_id": "fermi_week_878_observation_5",
-                "type": "imaging",
+                "type": "slew",
                 "status": "planned",
                 "pointing_angle": 0,
                 "exposure_time": 60.0,
@@ -165,7 +165,7 @@
                     "end": "2025-03-06T00:05:55.000"
                 },
                 "external_observation_id": "fermi_week_878_observation_6",
-                "type": "imaging",
+                "type": "slew",
                 "status": "planned",
                 "pointing_angle": 0,
                 "exposure_time": 60.0,
@@ -189,7 +189,7 @@
                     "end": "2025-03-06T00:06:55.000"
                 },
                 "external_observation_id": "fermi_week_878_observation_7",
-                "type": "imaging",
+                "type": "slew",
                 "status": "planned",
                 "pointing_angle": 0,
                 "exposure_time": 60.0,
@@ -213,7 +213,7 @@
                     "end": "2025-03-06T00:07:55.000"
                 },
                 "external_observation_id": "fermi_week_878_observation_8",
-                "type": "imaging",
+                "type": "slew",
                 "status": "planned",
                 "pointing_angle": 0,
                 "exposure_time": 60.0,
@@ -237,7 +237,7 @@
                     "end": "2025-03-06T00:08:55.000"
                 },
                 "external_observation_id": "fermi_week_878_observation_9",
-                "type": "imaging",
+                "type": "slew",
                 "status": "planned",
                 "pointing_angle": 0,
                 "exposure_time": 60.0,

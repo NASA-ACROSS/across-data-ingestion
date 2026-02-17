@@ -214,7 +214,7 @@ def fake_observation_create(
             end=datetime.fromisoformat("2025-3-5T23:59:55"),
         ),
         external_observation_id=f"fermi_week_{fake_fermi_week}_observation_0",
-        type=sdk.ObservationType.IMAGING,
+        type=sdk.ObservationType.SLEW,
         status=sdk.ObservationStatus.PLANNED,
         pointing_angle=FERMI_LAT_POINTING_ANGLE,
         exposure_time=float(60),
