@@ -279,7 +279,7 @@ def transform_to_observations(
             date_range=sdk.DateRange(begin=row.BEGIN, end=row.END),  # type:ignore
             external_observation_id=row.OBS_NAME,  # type:ignore
             exposure_time=row.EXPOSURE,  # type:ignore
-            type=sdk.ObservationType.IMAGING,
+            type=sdk.ObservationType.SLEW,
             status=sdk.ObservationStatus.PLANNED,
             pointing_angle=FERMI_LAT_POINTING_ANGLE,
             bandpass=sdk.Bandpass(
