@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.3.0](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.2.2...v1.3.0) (2026-02-20)
+
+
+### Features
+
+* add chandra as-flown schedule ingestion task ([#106](https://github.com/NASA-ACROSS/across-data-ingestion/issues/106)) ([c028859](https://github.com/NASA-ACROSS/across-data-ingestion/commit/c02885915799b4c01199d893c812228fdc43d289))
+* add hst as-flown schedule ingestion task ([#161](https://github.com/NASA-ACROSS/across-data-ingestion/issues/161)) ([425fea4](https://github.com/NASA-ACROSS/across-data-ingestion/commit/425fea421110236af8280315b78723cb84377a2c))
+* adding low fidelity planned ingestion task for rubin lsst ([#156](https://github.com/NASA-ACROSS/across-data-ingestion/issues/156)) ([81d0f76](https://github.com/NASA-ACROSS/across-data-ingestion/commit/81d0f760b8a332289b7aae63eb5426cfea61502c))
+* swift as flown schedules ([#105](https://github.com/NASA-ACROSS/across-data-ingestion/issues/105)) ([2064f6a](https://github.com/NASA-ACROSS/across-data-ingestion/commit/2064f6a19d7f8dd0a2930e37a99fa14d8c53244d))
+
+
+### Bug Fixes
+
+* fermi observation type is slew ([#180](https://github.com/NASA-ACROSS/across-data-ingestion/issues/180)) ([ccb7fab](https://github.com/NASA-ACROSS/across-data-ingestion/commit/ccb7fab491de7e296933da4ef53a8a0acb529092))
+
 ## [1.2.2](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.2.1...v1.2.2) (2026-01-15)
 
 
