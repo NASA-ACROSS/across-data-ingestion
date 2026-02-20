@@ -12,6 +12,7 @@ from fastapi_utilities import repeat_at  # type: ignore
 
 from ....util.across_server import client, sdk
 from ..types import Position
+from . import util as hst_util
 
 
 def get_logger() -> structlog.stdlib.BoundLogger:
@@ -67,47 +68,6 @@ TIMELINE_FILE_COLUMNS: list[Col] = [
     Col(name="al", type=str, spacing=(140, 143)),
     Col(name="ex", type=str, spacing=(143, 146)),
 ]
-
-# List of target names found in observations to ignore
-# Mostly calibration observations
-TARGET_NAMES_TO_IGNORE = [
-    "DARK-NM",
-    "WAVEHITM",
-    "DARK",
-    "BIAS",
-    "TUNGSTEN",
-    "NONE",
-    "WAVELINE",
-    "ANY",
-    "WAVE",
-    "DARK-EARTH-CALIB",
-]
-
-
-class InstrumentInfo(pydantic.BaseModel):
-    id: str
-    bandpass: sdk.Bandpass
-    type: sdk.ObservationType
-
-
-class Exposure(NamedTuple):
-    object_name: str = ""
-    ra_h: str = ""
-    ra_m: str = ""
-    ra_s: str = ""
-    dec_d: str = ""
-    dec_m: str = ""
-    dec_s: str = ""
-    config: str = ""
-    mode: str = ""
-    aper: str = ""
-    spec: str = ""
-    wave: str = ""
-    time: str = ""
-    prop: str = ""
-    cy: str = ""
-    dataset: str = ""
-    release: str = ""
 
 
 class TimelineRow(NamedTuple):
@@ -260,7 +220,7 @@ def extract_observation_pointing_coordinates(
 def extract_instrument_info(
     observation_data: TimelineRow,  # pd namedtuple
     instruments: list[sdk.Instrument],
-) -> InstrumentInfo | None:
+) -> hst_util.InstrumentInfo | None:
     """
     Extract the ACROSS instrument model, correct bandpass,
     and corresponding observation type from the observation parameters
@@ -268,17 +228,10 @@ def extract_instrument_info(
     # Extract instrument name
     obs_instrument = observation_data.instrument
 
-    if "ACS" in obs_instrument:
-        instrument_short_name = "HST_ACS"
-    elif "COS" in obs_instrument:
-        instrument_short_name = "HST_COS"
-    elif "STIS" in obs_instrument:
-        instrument_short_name = "HST_STIS"
-    elif "WFC3" in obs_instrument and "UV" in obs_instrument:
-        instrument_short_name = "HST_WFC3_UVIS"
-    elif "WFC3" in obs_instrument and "IR" in obs_instrument:
-        instrument_short_name = "HST_WFC3_IR"
-    else:
+    instrument_short_name = hst_util.get_instrument_short_name_from_observation(
+        obs_instrument
+    )
+    if instrument_short_name is None:
         logger.warning(
             "Could not match data to ACROSS instrument.",
             instrument=obs_instrument,
@@ -335,29 +288,9 @@ def extract_instrument_info(
         unit=sdk.WavelengthUnit.ANGSTROM,
     )
 
-    # Get the observation type
-    # Parse from filter name without HST or instrument name
-    filter_descriptor = matching_filter.name.split(" ")[-1]
+    obs_type = hst_util.get_obs_type(matching_filter, across_instrument)
 
-    # Filter element key
-    # "G" = grism
-    # "E" = grating
-    # "P" = prism
-    # "FR" = ACS grating ramp filter elements
-    spectroscopy_filter_element = filter_descriptor.startswith(("G", "E", "P", "FR"))
-
-    # All COS observations are spectroscopic
-    is_spectroscopy = (
-        "COS" in across_instrument.short_name or spectroscopy_filter_element
-    )
-
-    if is_spectroscopy:
-        obs_type = sdk.ObservationType.SPECTROSCOPY
-    else:
-        # All the rest are imaging elements
-        obs_type = sdk.ObservationType.IMAGING
-
-    return InstrumentInfo(
+    return hst_util.InstrumentInfo(
         id=across_instrument.id,
         bandpass=sdk.Bandpass(bandpass_parameters),
         type=obs_type,
@@ -447,7 +380,7 @@ def ingest() -> None:
     across_schedule = transform_to_across_schedule(timeline_file, telescope.id)
 
     # leverage pandas masking with vectorization to filter
-    non_calibration = ~timeline_df["target_name"].isin(TARGET_NAMES_TO_IGNORE)
+    non_calibration = ~timeline_df["target_name"].isin(hst_util.TARGET_NAMES_TO_IGNORE)
     non_acq_mode = ~timeline_df["mode"].str.contains("ACQ", na=False)
     filtered_observation_data = list(
         timeline_df[non_calibration & non_acq_mode].itertuples()
