@@ -31,8 +31,7 @@ astroquery==0.4.11
     # via
     #   -r requirements/base.in
     #   across-tools
-    #   rust-ephem
-asyncer==0.0.12
+asyncer==0.0.17
     # via -r requirements/base.in
 asyncpg==0.31.0
     # via -r requirements/base.in
