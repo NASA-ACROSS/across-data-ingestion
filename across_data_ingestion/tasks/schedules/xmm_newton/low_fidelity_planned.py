@@ -156,6 +156,9 @@ def extract_om_exposures_from_observation_data(obs_id: int) -> list:
     -----------
         list: a list containing dictionaries of filter, start date, and exposure times
     """
+    expected_tables_per_page: int = (
+        2  # The number of HTML tables that should be returned
+    )
     data = {"prpobs": obs_id}
     response = httpx.post(SCHEDULED_OBS_URL, data=data)
     if response.status_code != 200:
@@ -167,7 +170,8 @@ def extract_om_exposures_from_observation_data(obs_id: int) -> list:
 
     soup = BeautifulSoup(response.text, features="html5lib")
     tables = soup.find_all("table")
-    if len(tables) < 2:
+    if len(tables) < expected_tables_per_page:
+        # Page does not contain the correct HTML table to scrape
         return []
 
     obs_tab = tables[1]
