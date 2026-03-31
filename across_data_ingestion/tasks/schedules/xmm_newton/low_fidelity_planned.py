@@ -160,7 +160,17 @@ def extract_om_exposures_from_observation_data(obs_id: int) -> list:
         2  # The number of HTML tables that should be returned
     )
     data = {"prpobs": obs_id}
-    response = httpx.post(SCHEDULED_OBS_URL, data=data)
+
+    try:
+        response = httpx.post(SCHEDULED_OBS_URL, data=data, timeout=10.0)
+    except httpx.HTTPError as exc:
+        logger.warning(
+            "Scheduled observations page request failed",
+            observation_id=obs_id,
+            error=str(exc),
+        )
+        return []
+
     if response.status_code != 200:
         logger.warning(
             "Scheduled observations page returned bad status code",

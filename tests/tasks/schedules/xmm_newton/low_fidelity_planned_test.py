@@ -1,6 +1,7 @@
 from datetime import datetime
 from unittest.mock import MagicMock
 
+import httpx
 import pandas as pd
 import pytest
 
@@ -148,7 +149,28 @@ class TestXMMNewtonLowFidelityPlannedScheduleIngestionTask:
             exposures = extract_om_exposures_from_observation_data(12345)
             assert len(exposures) > 0
 
-        def test_should_return_empty_list_if_request_not_successful(
+        def test_should_return_empty_list_if_request_fails(
+            self, mock_httpx_post: MagicMock
+        ) -> None:
+            """Should return empty list if httpx request fails"""
+            mock_httpx_post.side_effect = httpx.HTTPError("mock error")
+            exposures = extract_om_exposures_from_observation_data(12345)
+            assert len(exposures) == 0
+
+        def test_should_log_warning_if_request_fails(
+            self,
+            mock_httpx_post: MagicMock,
+            mock_logger: MagicMock,
+        ) -> None:
+            """Should return empty list if httpx request fails"""
+            mock_httpx_post.side_effect = httpx.HTTPError("mock error")
+            extract_om_exposures_from_observation_data(12345)
+            assert (
+                "Scheduled observations page request failed"
+                in mock_logger.warning.call_args[0]
+            )
+
+        def test_should_return_empty_list_if_request_returns_bad_status_code(
             self, fake_httpx_response: MagicMock
         ) -> None:
             """Should return empty list if httpx request returns non-200 status code"""
@@ -156,7 +178,7 @@ class TestXMMNewtonLowFidelityPlannedScheduleIngestionTask:
             exposures = extract_om_exposures_from_observation_data(12345)
             assert len(exposures) == 0
 
-        def test_should_log_warning_if_request_not_successful(
+        def test_should_log_warning_if_request_returns_bad_status_code(
             self,
             fake_httpx_response: MagicMock,
             mock_logger: MagicMock,
