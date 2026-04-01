@@ -10,7 +10,7 @@ from .mocks import mock_ixpe_query, sample_html_string
 
 
 ## SET DATA FROM TOP-LEVEL FIXTURES ##
-@pytest.fixture()
+@pytest.fixture(autouse=True)
 def set_mock_res_text(fake_httpx_response: MagicMock) -> None:
     fake_httpx_response.text = sample_html_string.html
 

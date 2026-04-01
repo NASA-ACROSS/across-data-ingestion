@@ -19,40 +19,57 @@ IXPE_BANDPASS = sdk.EnergyBandpass(
     filter_name="IXPE",
 )
 
+EXPECTED_TABLE_COLUMNS = ["Start", "Name", "RA", "Dec"]
+
 
 def query_ixpe_schedule() -> pd.DataFrame:
     # Send a GET request to the webpage
-    response = httpx.get(IXPE_LTP_URL)
-    response.raise_for_status()
+
+    try:
+        response = httpx.get(IXPE_LTP_URL)
+        response.raise_for_status()
+    except httpx.HTTPError as exc:
+        logger.error(
+            "Long term planned schedule request failed",
+            error=str(exc),
+        )
+        return pd.DataFrame()
 
     try:
         # Parse the webpage content with BeautifulSoup
         soup = bs4.BeautifulSoup(response.text, "html.parser")
 
-        # Extract schedule information (adjust selectors based on the webpage structure)
-        schedule_table = soup.find("table")  # Assuming the schedule is in a table
-        schedule_data = []
+        # Fetch all HTML tables to search for schedule
+        tables_to_search = soup.find_all("table")
 
-        if schedule_table:
-            rows = schedule_table.find_all("tr")  # type: ignore
-            for row in rows:
-                columns = row.find_all("td")
-                schedule_data.append([col.get_text(strip=True) for col in columns])
+        if tables_to_search:
+            for table in tables_to_search:
+                schedule_data = []
+                rows = table.find_all("tr")  # type: ignore
+                for row in rows:
+                    columns = row.find_all("td")
+                    schedule_data.append([col.get_text(strip=True) for col in columns])
 
-            # Convert to a pandas dataframe with header information
-            header = schedule_data.pop(0)
+                # Convert to a pandas dataframe with header information
+                header = schedule_data.pop(0)
 
-            ixpe_df = pd.DataFrame(schedule_data, columns=header)
+                if all([column in header for column in EXPECTED_TABLE_COLUMNS]):
+                    # We found the table with the schedule data
+                    ixpe_df = pd.DataFrame(schedule_data, columns=header)
 
-            # IXPE doesn't give an end time for these schedules
-            # Populate them with the next observations start time.
-            # The last target won't have an end time, so fill it with its start time
-            ixpe_df["Start"] = pd.to_datetime(ixpe_df["Start"])
-            ixpe_df["Stop"] = ixpe_df["Start"].shift(-1).fillna(ixpe_df["Start"])
-            ixpe_df["Start"] = ixpe_df["Start"].astype(str)
-            ixpe_df["Stop"] = ixpe_df["Stop"].astype(str)
+                    # IXPE doesn't give an end time for these schedules
+                    # Populate them with the next observations start time.
+                    # The last target won't have an end time, so fill it with its start time
+                    ixpe_df["Start"] = pd.to_datetime(ixpe_df["Start"])
+                    ixpe_df["Stop"] = (
+                        ixpe_df["Start"].shift(-1).fillna(ixpe_df["Start"])
+                    )
+                    ixpe_df["Start"] = ixpe_df["Start"].astype(str)
+                    ixpe_df["Stop"] = ixpe_df["Stop"].astype(str)
 
-            return ixpe_df
+                    return ixpe_df
+
+        logger.warning("Could not find correct schedule table to read")
 
     except Exception as e:
         logger.error(
