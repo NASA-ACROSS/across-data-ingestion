@@ -7,6 +7,7 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore
 
 from across_data_ingestion.util.across_server import client, sdk
+from across_data_ingestion.util.footprint_util import generate_observation_footprint
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
@@ -107,7 +108,9 @@ def ixpe_to_across_schedule(
     )
 
 
-def ixpe_to_across_observation(instrument_id: str, row: dict) -> sdk.ObservationCreate:
+def ixpe_to_across_observation(
+    instrument_id: str, row: dict, footprint: dict
+) -> sdk.ObservationCreate:
     """
     Creates a IXPE observation from the provided row of data.
     Calculates the exposure time from the End - Start
@@ -119,6 +122,13 @@ def ixpe_to_across_observation(instrument_id: str, row: dict) -> sdk.Observation
     exposure_time = obs_end_at - obs_start_at
 
     external_id = f"{str.replace(row['P S'], ' ', '_')}_obs_{row['Pnum']}"
+
+    observation_footprint = generate_observation_footprint(
+        footprint[instrument_id],
+        ra=float(row["RA"]),
+        dec=float(row["Dec"]),
+        roll_angle=0.0,
+    )
 
     return sdk.ObservationCreate(
         instrument_id=instrument_id,
@@ -141,6 +151,7 @@ def ixpe_to_across_observation(instrument_id: str, row: dict) -> sdk.Observation
         exposure_time=int(exposure_time.to(u.second).value),
         bandpass=sdk.Bandpass(IXPE_BANDPASS),
         pointing_angle=0.0,  # No Value for position angle -_-
+        footprint=observation_footprint,
     )
 
 
@@ -154,13 +165,17 @@ def ingest() -> None:
         return
 
     # GET Telescope by name
-    telescope = sdk.TelescopeApi(client).get_telescopes(name="ixpe")[0]
+    telescope = sdk.TelescopeApi(client).get_telescopes(
+        name="ixpe", include_footprints=True
+    )[0]
 
     if not telescope.instruments:
         logger.error("Telescope has no instruments")
         return
 
     instrument_id = telescope.instruments[0].id
+    instrument_footprint = {}
+    instrument_footprint[instrument_id] = telescope.instruments[0].footprints
 
     # Initialize schedule
     schedule = ixpe_to_across_schedule(
@@ -175,7 +190,8 @@ def ingest() -> None:
 
     # Transform observations
     schedule.observations = [
-        ixpe_to_across_observation(instrument_id, row) for row in observation_rows
+        ixpe_to_across_observation(instrument_id, row, instrument_footprint)
+        for row in observation_rows
     ]
 
     # Post schedule

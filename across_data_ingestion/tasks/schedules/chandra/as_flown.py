@@ -6,6 +6,7 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore[import-untyped]
 
 from ....util.across_server import client, sdk
+from ....util.footprint_util import tmp_do_it
 from ....util.vo_service import VOService
 from . import util as chandra_util
 
@@ -96,6 +97,12 @@ async def ingest() -> None:
         logger.warning("No instruments found.")
         return
 
+    instrument_footprint = {}
+
+    for instrument in telescope.instruments:
+        if instrument.footprints:
+            instrument_footprint[instrument.id] = instrument.footprints
+
     tap_observation_table = await get_observation_data_from_tap()
     if not len(tap_observation_table):
         return
@@ -120,6 +127,8 @@ async def ingest() -> None:
         )
         observation = transform_to_observation(observation_data, instrument)
         schedule.observations.append(observation)
+
+    schedule.observations = tmp_do_it(telescope, schedule.observations)
 
     try:
         sdk.ScheduleApi(client).create_schedule(schedule)
