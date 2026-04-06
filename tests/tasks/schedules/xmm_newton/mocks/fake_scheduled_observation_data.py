@@ -39,7 +39,7 @@ fake_scheduled_observation_data = """<p>
   <tr style="background-color: #EEA500;">
    <td colspan="7" style="text-align: center;">
       <b><span style="font-family: Bookman, Times Roman, serif;">
-           0964591201 </span> </b> </td>
+           0811026501 </span> </b> </td>
   </tr>
   <tr>
    <td style="text-align: center;"> <b> AT2021nwa </b> </td>
