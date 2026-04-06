@@ -7,7 +7,10 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore
 
 from across_data_ingestion.util.across_server import client, sdk
-from across_data_ingestion.util.footprint_util import generate_observation_footprint
+from across_data_ingestion.util.footprint_util import (
+    generate_observation_footprint,
+    tmp_do_it,
+)
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
@@ -193,6 +196,8 @@ def ingest() -> None:
         ixpe_to_across_observation(instrument_id, row, instrument_footprint)
         for row in observation_rows
     ]
+
+    schedule.observations = tmp_do_it(telescope, schedule.observations)
 
     # Post schedule
     try:

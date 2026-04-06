@@ -6,6 +6,7 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from swifttools import swift_too  # type: ignore
 
 from ....util.across_server import client, sdk
+from ....util.footprint_util import generate_observation_footprint
 from .constants import SWIFT_BAT_BANDPASS, SWIFT_UVOT_BANDPASS_DICT, SWIFT_XRT_BANDPASS
 from .custom_uvot_mode_entry import CustomUVOTModeEntry
 from .swift_observation_entry import SwiftObservationEntry
@@ -80,8 +81,22 @@ def swift_to_across_observation(
     observation_type: sdk.ObservationType,
     exposure_time: float,
     observation_status: sdk.ObservationStatus,
+    instrument_footprint: dict,
 ) -> sdk.ObservationCreate:
     """Converts a SwiftObservationEntry to an ACROSS ObservationCreate object."""
+
+    footprint = None
+    if (
+        observation_type == sdk.ObservationType.IMAGING
+        and instrument_id in instrument_footprint.keys()
+    ):
+        footprint = generate_observation_footprint(
+            instrument_footprint[instrument_id],
+            ra=float(swift_obs.ra),
+            dec=float(swift_obs.dec),
+            roll_angle=swift_obs.roll,
+        )
+
     return sdk.ObservationCreate(
         instrument_id=instrument_id,
         object_name=swift_obs.targname,
@@ -103,6 +118,7 @@ def swift_to_across_observation(
         pointing_angle=swift_obs.roll,
         exposure_time=exposure_time,
         bandpass=bandpass,
+        footprint=footprint,
     )
 
 
@@ -110,6 +126,7 @@ def create_observations(
     instrument_id: str,
     observation_data: list[SwiftObservationEntry],
     observation_status: sdk.ObservationStatus,
+    instrument_footprint: dict,
     bandpass: sdk.Bandpass,
     observation_type: sdk.ObservationType,
 ) -> list[sdk.ObservationCreate]:
@@ -122,6 +139,7 @@ def create_observations(
             observation_type,
             obs.exposure,
             observation_status,
+            instrument_footprint,
         )
         for obs in observation_data
     ]
@@ -131,6 +149,7 @@ def create_uvot_observations(
     instrument_id: str,
     observation_data: list[SwiftObservationEntry],
     observation_status: sdk.ObservationStatus,
+    instrument_footprint: dict,
     *args: list[Any],
 ) -> list[sdk.ObservationCreate]:
     """Creates a list of ACROSS ObservationCreate objects specifically for UVOT observations."""
@@ -186,6 +205,7 @@ def create_uvot_observations(
                     observation_type=sdk.ObservationType.IMAGING,
                     exposure_time=obs_data.exposure * exposure_time_factor,
                     observation_status=observation_status,
+                    instrument_footprint=instrument_footprint,
                 )
             )
 
@@ -203,10 +223,14 @@ def create_swift_across_schedule(
     create_observations: Callable = create_observations,
     bandpass: sdk.Bandpass | None = None,
 ) -> sdk.ScheduleCreate:
-    telescope = sdk.TelescopeApi(client).get_telescopes(name=telescope_name)[0]
+    telescope = sdk.TelescopeApi(client).get_telescopes(
+        name=telescope_name, include_footprints=True
+    )[0]
+    instrument_footprint = {}
     telescope_id = telescope.id
     if telescope.instruments:
         instrument_id = telescope.instruments[0].id
+        instrument_footprint[instrument_id] = telescope.instruments[0].footprints
 
     schedule = swift_to_across_schedule(
         telescope_id=telescope_id,
@@ -218,7 +242,12 @@ def create_swift_across_schedule(
     )
 
     schedule.observations = create_observations(
-        instrument_id, observation_data, observation_status, bandpass, observation_type
+        instrument_id,
+        observation_data,
+        observation_status,
+        instrument_footprint,
+        bandpass,
+        observation_type,
     )
 
     return schedule
@@ -291,4 +320,10 @@ class SwiftScheduleHandler:
             )
 
             # Post the schedules to the ACROSS API
-            sdk.ScheduleApi(client).create_schedule(schedule)
+            try:
+                sdk.ScheduleApi(client).create_schedule(schedule)
+            except sdk.ApiException as err:
+                if err.status == 409:
+                    logger.warning("Schedule already exists.", err=err.__dict__)
+                else:
+                    raise err

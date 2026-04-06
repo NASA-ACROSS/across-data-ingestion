@@ -6,7 +6,7 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore[import-untyped]
 
 from ....util.across_server import client, sdk
-from ....util.footprint_util import tmp_do_it
+from ....util.footprint_util import generate_observation_footprint
 from ....util.vo_service import VOService
 from . import util as chandra_util
 
@@ -48,13 +48,30 @@ async def get_observation_data_from_tap() -> Table:
 
 
 def transform_to_observation(
-    tap_obs: Row, instrument: sdk.TelescopeInstrument
+    tap_obs: Row, instrument: sdk.TelescopeInstrument, instrument_footprint: dict
 ) -> sdk.ObservationCreate:
     begin = tap_obs["start_date"]
     end = (
         Time(begin, format="isot")
         + timedelta(seconds=tap_obs["exposure_time"] * 1000.0)
     ).isot
+
+    footprint = None
+
+    observation_type = chandra_util.CHANDRA_OBSERVATION_TYPES[
+        instrument.short_name or ""
+    ]
+
+    if (
+        observation_type == sdk.ObservationType.IMAGING
+        and instrument.id in instrument_footprint.keys()
+    ):
+        footprint = generate_observation_footprint(
+            instrument_footprint[instrument.id],
+            ra=float(tap_obs["ra"]),
+            dec=float(tap_obs["dec"]),
+            roll_angle=0.0,
+        )
 
     return sdk.ObservationCreate(
         instrument_id=instrument.id,
@@ -72,12 +89,13 @@ def transform_to_observation(
             end=end,
         ),
         external_observation_id=str(tap_obs["obsid"]),
-        type=chandra_util.CHANDRA_OBSERVATION_TYPES[instrument.short_name or ""],
+        type=observation_type,
         status=sdk.ObservationStatus.PERFORMED,
         pointing_angle=0.0,
         exposure_time=float(tap_obs["exposure_time"]) * 1000.0,
         bandpass=chandra_util.CHANDRA_BANDPASSES[instrument.short_name or ""],
         proposal_reference=str(tap_obs["proposal_number"]),
+        footprint=footprint,
     )
 
 
@@ -125,10 +143,10 @@ async def ingest() -> None:
         instrument = chandra_util.match_instrument_from_tap_observation(
             instruments_by_short_name, observation_data
         )
-        observation = transform_to_observation(observation_data, instrument)
+        observation = transform_to_observation(
+            observation_data, instrument, instrument_footprint
+        )
         schedule.observations.append(observation)
-
-    schedule.observations = tmp_do_it(telescope, schedule.observations)
 
     try:
         sdk.ScheduleApi(client).create_schedule(schedule)

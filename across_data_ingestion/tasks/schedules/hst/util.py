@@ -26,7 +26,7 @@ class InstrumentInfo(pydantic.BaseModel):
 
 def get_obs_type(
     filter: sdk.Filter,
-    across_instrument: sdk.Instrument,
+    across_instrument: sdk.TelescopeInstrument,
 ) -> sdk.ObservationType:
     # Get the observation type
     # Parse from filter name without HST or instrument name

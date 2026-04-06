@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore
 
 from ....util.across_server import client, sdk
+from ....util.footprint_util import generate_observation_footprint
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
@@ -293,7 +294,9 @@ def jwst_to_across_schedule(
     )
 
 
-def jwst_to_across_observation(row: dict) -> sdk.ObservationCreate:
+def jwst_to_across_observation(
+    row: dict, instrument_footprint: dict
+) -> sdk.ObservationCreate:
     """
     Creates a JWST observation from the provided row of data.
     Calculates the exposure time from the End - Start
@@ -313,6 +316,19 @@ def jwst_to_across_observation(row: dict) -> sdk.ObservationCreate:
         }
     )
 
+    footprint = None
+
+    if (
+        row["OBSERVATION_TYPE"] == sdk.ObservationType.IMAGING
+        and row["INSTRUMENT_ID"] in instrument_footprint.keys()
+    ):
+        footprint = generate_observation_footprint(
+            instrument_footprint[row["INSTRUMENT_ID"]],
+            ra=round(row["RA"], 8),
+            dec=round(row["DEC"], 8),
+            roll_angle=0.0,
+        )
+
     return sdk.ObservationCreate(
         instrument_id=row["INSTRUMENT_ID"],
         object_name=row["TARGET_NAME"],
@@ -329,6 +345,7 @@ def jwst_to_across_observation(row: dict) -> sdk.ObservationCreate:
         exposure_time=row["DURATION"],
         bandpass=sdk.Bandpass(bandpass),
         pointing_angle=0.0,
+        footprint=footprint,
     )
 
 
@@ -337,9 +354,15 @@ def ingest() -> None:
     Fetches the JWST schedule from the specified URL and returns the parsed data.
     """
     # GET Telescope by name
-    (jwst_telescope_information,) = sdk.TelescopeApi(client).get_telescopes(name="jwst")
+    (jwst_telescope_information,) = sdk.TelescopeApi(client).get_telescopes(
+        name="jwst", include_footprints=True
+    )
     telescope_id = jwst_telescope_information.id
+
     instruments_info = {}
+
+    instrument_footprint = {}
+
     jwst_instruments = (
         jwst_telescope_information.instruments
         if jwst_telescope_information.instruments
@@ -347,6 +370,7 @@ def ingest() -> None:
     )
     for inst in jwst_instruments:
         instruments_info[inst.short_name] = inst.id
+        instrument_footprint[inst.id] = inst.footprints
 
     # Query the JWST planned execution schedule
     latest_jwst_plan = query_jwst_planned_execution_schedule(instruments_info)
@@ -368,7 +392,8 @@ def ingest() -> None:
 
     # Transform observations
     jwst_schedule.observations = [
-        jwst_to_across_observation(row) for row in schedule_observations
+        jwst_to_across_observation(row, instrument_footprint)
+        for row in schedule_observations
     ]
 
     try:

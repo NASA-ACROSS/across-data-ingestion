@@ -1,5 +1,6 @@
 import os
 import time
+import warnings
 from contextlib import asynccontextmanager
 
 import structlog
@@ -14,6 +15,13 @@ time.tzset()
 
 logging.setup(json_logs=config.LOG_JSON_FORMAT, log_level=config.LOG_LEVEL)
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
+
+# Suppress the specific datetime deprecation warning
+warnings.filterwarnings(
+    "ignore",
+    category=DeprecationWarning,
+    message=r".*utcfromtimestamp\(\) is deprecated.*",
+)
 
 
 @asynccontextmanager
