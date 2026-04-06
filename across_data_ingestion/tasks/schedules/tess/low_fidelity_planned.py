@@ -1,3 +1,4 @@
+import ssl
 from datetime import datetime
 from typing import Any
 
@@ -7,6 +8,9 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore
 
 from ....util.across_server import client, sdk
+
+# Bypass SSL certificate verification
+ssl._create_default_https_context = ssl._create_unverified_context
 
 logger: structlog.stdlib.BoundLogger = structlog.getLogger()
 
