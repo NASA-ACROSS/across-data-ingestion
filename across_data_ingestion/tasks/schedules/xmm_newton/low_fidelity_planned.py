@@ -142,7 +142,7 @@ def read_planned_schedule_table() -> pd.DataFrame:
     return planned_schedule_df
 
 
-def extract_om_exposures_from_observation_data(obs_id: int) -> list:
+def extract_om_exposures_from_observation_data(revolution_id: int) -> dict:
     """
     Read individual OM filter exposures using the scheduled observations search page.
     Submit an HTTP request containing the observation ID, scrape the HTML using bs4,
@@ -150,7 +150,7 @@ def extract_om_exposures_from_observation_data(obs_id: int) -> list:
 
     Parameters
     -----------
-        obs_id (int): the ID of the observation
+        revolution_id (int): the ID of the observation
 
     Returns
     -----------
@@ -159,66 +159,86 @@ def extract_om_exposures_from_observation_data(obs_id: int) -> list:
     expected_tables_per_page: int = (
         2  # The number of HTML tables that should be returned
     )
-    data = {"prpobs": obs_id}
+    data = {"revn": revolution_id}
 
     try:
         response = httpx.post(SCHEDULED_OBS_URL, data=data, timeout=10.0)
     except httpx.HTTPError as exc:
         logger.warning(
             "Scheduled observations page request failed",
-            observation_id=obs_id,
+            revolution_id=revolution_id,
             error=str(exc),
         )
-        return []
+        return {}
 
     if response.status_code != 200:
         logger.warning(
             "Scheduled observations page returned bad status code",
             status_code=response.status_code,
         )
-        return []
+        return {}
 
     soup = BeautifulSoup(response.text, features="html5lib")
     tables = soup.find_all("table")
     if len(tables) < expected_tables_per_page:
         # Page does not contain the correct HTML table to scrape
-        return []
+        return {}
 
     obs_tab = tables[1]
-    om_exposures = []
 
+    om_observations_per_revolution: dict[str, list[dict]] = {}
+    om_exposures: list[dict] = []
+    obs_id = None
+
+    # Observation ID rows have background-color style
+    observation_row_style = "background-color: #EEA500;"
     for row in obs_tab.find_all("tr"):
-        first_div = row.find_all("td")[0]
-        if "OM" in first_div.text and any(
-            [filt in first_div.text.split() for filt in OM_FILTERS]
-        ):
-            filt = first_div.get_text(strip=True).split("-")[1].split()[0]
-            start_time = row.find_all("td")[1].get_text(strip=True).replace("@", "T")
-            exposure_time = row.find_all("td")[2].get_text(strip=True)
+        if row.attrs.get("style", "") == observation_row_style:
+            # Reached a new observation, so add previously aggregated exposures
+            # to the dictionary
+            if obs_id is not None:
+                om_observations_per_revolution[obs_id] = om_exposures
+            obs_id = row.find("td").get_text(strip=True)  # type: ignore[union-attr]
+            om_exposures = []
+        else:
+            first_div = row.find_all("td")[0]
+            if "OM" in first_div.text and any(
+                [filt in first_div.text.split() for filt in OM_FILTERS]
+            ):
+                filt = first_div.get_text(strip=True).split("-")[1].split()[0]
+                start_time = (
+                    row.find_all("td")[1].get_text(strip=True).replace("@", "T")
+                )
+                exposure_time = row.find_all("td")[2].get_text(strip=True)
 
-            # Must convert the string start time to a valid future datetime
-            # The start time only contains month and day, not year, so
-            # we must assume it is in the future and add the correct year
-            start_datetime = datetime.strptime(start_time, "%m-%dT%H:%M:%S")
-            now = get_datetime_now()
+                # Must convert the string start time to a valid future datetime
+                # The start time only contains month and day, not year, so
+                # we must assume it is in the future and add the correct year
+                start_datetime = datetime.strptime(start_time, "%m-%dT%H:%M:%S")
+                now = get_datetime_now()
 
-            # Use current year, if passed, use next year
-            target_year = now.year
-            start_datetime = start_datetime.replace(year=target_year)
+                # Use current year, if passed, use next year
+                target_year = now.year
+                start_datetime = start_datetime.replace(year=target_year)
 
-            if start_datetime < now:
-                start_datetime = start_datetime.replace(year=target_year + 1)
+                if start_datetime < now:
+                    start_datetime = start_datetime.replace(year=target_year + 1)
 
-            start_time = start_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                start_time = start_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
-            om_exposures.append(
-                {
-                    "filter": filt,
-                    "start_time": start_time,
-                    "exposure_time": float(exposure_time),
-                }
-            )
-    return om_exposures
+                om_exposures.append(
+                    {
+                        "filter": filt,
+                        "start_time": start_time,
+                        "exposure_time": float(exposure_time),
+                    }
+                )
+
+    # Reached the end of the loop, so add the last observations aggregated to the dictionary
+    if obs_id is not None:
+        om_observations_per_revolution[obs_id] = om_exposures
+
+    return om_observations_per_revolution
 
 
 def transform_to_across_schedule(
@@ -386,28 +406,34 @@ def aggregate_observations(
         )
         across_observations.extend(across_pn_observations)
 
-        for _, row in current_revolution_observations_df.iterrows():
-            obs_id = row["Obs Id."]
-            om_exposures = extract_om_exposures_from_observation_data(obs_id)
-            if len(om_exposures) == 0:
-                logger.warning(
-                    "Did not find OM exposures from scheduled observations search page",
-                    obs_id=obs_id,
-                )
-
-            else:
-                across_om_observations = [
-                    transform_to_across_observation(
-                        row,
-                        exposure["start_time"],
-                        exposure["exposure_time"],
-                        instrument_id_dict["OM"],
-                        sdk.ObservationType.IMAGING,
-                        sdk.Bandpass(XMM_BANDPASSES[exposure["filter"]]),
-                    )
-                    for exposure in om_exposures
-                ]
-                across_observations.extend(across_om_observations)
+        om_exposures_for_revn = extract_om_exposures_from_observation_data(
+            revolution_id=rev_id
+        )
+        if len(om_exposures_for_revn) == 0:
+            logger.warning(
+                "Did not find OM exposures from scheduled observations search page",
+                rev_id=rev_id,
+            )
+        else:
+            for obs_id, om_exposures in om_exposures_for_revn.items():
+                # Edge case where the OM observation may not be in the current revolution df
+                # if the current revolution overlaps with datetime.now()
+                if int(obs_id) in current_revolution_observations_df["Obs Id."].values:
+                    row = current_revolution_observations_df[
+                        current_revolution_observations_df["Obs Id."] == int(obs_id)
+                    ].iloc[0]
+                    across_om_observations = [
+                        transform_to_across_observation(
+                            row,
+                            exposure["start_time"],
+                            exposure["exposure_time"],
+                            instrument_id_dict["OM"],
+                            sdk.ObservationType.IMAGING,
+                            sdk.Bandpass(XMM_BANDPASSES[exposure["filter"]]),
+                        )
+                        for exposure in om_exposures
+                    ]
+                    across_observations.extend(across_om_observations)
 
     return across_observations
 

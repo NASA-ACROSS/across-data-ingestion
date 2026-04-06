@@ -139,10 +139,10 @@ class TestXMMNewtonLowFidelityPlannedScheduleIngestionTask:
     class TestExtractOMExposuresFromObservationData:
         """Test extract OM exposures from observation data"""
 
-        def test_should_return_list_of_exposures(self) -> None:
-            """Should extract OM exposures from scheduled observation data and return them as a list"""
+        def test_should_return_dictionary_of_exposures(self) -> None:
+            """Should extract OM exposures from scheduled observation data and return them as a dictionary"""
             exposures = extract_om_exposures_from_observation_data(12345)
-            assert type(exposures) is list
+            assert type(exposures) is dict
 
         def test_should_return_nonempty_list_if_request_successful(self) -> None:
             """Should extract OM exposures from scheduled observation data if successful"""
@@ -216,6 +216,7 @@ class TestXMMNewtonLowFidelityPlannedScheduleIngestionTask:
                 [
                     datetime.strptime(exposure["start_time"], "%Y-%m-%d %H:%M:%S")
                     > fake_datetime_now
-                    for exposure in exposures
+                    for exposure_list in exposures.values()
+                    for exposure in exposure_list
                 ]
             )
