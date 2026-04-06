@@ -10,7 +10,7 @@ from fastapi_utilities import repeat_at  # type: ignore
 from ....util.across_server import client, sdk
 
 # Bypass SSL certificate verification
-ssl._create_default_https_context = ssl._create_unverified_context
+ssl._create_default_https_context = ssl._create_unverified_context  # type: ignore
 
 logger: structlog.stdlib.BoundLogger = structlog.getLogger()
 
