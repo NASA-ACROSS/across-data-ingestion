@@ -409,7 +409,6 @@ typing-extensions==4.15.0
     #   pydantic
     #   pydantic-core
     #   pydantic-extra-types
-    #   pytest-asyncio
     #   rich-toolkit
     #   sqlalchemy
     #   starlette

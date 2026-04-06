@@ -59,6 +59,8 @@ certifi==2025.11.12
     #   httpx
     #   requests
     #   skyfield
+cffi==2.0.0
+    # via cryptography
 charset-normalizer==3.4.4
     # via requests
 click==8.3.1
@@ -114,6 +116,10 @@ jaraco-context==6.1.2
     # via keyring
 jaraco-functools==4.4.0
     # via keyring
+jeepney==0.9.0
+    # via
+    #   keyring
+    #   secretstorage
 jmespath==1.0.1
     # via
     #   boto3
@@ -175,6 +181,8 @@ pluggy==1.6.0
     # via pytest
 psutil==5.9.8
     # via fastapi-utils
+pycparser==3.0
+    # via cffi
 pydantic==2.12.5
     # via
     #   across-server-openapi-python
@@ -226,6 +234,8 @@ rust-ephem==0.11.1
     # via across-tools
 s3transfer==0.16.0
     # via boto3
+secretstorage==3.5.0
+    # via keyring
 sgp4==2.25
     # via
     #   -r requirements/base.in
@@ -276,9 +286,7 @@ typing-extensions==4.15.0
     #   logbook
     #   pydantic
     #   pydantic-core
-    #   pytest-asyncio
     #   sqlalchemy
-    #   starlette
     #   typing-inspect
     #   typing-inspection
 typing-inspect==0.9.0
