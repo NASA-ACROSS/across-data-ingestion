@@ -84,6 +84,17 @@ At such time, the LTP will be adjusted, attempting to minimize the
 impact on the overall plan; however, nothing is guaranteed.
 </P>
 
+<table style="BORDER:0; margin:auto;">
+
+<tbody><tr>
+ <td style="width:40px">Prop</td>
+ <td style="width:120px">Name</td>
+ <td style="width:64px">RA</td>
+ <td style="width:56px">Dec</td>
+</tr>
+<tr><td>2142  </td><td>SS 433      </td><td> 287.9565</td><td>  4.98272</td></tr>
+</tbody></table>
+
 <P>
 IXPE is telemetry limited for bright sources and this requires that
 observations be handled slightly differently from the way most X-ray

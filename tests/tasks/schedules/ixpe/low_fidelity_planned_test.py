@@ -13,7 +13,7 @@ from across_data_ingestion.tasks.schedules.ixpe.low_fidelity_planned import (
 from across_data_ingestion.util import across_server
 
 
-class TestNicerLowFidelityScheduleIngestionTask:
+class TestIxpeLowFidelityScheduleIngestionTask:
     class TestIngest:
         @pytest.fixture(autouse=True)
         def patch_query_ixpe_schedule(
@@ -42,7 +42,7 @@ class TestNicerLowFidelityScheduleIngestionTask:
             assert isinstance(args[0], across_server.sdk.ScheduleCreate)
 
         def test_should_call_get_telescopes(self, mock_telescope_api: MagicMock):
-            """Should create ACROSS schedules"""
+            """Should call get telescopes"""
             ingest()
             mock_telescope_api.get_telescopes.assert_called()
 
@@ -76,22 +76,29 @@ class TestNicerLowFidelityScheduleIngestionTask:
             data = query_ixpe_schedule()
             assert not len(data)
 
-        def test_should_raise_error_when_status_is_failure(
-            self, mock_httpx_get: MagicMock
+        def test_should_log_warning_when_status_is_failure(
+            self,
+            mock_httpx_get: MagicMock,
+            mock_logger: MagicMock,
         ):
+            """Should trap exception and log warning when httpx request fails"""
             fake_error_res = httpx.Response(
                 status_code=400, request=httpx.Request("GET", "http://test.com")
             )
             mock_httpx_get.return_value = fake_error_res
 
-            with pytest.raises(httpx.HTTPStatusError):
-                query_ixpe_schedule()
+            query_ixpe_schedule()
+            assert (
+                "Long term planned schedule request failed"
+                in mock_logger.error.call_args[0]
+            )
 
         def test_should_log_error_when_parsing_fails(
             self, monkeypatch: pytest.MonkeyPatch, mock_logger: MagicMock
         ):
+            """Should log error when BeautifulSoup throws error"""
             mock_soup_instance = MagicMock(spec=bs4.BeautifulSoup)
-            mock_soup_instance.find.side_effect = Exception("oh no")
+            mock_soup_instance.find_all.side_effect = Exception("oh no")
             mock_soup_cls = MagicMock(return_value=mock_soup_instance)
 
             monkeypatch.setattr(bs4, "BeautifulSoup", mock_soup_cls)
@@ -99,3 +106,17 @@ class TestNicerLowFidelityScheduleIngestionTask:
             query_ixpe_schedule()
 
             mock_logger.error.assert_called_once()
+
+        def test_should_log_warning_when_cannot_find_correct_table(
+            self,
+            mock_logger: MagicMock,
+            fake_httpx_response: MagicMock,
+        ) -> None:
+            """Should log warning when cannot find a table with long term planend schedule"""
+            fake_httpx_response.text = "<table><tr><td></td></tr></table>"
+
+            query_ixpe_schedule()
+            assert (
+                "Could not find correct schedule table to read"
+                in mock_logger.warning.call_args[0]
+            )
