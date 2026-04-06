@@ -1,4 +1,4 @@
-from swifttools.swift_too.swift_uvot import UVOTModeEntry  # type: ignore
+from swifttools.swift_too.swift.uvot import UVOTModeEntry  # type: ignore
 
 
 class CustomUVOTModeEntry:

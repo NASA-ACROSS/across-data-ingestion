@@ -1,6 +1,6 @@
 from astropy.time import Time  # type: ignore[import-untyped]
-from swifttools.swift_too.swift_obsquery import Swift_AFST_Entry  # type: ignore
-from swifttools.swift_too.swift_planquery import PPSTEntry  # type: ignore
+from swifttools.swift_too.swift.obsquery import SwiftAFSTEntry  # type: ignore
+from swifttools.swift_too.swift.planquery import SwiftPPSTEntry  # type: ignore
 
 
 class SwiftObservationEntry:
@@ -32,9 +32,11 @@ class SwiftObservationEntry:
             setattr(self, key, value)
 
     @classmethod
-    def from_entry(cls, entry: Swift_AFST_Entry | PPSTEntry) -> "SwiftObservationEntry":
+    def from_entry(
+        cls, entry: SwiftAFSTEntry | SwiftPPSTEntry
+    ) -> "SwiftObservationEntry":
         """
-        Converts a PPSTEntry to a CustomSwiftEntry.
+        Converts a SwiftAFSTEntry or SwiftPPSTEntry to a SwiftObservationEntry.
         """
         return cls(
             obsid=entry.obsid,
