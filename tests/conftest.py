@@ -101,6 +101,7 @@ def fake_telescope() -> sdk.Telescope:
                 name="Test Instrument",
                 short_name="ti",
                 created_on=datetime.now(),
+                footprints=[],
             )
         ],
     )

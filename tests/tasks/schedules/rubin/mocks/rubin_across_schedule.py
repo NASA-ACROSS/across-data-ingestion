@@ -56,6 +56,7 @@ schedule: sdk.ScheduleCreate = sdk.ScheduleCreate(
             tracking_type=sdk.IVOAObsTrackingType.SIDEREAL,
             created_on=None,
             created_by_id=None,
+            footprint=[],
         ),
         sdk.ObservationCreate(
             instrument_id="lsst_instrument_id",
@@ -100,6 +101,7 @@ schedule: sdk.ScheduleCreate = sdk.ScheduleCreate(
             tracking_type=sdk.IVOAObsTrackingType.SIDEREAL,
             created_on=None,
             created_by_id=None,
+            footprint=[],
         ),
         sdk.ObservationCreate(
             instrument_id="lsst_instrument_id",
@@ -144,6 +146,7 @@ schedule: sdk.ScheduleCreate = sdk.ScheduleCreate(
             tracking_type=sdk.IVOAObsTrackingType.SIDEREAL,
             created_on=None,
             created_by_id=None,
+            footprint=[],
         ),
         sdk.ObservationCreate(
             instrument_id="lsst_instrument_id",
@@ -188,6 +191,7 @@ schedule: sdk.ScheduleCreate = sdk.ScheduleCreate(
             tracking_type=sdk.IVOAObsTrackingType.SIDEREAL,
             created_on=None,
             created_by_id=None,
+            footprint=[],
         ),
         sdk.ObservationCreate(
             instrument_id="lsst_instrument_id",
@@ -232,6 +236,7 @@ schedule: sdk.ScheduleCreate = sdk.ScheduleCreate(
             tracking_type=sdk.IVOAObsTrackingType.SIDEREAL,
             created_on=None,
             created_by_id=None,
+            footprint=[],
         ),
         sdk.ObservationCreate(
             instrument_id="lsst_instrument_id",
@@ -276,6 +281,7 @@ schedule: sdk.ScheduleCreate = sdk.ScheduleCreate(
             tracking_type=sdk.IVOAObsTrackingType.SIDEREAL,
             created_on=None,
             created_by_id=None,
+            footprint=[],
         ),
         sdk.ObservationCreate(
             instrument_id="lsst_instrument_id",
@@ -320,6 +326,7 @@ schedule: sdk.ScheduleCreate = sdk.ScheduleCreate(
             tracking_type=sdk.IVOAObsTrackingType.SIDEREAL,
             created_on=None,
             created_by_id=None,
+            footprint=[],
         ),
         sdk.ObservationCreate(
             instrument_id="lsst_instrument_id",
@@ -364,6 +371,7 @@ schedule: sdk.ScheduleCreate = sdk.ScheduleCreate(
             tracking_type=sdk.IVOAObsTrackingType.SIDEREAL,
             created_on=None,
             created_by_id=None,
+            footprint=[],
         ),
         sdk.ObservationCreate(
             instrument_id="lsst_instrument_id",
@@ -408,6 +416,7 @@ schedule: sdk.ScheduleCreate = sdk.ScheduleCreate(
             tracking_type=sdk.IVOAObsTrackingType.SIDEREAL,
             created_on=None,
             created_by_id=None,
+            footprint=[],
         ),
         sdk.ObservationCreate(
             instrument_id="lsst_instrument_id",
@@ -452,6 +461,7 @@ schedule: sdk.ScheduleCreate = sdk.ScheduleCreate(
             tracking_type=sdk.IVOAObsTrackingType.SIDEREAL,
             created_on=None,
             created_by_id=None,
+            footprint=[],
         ),
     ],
 )

@@ -35,6 +35,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "nircam_instrument_id",
@@ -60,6 +61,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "nirspec_instrument_id",
@@ -85,6 +87,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "nirspec_instrument_id",
@@ -110,6 +113,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "miri_instrument_id",
@@ -135,6 +139,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "miri_instrument_id",
@@ -160,6 +165,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "miri_instrument_id",
@@ -185,6 +191,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "miri_instrument_id",
@@ -210,6 +217,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "miri_instrument_id",
@@ -235,6 +243,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "nirspec_instrument_id",
@@ -260,6 +269,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": None,
             },
             {
                 "instrument_id": "miri_instrument_id",
@@ -285,6 +295,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "nirspec_instrument_id",
@@ -310,6 +321,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": None,
             },
             {
                 "instrument_id": "nirspec_instrument_id",
@@ -335,6 +347,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "nirspec_instrument_id",
@@ -360,6 +373,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": None,
             },
             {
                 "instrument_id": "niriss_instrument_id",
@@ -385,6 +399,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "miri_instrument_id",
@@ -410,6 +425,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "miri_instrument_id",
@@ -435,6 +451,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "miri_instrument_id",
@@ -460,6 +477,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "miri_instrument_id",
@@ -485,6 +503,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "miri_instrument_id",
@@ -510,6 +529,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "nirspec_instrument_id",
@@ -535,6 +555,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "nircam_instrument_id",
@@ -560,6 +581,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "nirspec_instrument_id",
@@ -585,6 +607,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "nircam_instrument_id",
@@ -610,6 +633,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "nircam_instrument_id",
@@ -635,6 +659,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "nircam_instrument_id",
@@ -660,6 +685,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
             {
                 "instrument_id": "niriss_instrument_id",
@@ -685,6 +711,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
+                "footprint": [],
             },
         ],
     }

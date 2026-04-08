@@ -48,23 +48,27 @@ def fake_jwst_instruments() -> list[sdk.TelescopeInstrument]:
             name="MIRI",
             short_name="JWST_MIRI",
             created_on=datetime.now(),
+            footprints=[],
         ),
         sdk.TelescopeInstrument(
             id="nircam_instrument_id",
             name="NIRCAM",
             short_name="JWST_NIRCAM",
             created_on=datetime.now(),
+            footprints=[],
         ),
         sdk.TelescopeInstrument(
             id="niriss_instrument_id",
             name="NIRISS",
             short_name="JWST_NIRISS",
             created_on=datetime.now(),
+            footprints=[],
         ),
         sdk.TelescopeInstrument(
             id="nirspec_instrument_id",
             name="NIRSPEC",
             short_name="JWST_NIRSPEC",
             created_on=datetime.now(),
+            footprints=[],
         ),
     ]

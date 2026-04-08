@@ -46,5 +46,6 @@ def fake_rubin_instruments() -> list[sdk.TelescopeInstrument]:
             name="LSST Camera",
             short_name="LSST_CAM",
             created_on=datetime.now(),
+            footprints=[],
         )
     ]

@@ -37,6 +37,7 @@ schedules = [
                 "status": sdk.ObservationStatus.PLANNED,
                 "type": sdk.ObservationType.IMAGING,
                 "bandpass": bandpass,
+                "footprint": [],
             },
             {
                 "instrument_id": "instrument_id",
@@ -52,6 +53,7 @@ schedules = [
                 "status": sdk.ObservationStatus.PLANNED,
                 "type": sdk.ObservationType.IMAGING,
                 "bandpass": bandpass,
+                "footprint": [],
             },
             {
                 "instrument_id": "instrument_id",
@@ -67,6 +69,7 @@ schedules = [
                 "status": sdk.ObservationStatus.PLANNED,
                 "type": sdk.ObservationType.IMAGING,
                 "bandpass": bandpass,
+                "footprint": [],
             },
             {
                 "instrument_id": "instrument_id",
@@ -82,6 +85,7 @@ schedules = [
                 "status": sdk.ObservationStatus.PLANNED,
                 "type": sdk.ObservationType.IMAGING,
                 "bandpass": bandpass,
+                "footprint": [],
             },
         ],
     },
@@ -109,6 +113,7 @@ schedules = [
                 "status": sdk.ObservationStatus.PLANNED,
                 "type": sdk.ObservationType.IMAGING,
                 "bandpass": bandpass,
+                "footprint": [],
             },
             {
                 "instrument_id": "instrument_id",
@@ -124,6 +129,7 @@ schedules = [
                 "status": sdk.ObservationStatus.PLANNED,
                 "type": sdk.ObservationType.IMAGING,
                 "bandpass": bandpass,
+                "footprint": [],
             },
             {
                 "instrument_id": "instrument_id",
@@ -139,6 +145,7 @@ schedules = [
                 "status": sdk.ObservationStatus.PLANNED,
                 "type": sdk.ObservationType.IMAGING,
                 "bandpass": bandpass,
+                "footprint": [],
             },
             {
                 "instrument_id": "instrument_id",
@@ -154,6 +161,7 @@ schedules = [
                 "status": sdk.ObservationStatus.PLANNED,
                 "type": sdk.ObservationType.IMAGING,
                 "bandpass": bandpass,
+                "footprint": [],
             },
         ],
     },

@@ -40,6 +40,7 @@ def fake_tess_telescope(fake_telescope: sdk.Telescope) -> sdk.Telescope:
 
     for i in fake_telescope.instruments or []:
         i.id = "instrument_id"
+        i.footprints = []
 
     return fake_telescope
 
@@ -54,6 +55,7 @@ def fake_tess_instrument() -> sdk.Instrument:
         created_on=datetime.now(),
         name="TESS instrument",
         short_name="FAKE_INSTRUMENT",
+        footprints=[],
     )
 
     return instrument

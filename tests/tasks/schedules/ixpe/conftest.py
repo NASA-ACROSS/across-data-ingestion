@@ -38,6 +38,7 @@ def fake_ixpe_telescope(fake_telescope: sdk.Telescope) -> sdk.Telescope:
 
     for i in fake_telescope.instruments or []:
         i.id = "ixpe_instrument_id"
+        i.footprints = []
 
     return fake_telescope
 
