@@ -1,9 +1,6 @@
 from across.sdk.v1 import (
-    ObservationCreate,
     ObservationFootprintCreate,
-    ObservationType,
     Point,
-    Telescope,
 )
 from across.tools import Coordinate, Polygon
 from across.tools.footprint import Footprint
@@ -87,34 +84,3 @@ def generate_observation_footprint(
         )
 
     return footprint_creates
-
-
-def tmp_do_it(
-    telescope: Telescope, observations: list[ObservationCreate]
-) -> list[ObservationCreate]:
-
-    if telescope.instruments:
-        instrument_footprint = {}
-
-        for instrument in telescope.instruments:
-            if instrument.footprints:
-                instrument_footprint[instrument.id] = instrument.footprints
-
-        for i, observation in enumerate(observations):
-            if (
-                observation.instrument_id in instrument_footprint.keys()
-                and observation.type == ObservationType.IMAGING
-            ):
-                footprint = instrument_footprint[observation.instrument_id]
-                roll_angle = (
-                    observation.pointing_angle if observation.pointing_angle else 0.0
-                )
-                if observation.pointing_position:
-                    observations[i].footprint = generate_observation_footprint(
-                        footprint,
-                        observation.pointing_position.ra,
-                        observation.pointing_position.dec,
-                        roll_angle,
-                    )
-
-    return observations
