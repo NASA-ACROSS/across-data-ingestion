@@ -1,6 +1,7 @@
 from datetime import datetime
 from unittest.mock import MagicMock
 
+import httpx
 import pandas as pd
 import pytest
 import structlog
@@ -130,13 +131,6 @@ def mock_planned_schedule_table() -> pd.DataFrame:
     )
 
 
-@pytest.fixture
-def mock_revolution_timeline_file() -> pd.DataFrame:
-    return pd.read_csv(
-        "tests/tasks/schedules/xmm_newton/mocks/revolution_timeline_file.csv"
-    )
-
-
 @pytest.fixture(autouse=True)
 def mock_read_planned_schedule_table(
     monkeypatch: pytest.MonkeyPatch,
@@ -148,10 +142,27 @@ def mock_read_planned_schedule_table(
 
 
 @pytest.fixture(autouse=True)
-def mock_read_revolution_timeline_file(
+def mock_httpx_post(
     monkeypatch: pytest.MonkeyPatch,
-    mock_revolution_timeline_file: pd.DataFrame,
+    fake_httpx_response: MagicMock,
 ) -> MagicMock:
-    mock = MagicMock(return_value=mock_revolution_timeline_file)
-    monkeypatch.setattr(task, "read_revolution_timeline_file", mock)
+    fake_httpx_response.status_code = 200
+    fake_httpx_response.text = "some text"
+    mock = MagicMock(return_value=fake_httpx_response)
+    monkeypatch.setattr(httpx, "post", mock)
     return mock
+
+
+@pytest.fixture(autouse=True)
+def fake_datetime() -> MagicMock:
+    fake_datetime = datetime(2025, 1, 1)
+    return MagicMock(return_value=fake_datetime)
+
+
+@pytest.fixture(autouse=True)
+def mock_get_datetime_now(
+    monkeypatch: pytest.MonkeyPatch, fake_datetime: MagicMock
+) -> MagicMock:
+    """Mock get_datetime_now() for reproducible test results"""
+    monkeypatch.setattr(task, "get_datetime_now", fake_datetime)
+    return fake_datetime
