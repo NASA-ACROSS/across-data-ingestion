@@ -1,5 +1,6 @@
 import os
 import time
+import warnings
 from contextlib import asynccontextmanager
 
 import structlog
@@ -7,6 +8,13 @@ from fastapi import FastAPI, status
 
 from .core import config, logging
 from .tasks.task_loader import init_tasks
+
+# Suppress the specific datetime deprecation warning
+warnings.filterwarnings(
+    "ignore",
+    category=DeprecationWarning,
+    message=r".*utcfromtimestamp\(\) is deprecated.*",
+)
 
 # Configure UTC system time
 os.environ["TZ"] = "UTC"
