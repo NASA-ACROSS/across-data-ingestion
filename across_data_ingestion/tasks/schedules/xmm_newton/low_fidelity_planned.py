@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
 
 import astropy.units as u  # type: ignore[import-untyped]
+import httpx
 import pandas as pd
 import structlog
 from astropy.coordinates import SkyCoord  # type: ignore[import-untyped]
+from bs4 import BeautifulSoup
 from fastapi_utilities import repeat_at  # type: ignore
 
 from ....util.across_server import client, sdk
@@ -16,7 +18,10 @@ logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 PLANNED_SCHEDULE_TABLE_URL = (
     "https://xmm-tools.cosmos.esa.int/external/xmm_sched/short_term_schedule.php"
 )
-REVOLUTION_FILE_BASE_URL = "https://xmmweb.esac.esa.int/user/mplan/summaries/"
+
+SCHEDULED_OBS_URL = (
+    "https://xmmweb.esac.esa.int/cgi-bin_external/obs_search/selectobs_cosmos"
+)
 
 EPIC_BANDPASS = sdk.EnergyBandpass.model_validate(
     {
@@ -111,6 +116,12 @@ XMM_BANDPASSES: dict[str, sdk.EnergyBandpass | sdk.WavelengthBandpass] = {
     "V": OM_V_BANDPASS,
     "WHITE": OM_WHITE_BANDPASS,
 }
+OM_FILTERS = ["UVW2", "UVM2", "UVW1", "U", "B", "V", "WHITE"]
+
+
+def get_datetime_now() -> datetime:
+    """Wraps the datetime.now method for easier testing"""
+    return datetime.now()
 
 
 def read_planned_schedule_table() -> pd.DataFrame:
@@ -131,84 +142,103 @@ def read_planned_schedule_table() -> pd.DataFrame:
     return planned_schedule_df
 
 
-def read_revolution_timeline_file(revolution_id: int) -> pd.DataFrame:
-    """Read a revolution timeline file by revolution ID as a pandas DataFrame"""
-    dfs: list[pd.DataFrame] = pd.read_html(
-        REVOLUTION_FILE_BASE_URL + f"{revolution_id}_nice.html", flavor="bs4", header=0
+def extract_om_exposures_from_observation_data(revolution_id: int) -> dict:
+    """
+    Read individual OM filter exposures using the scheduled observations search page.
+    Submit an HTTP request containing the observation ID, scrape the HTML using bs4,
+    and return the OM observation filters, start datetimes, and exposure times.
+
+    Parameters
+    -----------
+        revolution_id (int): the ID of the observation
+
+    Returns
+    -----------
+        list: a list containing dictionaries of filter, start date, and exposure times
+    """
+    expected_tables_per_page: int = (
+        2  # The number of HTML tables that should be returned
     )
-    if len(dfs) == 0:
-        logger.warn(
-            "Could not read revolution timeline file", revolution_id=revolution_id
+    data = {"revn": revolution_id}
+
+    try:
+        response = httpx.post(SCHEDULED_OBS_URL, data=data, timeout=10.0)
+    except httpx.HTTPError as exc:
+        logger.warning(
+            "Scheduled observations page request failed",
+            revolution_id=revolution_id,
+            error=str(exc),
         )
-        return pd.DataFrame([])
+        return {}
 
-    # The second HTML table on that page is the timeline data, so return it
-    return dfs[1]
-
-
-def extract_om_exposures_from_timeline_data(timeline_df: pd.DataFrame) -> dict:
-    """
-    Read individual OM exposures from the timeline data and return them.
-    Parses the timeline data to get the start and stop time of each exposure.
-    Finds the correct OM filter by parsing the string in the "OM" field.
-    Additionally parses the strings to get the exposure time per filter.
-    """
-    # Get the start and stop indices for each observation in this revolution
-    obs_start_inds = timeline_df[timeline_df["Event"] == "OBS_START"].index
-    obs_stop_inds = timeline_df[timeline_df["Event"] == "OBS_END"].index
-
-    exposures = {}
-    for start_ind, stop_ind in zip(*(obs_start_inds, obs_stop_inds)):
-        # For each observation, get the OM exposures in each filter
-        current_obs_df = timeline_df[start_ind:stop_ind]
-
-        # Get the current observation ID
-        obs_id_ind = current_obs_df[current_obs_df["Event"].str[:3] == "ID:"].index
-        # The string is of form "ID: 12345", so slice it to just get the numerical part
-        obs_id = current_obs_df["Event"][obs_id_ind].values[0][4:]
-
-        # Construct a mask to find the start indices of each exposure by matching filter names
-        om_timeline_df = current_obs_df[current_obs_df["OM"].notna()]
-        filter_list = ["UVW2", "UVM2", "UVW1", "U", "B", "V", "WHITE"]
-        # Split the value of the string and match filter names in the spit string
-        split_om_logs = om_timeline_df["OM"].str.split().str[0]
-        mask = [
-            any(filt == split_string[:4] for filt in filter_list)
-            for split_string in split_om_logs
-        ]
-        # The row that matches the filter has the start time
-        exposure_start_inds = om_timeline_df[mask].index
-        exposure_start_times = current_obs_df["Date & Time"][exposure_start_inds].values
-
-        # Get the filter for each exposure
-        exposure_filters = (
-            current_obs_df["OM"][exposure_start_inds].str.split().str[0].values
+    if response.status_code != 200:
+        logger.warning(
+            "Scheduled observations page returned bad status code",
+            status_code=response.status_code,
         )
+        return {}
 
-        # Get each unique exposure time (i.e., one entry per exposure)
-        raw_exposure_times = om_timeline_df[om_timeline_df["OM"].str.endswith("sec")][
-            "OM"
-        ].unique()
-        # exptime has the form "Image ID: 600 sec"
-        exposure_times = [
-            exptime.split(":")[-1].strip() for exptime in raw_exposure_times
-        ]
+    soup = BeautifulSoup(response.text, features="html5lib")
+    tables = soup.find_all("table")
+    if len(tables) < expected_tables_per_page:
+        # Page does not contain the correct HTML table to scrape
+        return {}
 
-        # Add it to the dictionary
-        exposures[obs_id] = [
-            {
-                "filter": filt,
-                "start_time": start_time.replace(
-                    " | ", " "
-                ),  # start_time has form "2025-08-20 | 00:00:00"
-                "exposure_time": int(exptime.split()[0]),  # exptime has form "600 sec"
-            }
-            for filt, start_time, exptime in zip(
-                *(exposure_filters, exposure_start_times, exposure_times)
-            )
-        ]
+    obs_tab = tables[1]
 
-    return exposures
+    om_observations_per_revolution: dict[str, list[dict]] = {}
+    om_exposures: list[dict] = []
+    obs_id = None
+
+    # Observation ID rows have background-color style
+    observation_row_style = "background-color: #EEA500;"
+    for row in obs_tab.find_all("tr"):
+        if row.attrs.get("style", "") == observation_row_style:
+            # Reached a new observation, so add previously aggregated exposures
+            # to the dictionary
+            if obs_id is not None:
+                om_observations_per_revolution[obs_id] = om_exposures
+            obs_id = row.find("td").get_text(strip=True)  # type: ignore[union-attr]
+            om_exposures = []
+        else:
+            first_div = row.find_all("td")[0]
+            if "OM" in first_div.text and any(
+                [filt in first_div.text.split() for filt in OM_FILTERS]
+            ):
+                filt = first_div.get_text(strip=True).split("-")[1].split()[0]
+                start_time = (
+                    row.find_all("td")[1].get_text(strip=True).replace("@", "T")
+                )
+                exposure_time = row.find_all("td")[2].get_text(strip=True)
+
+                # Must convert the string start time to a valid future datetime
+                # The start time only contains month and day, not year, so
+                # we must assume it is in the future and add the correct year
+                start_datetime = datetime.strptime(start_time, "%m-%dT%H:%M:%S")
+                now = get_datetime_now()
+
+                # Use current year, if passed, use next year
+                target_year = now.year
+                start_datetime = start_datetime.replace(year=target_year)
+
+                if start_datetime < now:
+                    start_datetime = start_datetime.replace(year=target_year + 1)
+
+                start_time = start_datetime.strftime("%Y-%m-%d %H:%M:%S")
+
+                om_exposures.append(
+                    {
+                        "filter": filt,
+                        "start_time": start_time,
+                        "exposure_time": float(exposure_time),
+                    }
+                )
+
+    # Reached the end of the loop, so add the last observations aggregated to the dictionary
+    if obs_id is not None:
+        om_observations_per_revolution[obs_id] = om_exposures
+
+    return om_observations_per_revolution
 
 
 def transform_to_across_schedule(
@@ -355,9 +385,6 @@ def aggregate_observations(
     across_observations: list[sdk.ObservationCreate] = []
     unique_rev_ids = schedule_data["Revn #"].unique()
     for rev_id in unique_rev_ids:
-        # Read the revolution timeline for this revolution
-        revolution_timeline_df = read_revolution_timeline_file(rev_id)
-
         # Filter the dataframe for the current revolution
         current_revolution_observations_df = schedule_data[
             schedule_data["Revn #"] == rev_id
@@ -379,24 +406,34 @@ def aggregate_observations(
         )
         across_observations.extend(across_pn_observations)
 
-        if len(revolution_timeline_df):
-            # Get OM exposure info from the revolution timeline df
-            om_exposures = extract_om_exposures_from_timeline_data(
-                revolution_timeline_df
+        om_exposures_for_revn = extract_om_exposures_from_observation_data(
+            revolution_id=rev_id
+        )
+        if len(om_exposures_for_revn) == 0:
+            logger.warning(
+                "Did not find OM exposures from scheduled observations search page",
+                rev_id=rev_id,
             )
-            across_om_observations = [
-                transform_to_across_observation(
-                    row,
-                    exposure["start_time"],
-                    exposure["exposure_time"],
-                    instrument_id_dict["OM"],
-                    sdk.ObservationType.IMAGING,
-                    sdk.Bandpass(XMM_BANDPASSES[exposure["filter"]]),
-                )
-                for _, row in current_revolution_observations_df.iterrows()
-                for exposure in om_exposures["0" + str(row["Obs Id."])]
-            ]
-            across_observations.extend(across_om_observations)
+        else:
+            for obs_id, om_exposures in om_exposures_for_revn.items():
+                # Edge case where the OM observation may not be in the current revolution df
+                # if the current revolution overlaps with datetime.now()
+                if int(obs_id) in current_revolution_observations_df["Obs Id."].values:
+                    row = current_revolution_observations_df[
+                        current_revolution_observations_df["Obs Id."] == int(obs_id)
+                    ].iloc[0]
+                    across_om_observations = [
+                        transform_to_across_observation(
+                            row,
+                            exposure["start_time"],
+                            exposure["exposure_time"],
+                            instrument_id_dict["OM"],
+                            sdk.ObservationType.IMAGING,
+                            sdk.Bandpass(XMM_BANDPASSES[exposure["filter"]]),
+                        )
+                        for exposure in om_exposures
+                    ]
+                    across_observations.extend(across_om_observations)
 
     return across_observations
 
