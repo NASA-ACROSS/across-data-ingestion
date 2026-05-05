@@ -7,6 +7,9 @@ from .schedules.chandra.as_flown import (
 from .schedules.chandra.high_fidelity_planned import (
     entrypoint as chandra_high_fidelity_planned_schedule_ingestion_task,
 )
+from .schedules.euclid.low_fidelity_planned import (
+    entrypoint as euclid_low_fidelity_planned_schedule_ingestion_task,
+)
 from .schedules.fermi.lat_planned import (
     entrypoint as fermi_planned_schedule_ingestion_task,
 )
@@ -74,3 +77,4 @@ async def init_tasks():
     create_task(chandra_as_flown_schedule_ingestion_task())
     create_task(rubin_low_fidelity_planned_schedule_ingestion_task())
     create_task(HST_as_flown_schedule_ingestion_task())
+    create_task(euclid_low_fidelity_planned_schedule_ingestion_task())
