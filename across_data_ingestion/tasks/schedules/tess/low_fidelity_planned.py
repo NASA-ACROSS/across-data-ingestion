@@ -8,7 +8,7 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore
 
 from ....util.across_server import client, sdk
-from ....util.footprint_util import generate_observation_footprint
+from ....util.footprint_util import project_footprint
 
 # Bypass SSL certificate verification
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -47,7 +47,7 @@ def transform_to_across_orbit_observation(
 
     object_name = f"TESS_sector_{int(obs.sector)}_obs_{idx}_orbit_{int(obs.orbit)}"
 
-    footprint = generate_observation_footprint(
+    footprint = project_footprint(
         instrument_footprint[instrument_id],
         ra=pointing.ra,
         dec=pointing.dec,
@@ -78,7 +78,7 @@ def transform_to_across_placeholder_observation(
     exposure_time = date_range.end - date_range.begin
     object_name = f"TESS_sector_{pointing.sector}_placeholder"
 
-    footprint = generate_observation_footprint(
+    footprint = project_footprint(
         instrument_footprint[instrument_id],
         ra=pointing.ra,
         dec=pointing.dec,

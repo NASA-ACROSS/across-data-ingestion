@@ -6,7 +6,7 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from swifttools import swift_too  # type: ignore
 
 from ....util.across_server import client, sdk
-from ....util.footprint_util import generate_observation_footprint
+from ....util.footprint_util import project_footprint
 from .constants import SWIFT_BAT_BANDPASS, SWIFT_UVOT_BANDPASS_DICT, SWIFT_XRT_BANDPASS
 from .custom_uvot_mode_entry import CustomUVOTModeEntry
 from .swift_observation_entry import SwiftObservationEntry
@@ -87,7 +87,7 @@ def swift_to_across_observation(
 
     footprint = None
     if instrument_id in instrument_footprint.keys():
-        footprint = generate_observation_footprint(
+        footprint = project_footprint(
             instrument_footprint[instrument_id],
             ra=float(swift_obs.ra),
             dec=float(swift_obs.dec),

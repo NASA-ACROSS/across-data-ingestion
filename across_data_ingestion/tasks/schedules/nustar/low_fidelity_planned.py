@@ -4,7 +4,7 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore[import-untyped]
 
 from ....util.across_server import client, sdk
-from ....util.footprint_util import generate_observation_footprint
+from ....util.footprint_util import project_footprint
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
@@ -61,7 +61,7 @@ def transform_to_observation(
     instrument_id: str, row: pd.Series, instrument_footprint: dict
 ) -> sdk.ObservationCreate:
     """Create ACROSS observation for given instrument ID and observation row"""
-    footprint = generate_observation_footprint(
+    footprint = project_footprint(
         instrument_footprint[instrument_id],
         ra=float(row["J2000 RA"]),
         dec=float(row["J2000 Dec"]),

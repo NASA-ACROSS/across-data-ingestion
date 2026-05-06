@@ -6,7 +6,7 @@ from across.tools import Coordinate, Polygon
 from across.tools.footprint import Footprint
 
 
-def sdk_footprints_to_tools(footprint: list[list[Point]]) -> Footprint:
+def _convert(footprint_points: list[list[Point]]) -> Footprint:
     """Convert SDK footprint representation into tools Footprint format.
 
     This function transforms a nested list of SDK `Point` objects into an
@@ -14,7 +14,7 @@ def sdk_footprints_to_tools(footprint: list[list[Point]]) -> Footprint:
     is defined by a list of `Coordinate` objects.
 
     Args:
-        footprint (list[list[Point]]):
+        footprint_points (list[list[Point]]):
             A list of detectors, where each detector is represented as a list
             of `Point` objects. Each `Point` contains `x` (RA) and `y` (Dec)
             values.
@@ -26,7 +26,7 @@ def sdk_footprints_to_tools(footprint: list[list[Point]]) -> Footprint:
 
     """
     detectors = []
-    for detector in footprint:
+    for detector in footprint_points:
         detectors.append(
             Polygon(
                 coordinates=[Coordinate(ra=point.x, dec=point.y) for point in detector]
@@ -36,8 +36,8 @@ def sdk_footprints_to_tools(footprint: list[list[Point]]) -> Footprint:
     return Footprint(detectors=detectors)
 
 
-def generate_observation_footprint(
-    footprint: list[list[Point]], ra: float, dec: float, roll_angle: float
+def project_footprint(
+    footprint_points: list[list[Point]], ra: float, dec: float, roll_angle: float
 ) -> list[ObservationFootprintCreate]:
     """Project a footprint onto a sky position and convert to SDK format.
 
@@ -47,7 +47,7 @@ def generate_observation_footprint(
     `ObservationFootprintCreate` objects for SDK usage.
 
     Args:
-        footprint (list[list[Point]]):
+        footprint_points (list[list[Point]]):
             A list of detectors, where each detector is a list of `Point`
             objects representing the footprint geometry in detector space.
 
@@ -65,7 +65,7 @@ def generate_observation_footprint(
             The projected footprint to be associated with the created observation
 
     """
-    tools_footprint = sdk_footprints_to_tools(footprint)
+    tools_footprint = _convert(footprint_points)
 
     projected_footprint = tools_footprint.project(
         coordinate=Coordinate(ra=ra, dec=dec), roll_angle=roll_angle

@@ -6,7 +6,7 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore
 
 from ....util.across_server import client, sdk
-from ....util.footprint_util import generate_observation_footprint
+from ....util.footprint_util import project_footprint
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
@@ -69,7 +69,7 @@ def transform_to_across_observation(
     Creates a NICER observation from the provided row of data.
     """
 
-    footprint = generate_observation_footprint(
+    footprint = project_footprint(
         instrument_footprint[instrument_id],
         ra=row.RightAscension,
         dec=row.Declination,

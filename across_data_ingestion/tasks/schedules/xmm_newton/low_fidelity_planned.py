@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from fastapi_utilities import repeat_at  # type: ignore
 
 from ....util.across_server import client, sdk
-from ....util.footprint_util import generate_observation_footprint
+from ....util.footprint_util import project_footprint
 
 pd.options.mode.chained_assignment = None  # Disable pandas chained assignment warning
 
@@ -293,8 +293,8 @@ def transform_to_across_observation(
 
     footprint = None
     if instrument_id in instrument_footprint.keys():
-        footprint = generate_observation_footprint(
-            footprint=instrument_footprint[instrument_id],
+        footprint = project_footprint(
+            footprint_points=instrument_footprint[instrument_id],
             ra=pointing_coord.ra.deg,
             dec=pointing_coord.dec.deg,
             roll_angle=row["PA ddd.dd"],

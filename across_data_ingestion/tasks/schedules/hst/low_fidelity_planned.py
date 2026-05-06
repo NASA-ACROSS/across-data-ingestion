@@ -11,7 +11,7 @@ from astropy.coordinates import SkyCoord  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore
 
 from ....util.across_server import client, sdk
-from ....util.footprint_util import generate_observation_footprint
+from ....util.footprint_util import project_footprint
 from ..types import Position
 from . import util as hst_util
 
@@ -330,7 +330,7 @@ def transform_to_across_observation(
         instrument_info.type == sdk.ObservationType.IMAGING
         and instrument_info.id in instrument_footprint.keys()
     ):
-        footprint = generate_observation_footprint(
+        footprint = project_footprint(
             instrument_footprint[instrument_info.id],
             ra=pointing_coord.ra.deg,
             dec=pointing_coord.dec.deg,

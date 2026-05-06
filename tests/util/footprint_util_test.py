@@ -5,18 +5,18 @@ from across.tools import Coordinate
 from across.tools.footprint import Footprint
 
 from across_data_ingestion.util.footprint_util import (
-    generate_observation_footprint,
-    sdk_footprints_to_tools,
+    _convert,
+    project_footprint,
 )
 
 
 class TestSdkFootprintsToTools:
     def test_returns_footprint_instance(self):
-        result = sdk_footprints_to_tools([])
+        result = _convert([])
         assert isinstance(result, Footprint)
 
     def test_empty_input_returns_no_detectors(self):
-        result = sdk_footprints_to_tools([])
+        result = _convert([])
         assert result.detectors == []
 
 
@@ -26,11 +26,11 @@ class TestGenerateObservationFootprint:
         mock_fp.project.return_value.detectors = []
 
         monkeypatch.setattr(
-            "across_data_ingestion.util.footprint_util.sdk_footprints_to_tools",
+            "across_data_ingestion.util.footprint_util._convert",
             lambda _: mock_fp,
         )
 
-        result = generate_observation_footprint([], 0, 0, 0)
+        result = project_footprint([], 0, 0, 0)
         assert isinstance(result, list)
 
     def test_calls_project(self, monkeypatch):
@@ -38,11 +38,11 @@ class TestGenerateObservationFootprint:
         mock_fp.project.return_value.detectors = []
 
         monkeypatch.setattr(
-            "across_data_ingestion.util.footprint_util.sdk_footprints_to_tools",
+            "across_data_ingestion.util.footprint_util._convert",
             lambda _: mock_fp,
         )
 
-        generate_observation_footprint([], 1, 2, 3)
+        project_footprint([], 1, 2, 3)
         assert mock_fp.project.called
 
     def test_project_called_with_correct_ra(self, monkeypatch):
@@ -50,11 +50,11 @@ class TestGenerateObservationFootprint:
         mock_fp.project.return_value.detectors = []
 
         monkeypatch.setattr(
-            "across_data_ingestion.util.footprint_util.sdk_footprints_to_tools",
+            "across_data_ingestion.util.footprint_util._convert",
             lambda _: mock_fp,
         )
 
-        generate_observation_footprint([], 10, 20, 30)
+        project_footprint([], 10, 20, 30)
         assert mock_fp.project.call_args.kwargs["coordinate"].ra == 10
 
     def test_project_called_with_correct_dec(self, monkeypatch):
@@ -62,11 +62,11 @@ class TestGenerateObservationFootprint:
         mock_fp.project.return_value.detectors = []
 
         monkeypatch.setattr(
-            "across_data_ingestion.util.footprint_util.sdk_footprints_to_tools",
+            "across_data_ingestion.util.footprint_util._convert",
             lambda _: mock_fp,
         )
 
-        generate_observation_footprint([], 10, 20, 30)
+        project_footprint([], 10, 20, 30)
         assert mock_fp.project.call_args.kwargs["coordinate"].dec == 20
 
     def test_project_called_with_correct_roll(self, monkeypatch):
@@ -74,11 +74,11 @@ class TestGenerateObservationFootprint:
         mock_fp.project.return_value.detectors = []
 
         monkeypatch.setattr(
-            "across_data_ingestion.util.footprint_util.sdk_footprints_to_tools",
+            "across_data_ingestion.util.footprint_util._convert",
             lambda _: mock_fp,
         )
 
-        generate_observation_footprint([], 10, 20, 30)
+        project_footprint([], 10, 20, 30)
         assert mock_fp.project.call_args.kwargs["roll_angle"] == 30
 
     def test_returns_empty_when_no_detectors(self, monkeypatch):
@@ -86,11 +86,11 @@ class TestGenerateObservationFootprint:
         mock_fp.project.return_value.detectors = []
 
         monkeypatch.setattr(
-            "across_data_ingestion.util.footprint_util.sdk_footprints_to_tools",
+            "across_data_ingestion.util.footprint_util._convert",
             lambda _: mock_fp,
         )
 
-        result = generate_observation_footprint([], 0, 0, 0)
+        result = project_footprint([], 0, 0, 0)
         assert result == []
 
     def test_output_length_matches_detectors(self, monkeypatch):
@@ -101,11 +101,11 @@ class TestGenerateObservationFootprint:
         mock_fp.project.return_value.detectors = [mock_detector, mock_detector]
 
         monkeypatch.setattr(
-            "across_data_ingestion.util.footprint_util.sdk_footprints_to_tools",
+            "across_data_ingestion.util.footprint_util._convert",
             lambda _: mock_fp,
         )
 
-        result = generate_observation_footprint([], 0, 0, 0)
+        result = project_footprint([], 0, 0, 0)
         assert len(result) == 2
 
     def test_output_type_is_observation_footprint_create(self, monkeypatch):
@@ -116,11 +116,11 @@ class TestGenerateObservationFootprint:
         mock_fp.project.return_value.detectors = [mock_detector]
 
         monkeypatch.setattr(
-            "across_data_ingestion.util.footprint_util.sdk_footprints_to_tools",
+            "across_data_ingestion.util.footprint_util._convert",
             lambda _: mock_fp,
         )
 
-        result = generate_observation_footprint([], 0, 0, 0)
+        result = project_footprint([], 0, 0, 0)
         assert isinstance(result[0], ObservationFootprintCreate)
 
     def test_polygon_point_ra_mapping(self, monkeypatch):
@@ -131,11 +131,11 @@ class TestGenerateObservationFootprint:
         mock_fp.project.return_value.detectors = [mock_detector]
 
         monkeypatch.setattr(
-            "across_data_ingestion.util.footprint_util.sdk_footprints_to_tools",
+            "across_data_ingestion.util.footprint_util._convert",
             lambda _: mock_fp,
         )
 
-        result = generate_observation_footprint([], 0, 0, 0)
+        result = project_footprint([], 0, 0, 0)
         assert result[0].polygon[0].x == 5
 
     def test_polygon_point_dec_mapping(self, monkeypatch):
@@ -146,9 +146,9 @@ class TestGenerateObservationFootprint:
         mock_fp.project.return_value.detectors = [mock_detector]
 
         monkeypatch.setattr(
-            "across_data_ingestion.util.footprint_util.sdk_footprints_to_tools",
+            "across_data_ingestion.util.footprint_util._convert",
             lambda _: mock_fp,
         )
 
-        result = generate_observation_footprint([], 0, 0, 0)
+        result = project_footprint([], 0, 0, 0)
         assert result[0].polygon[0].y == 6

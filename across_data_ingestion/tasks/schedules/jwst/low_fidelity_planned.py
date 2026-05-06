@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore
 
 from ....util.across_server import client, sdk
-from ....util.footprint_util import generate_observation_footprint
+from ....util.footprint_util import project_footprint
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
@@ -319,7 +319,7 @@ def jwst_to_across_observation(
     footprint = None
 
     if row["INSTRUMENT_ID"] in instrument_footprint.keys():
-        footprint = generate_observation_footprint(
+        footprint = project_footprint(
             instrument_footprint[row["INSTRUMENT_ID"]],
             ra=round(row["RA"], 8),
             dec=round(row["DEC"], 8),

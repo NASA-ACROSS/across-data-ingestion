@@ -7,7 +7,7 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore
 
 from across_data_ingestion.util.across_server import client, sdk
-from across_data_ingestion.util.footprint_util import generate_observation_footprint
+from across_data_ingestion.util.footprint_util import project_footprint
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
@@ -123,7 +123,7 @@ def ixpe_to_across_observation(
 
     external_id = f"{str.replace(row['P S'], ' ', '_')}_obs_{row['Pnum']}"
 
-    observation_footprint = generate_observation_footprint(
+    observation_footprint = project_footprint(
         footprint[instrument_id],
         ra=float(row["RA"]),
         dec=float(row["Dec"]),

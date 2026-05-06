@@ -6,7 +6,7 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore[import-untyped]
 
 from ....util.across_server import client, sdk
-from ....util.footprint_util import generate_observation_footprint
+from ....util.footprint_util import project_footprint
 from ....util.vo_service import VOService
 from . import util as chandra_util
 
@@ -63,7 +63,7 @@ def transform_to_observation(
     ]
 
     if instrument.id in instrument_footprint.keys():
-        footprint = generate_observation_footprint(
+        footprint = project_footprint(
             instrument_footprint[instrument.id],
             ra=float(tap_obs["ra"]),
             dec=float(tap_obs["dec"]),

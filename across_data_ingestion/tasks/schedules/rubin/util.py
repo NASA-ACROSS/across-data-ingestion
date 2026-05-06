@@ -5,7 +5,7 @@ import structlog
 from astropy.time import Time  # type: ignore[import-untyped]
 
 from ....util.across_server import client, sdk
-from ....util.footprint_util import generate_observation_footprint
+from ....util.footprint_util import project_footprint
 from .constants import RUBIN_BANDPASSES
 
 logger: structlog.stdlib.BoundLogger = structlog.getLogger()
@@ -92,8 +92,8 @@ def rubin_observation_to_across_observation(
 
     footprint = None
     if instrument_id in instrument_footprint.keys():
-        footprint = generate_observation_footprint(
-            footprint=instrument_footprint[instrument_id],
+        footprint = project_footprint(
+            footprint_points=instrument_footprint[instrument_id],
             ra=float(row["s_ra"]),
             dec=float(row["s_dec"]),
             roll_angle=float(row["rubin_rot_sky_pos"]),
