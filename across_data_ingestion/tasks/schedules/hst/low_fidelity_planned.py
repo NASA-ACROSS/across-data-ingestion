@@ -389,7 +389,7 @@ def ingest() -> None:
 
     # GET telescope and instrument info from the server
     [telescope] = sdk.TelescopeApi(client).get_telescopes(
-        name="HST", include_filters=True, include_footprints=True
+        name="HST", include_footprints=True
     )
     instruments = telescope.instruments if telescope.instruments else []
 

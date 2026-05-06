@@ -269,7 +269,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
-                "footprint": None,
+                "footprint": [],
             },
             {
                 "instrument_id": "miri_instrument_id",
@@ -321,7 +321,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
-                "footprint": None,
+                "footprint": [],
             },
             {
                 "instrument_id": "nirspec_instrument_id",
@@ -373,7 +373,7 @@ fake_across_plan: sdk.ScheduleCreate = sdk.ScheduleCreate.model_validate(
                     )
                 ),
                 "pointing_angle": 0.0,
-                "footprint": None,
+                "footprint": [],
             },
             {
                 "instrument_id": "niriss_instrument_id",

@@ -62,10 +62,7 @@ def transform_to_observation(
         instrument.short_name or ""
     ]
 
-    if (
-        observation_type == sdk.ObservationType.IMAGING
-        and instrument.id in instrument_footprint.keys()
-    ):
+    if instrument.id in instrument_footprint.keys():
         footprint = generate_observation_footprint(
             instrument_footprint[instrument.id],
             ra=float(tap_obs["ra"]),

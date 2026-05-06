@@ -83,8 +83,7 @@ def transform_to_observation(
 ) -> sdk.ObservationCreate:
     begin = tap_obs["start_date"]
     end = (
-        Time(begin, format="isot")
-        + timedelta(seconds=tap_obs["t_plan_exptime"] * 1000.0)
+        Time(begin, format="isot") + timedelta(seconds=tap_obs["t_plan_exptime"])
     ).isot
 
     footprint = None
@@ -93,10 +92,7 @@ def transform_to_observation(
         instrument.short_name or ""
     ]
 
-    if (
-        observation_type == sdk.ObservationType.IMAGING
-        and instrument.id in instrument_footprint.keys()
-    ):
+    if instrument.id in instrument_footprint.keys():
         footprint = generate_observation_footprint(
             instrument_footprint[instrument.id],
             ra=float(tap_obs["ra"]),

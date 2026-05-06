@@ -86,10 +86,7 @@ def swift_to_across_observation(
     """Converts a SwiftObservationEntry to an ACROSS ObservationCreate object."""
 
     footprint = None
-    if (
-        observation_type == sdk.ObservationType.IMAGING
-        and instrument_id in instrument_footprint.keys()
-    ):
+    if instrument_id in instrument_footprint.keys():
         footprint = generate_observation_footprint(
             instrument_footprint[instrument_id],
             ra=float(swift_obs.ra),

@@ -86,7 +86,7 @@ xmm_newton_planned_schedule: dict = {
                     },
                 )
             ),
-            "footprint": None,
+            "footprint": [],
         },
         {
             "instrument_id": "om_instrument_uuid",

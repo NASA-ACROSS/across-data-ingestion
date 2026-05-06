@@ -292,10 +292,7 @@ def transform_to_across_observation(
     )
 
     footprint = None
-    if (
-        observation_type == sdk.ObservationType.IMAGING
-        and instrument_id in instrument_footprint.keys()
-    ):
+    if instrument_id in instrument_footprint.keys():
         footprint = generate_observation_footprint(
             footprint=instrument_footprint[instrument_id],
             ra=pointing_coord.ra.deg,

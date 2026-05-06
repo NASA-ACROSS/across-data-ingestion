@@ -35,7 +35,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         }
                     )
                 ),
-                "footprint": None,
+                "footprint": [],
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -61,7 +61,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": None,
+                "footprint": [],
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -87,7 +87,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": None,
+                "footprint": [],
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -113,7 +113,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": None,
+                "footprint": [],
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -139,7 +139,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": None,
+                "footprint": [],
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -165,7 +165,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": None,
+                "footprint": [],
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -191,7 +191,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": None,
+                "footprint": [],
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -217,7 +217,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": None,
+                "footprint": [],
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -243,7 +243,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": None,
+                "footprint": [],
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -269,7 +269,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": None,
+                "footprint": [],
             },
         ],
     }

@@ -195,7 +195,7 @@ def transform_to_across_observation(
 async def ingest():
     # GET telescope and instrument info from the server
     [telescope] = sdk.TelescopeApi(client).get_telescopes(
-        name="HST", include_footprints=True, include_filters=True
+        name="HST", include_footprints=True
     )
     instruments = telescope.instruments
 

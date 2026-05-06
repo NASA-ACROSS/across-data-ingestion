@@ -90,10 +90,8 @@ def rubin_observation_to_across_observation(
     begin = Time(row["date_range_begin"])
     end = Time(row["date_range_end"])
 
-    if (
-        observation_type == sdk.ObservationType.IMAGING
-        and instrument_id in instrument_footprint.keys()
-    ):
+    footprint = None
+    if instrument_id in instrument_footprint.keys():
         footprint = generate_observation_footprint(
             footprint=instrument_footprint[instrument_id],
             ra=float(row["s_ra"]),

@@ -85,7 +85,7 @@ def transform_to_observation(
             }
         ),
         external_observation_id=f"{row['obsid']}",
-        type=sdk.ObservationType.IMAGING,
+        type=sdk.ObservationType.TIMING,
         status=sdk.ObservationStatus.PERFORMED,
         pointing_angle=float(f"{row['roll_angle']}"),
         exposure_time=float(row["end_time"] - row["time"]) * SECONDS_IN_A_DAY,
@@ -115,7 +115,7 @@ def ingest() -> None:
 
     # Get telescope and instrument IDs
     (telescope,) = sdk.TelescopeApi(client).get_telescopes(
-        name="NuSTAR", include_filters=True, include_footprints=True
+        name="NuSTAR", include_footprints=True
     )
 
     instrument_footprint = {}

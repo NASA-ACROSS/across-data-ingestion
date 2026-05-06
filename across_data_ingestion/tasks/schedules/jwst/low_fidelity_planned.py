@@ -318,10 +318,7 @@ def jwst_to_across_observation(
 
     footprint = None
 
-    if (
-        row["OBSERVATION_TYPE"] == sdk.ObservationType.IMAGING
-        and row["INSTRUMENT_ID"] in instrument_footprint.keys()
-    ):
+    if row["INSTRUMENT_ID"] in instrument_footprint.keys():
         footprint = generate_observation_footprint(
             instrument_footprint[row["INSTRUMENT_ID"]],
             ra=round(row["RA"], 8),
