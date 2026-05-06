@@ -71,12 +71,10 @@ click==8.3.1
     # via uvicorn
 click-spinner==0.1.10
     # via fastapi-utilities
-coverage==7.13.5
+coverage==7.13.0
     # via pytest-cov
 croniter==1.4.1
     # via fastapi-utilities
-diskcache==5.6.3
-    # via across-tools
 distlib==0.4.0
     # via virtualenv
 dnspython==2.8.0
@@ -92,14 +90,11 @@ fastapi==0.135.3
 fastapi-utilities==0.3.1
     # via -r requirements/base.in
 fastapi-utils==0.8.0
-    # via -r requirements/base.in
-filelock==3.25.2
-    # via
-    #   python-discovery
-    #   spacetrack
-    #   virtualenv
-geoalchemy2==0.18.4
-    # via -r requirements/base.in
+    # via -r base.in
+filelock==3.20.3
+    # via virtualenv
+geoalchemy2==0.18.1
+    # via -r base.in
 h11==0.16.0
     # via
     #   httpcore
@@ -116,7 +111,7 @@ httpx==0.28.1
     #   across-tools
     #   spacetrack
     #   swifttools
-identify==2.6.18
+identify==2.6.15
     # via pre-commit
 idna==3.11
     # via
@@ -132,7 +127,7 @@ jaraco-context==6.1.2
     # via keyring
 jaraco-functools==4.4.0
     # via keyring
-jmespath==1.1.0
+jmespath==1.0.1
     # via
     #   boto3
     #   botocore
@@ -142,7 +137,7 @@ keyring==25.7.0
     # via
     #   astroquery
     #   swifttools
-librt==0.8.1
+librt==0.7.4
     # via mypy
 logbook==1.9.2
     # via spacetrack
@@ -223,7 +218,6 @@ pydantic==2.12.5
     #   fastapi-utilities
     #   fastapi-utils
     #   pydantic-settings
-    #   rust-ephem
     #   swifttools
 pydantic-core==2.41.5
     # via pydantic
@@ -235,8 +229,8 @@ pyerfa==2.0.1.5
     # via astropy
 pygments==2.20.0
     # via pytest
-pyjwt==2.12.1
-    # via -r requirements/base.in
+pyjwt==2.10.1
+    # via -r base.in
 pytest==9.0.2
     # via
     #   -r requirements/test.in
@@ -318,18 +312,18 @@ sqlalchemy==2.0.49
 starlette==1.0.0
     # via fastapi
 structlog==25.5.0
-    # via -r requirements/base.in
+    # via -r base.in
 swifttools==4.0.2
-    # via -r requirements/base.in
-tabulate==0.10.0
+    # via -r base.in
+tabulate==0.9.0
     # via swifttools
 tqdm==4.67.3
     # via swifttools
 types-awscrt==0.31.3
     # via botocore-stubs
-types-boto3==1.42.82
-    # via -r requirements/types.in
-types-boto3-ssm==1.42.54
+types-boto3==1.42.14
+    # via -r types.in
+types-boto3-ssm==1.42.3
     # via types-boto3
 types-cachetools==6.2.0.20260317
     # via -r requirements/types.in

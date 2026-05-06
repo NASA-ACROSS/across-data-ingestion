@@ -78,12 +78,10 @@ click==8.3.1
     #   uvicorn
 click-spinner==0.1.10
     # via fastapi-utilities
-coverage==7.13.5
+coverage==7.13.0
     # via pytest-cov
 croniter==1.4.1
     # via fastapi-utilities
-diskcache==5.6.3
-    # via across-tools
 distlib==0.4.0
     # via virtualenv
 dnspython==2.8.0
@@ -93,14 +91,14 @@ email-validator==2.3.0
     #   -r requirements/base.in
     #   fastapi
     #   pydantic
-fastapi==0.135.3
+fastapi==0.128.0
     # via
     #   -r requirements/base.in
     #   -r requirements/local.in
     #   fastapi-utilities
     #   fastapi-utils
     #   pytest-fastapi-deps
-fastapi-cli==0.0.24
+fastapi-cli==0.0.16
     # via fastapi
 fastapi-cloud-cli==0.15.1
     # via fastapi-cli
@@ -110,13 +108,10 @@ fastapi-utils==0.8.0
     # via -r requirements/base.in
 fastar==0.9.0
     # via fastapi-cloud-cli
-filelock==3.25.2
-    # via
-    #   python-discovery
-    #   spacetrack
-    #   virtualenv
-geoalchemy2==0.18.4
-    # via -r requirements/base.in
+filelock==3.20.3
+    # via virtualenv
+geoalchemy2==0.18.1
+    # via -r base.in
 h11==0.16.0
     # via
     #   httpcore
@@ -137,7 +132,7 @@ httpx==0.28.1
     #   fastapi-cloud-cli
     #   spacetrack
     #   swifttools
-identify==2.6.18
+identify==2.6.15
     # via pre-commit
 idna==3.11
     # via
@@ -165,7 +160,7 @@ keyring==25.7.0
     # via
     #   astroquery
     #   swifttools
-librt==0.8.1
+librt==0.7.4
     # via mypy
 logbook==1.9.2
     # via spacetrack
@@ -254,7 +249,6 @@ pydantic==2.12.5
     #   fastapi-utils
     #   pydantic-extra-types
     #   pydantic-settings
-    #   rust-ephem
     #   swifttools
 pydantic-core==2.41.5
     # via pydantic
@@ -271,8 +265,8 @@ pygments==2.20.0
     # via
     #   pytest
     #   rich
-pyjwt==2.12.1
-    # via -r requirements/base.in
+pyjwt==2.10.1
+    # via -r base.in
 pytest==9.0.2
     # via
     #   -r requirements/test.in
@@ -333,7 +327,7 @@ rust-ephem==0.7.0
     # via across-tools
 s3transfer==0.16.0
     # via boto3
-sentry-sdk==2.57.0
+sentry-sdk==2.48.0
     # via fastapi-cloud-cli
 sgp4==2.25
     # via
@@ -373,10 +367,10 @@ sqlalchemy==2.0.49
 starlette==1.0.0
     # via fastapi
 structlog==25.5.0
-    # via -r requirements/base.in
+    # via -r base.in
 swifttools==4.0.2
-    # via -r requirements/base.in
-tabulate==0.10.0
+    # via -r base.in
+tabulate==0.9.0
     # via swifttools
 tqdm==4.67.3
     # via swifttools
@@ -386,9 +380,9 @@ typer==0.24.1
     #   fastapi-cloud-cli
 types-awscrt==0.31.3
     # via botocore-stubs
-types-boto3==1.42.82
-    # via -r requirements/types.in
-types-boto3-ssm==1.42.54
+types-boto3==1.42.14
+    # via -r types.in
+types-boto3-ssm==1.42.3
     # via types-boto3
 types-cachetools==6.2.0.20260317
     # via -r requirements/types.in
@@ -418,6 +412,7 @@ typing-extensions==4.15.0
     #   rich-toolkit
     #   sqlalchemy
     #   starlette
+    #   typer
     #   typing-inspect
     #   typing-inspection
 typing-inspect==0.9.0
