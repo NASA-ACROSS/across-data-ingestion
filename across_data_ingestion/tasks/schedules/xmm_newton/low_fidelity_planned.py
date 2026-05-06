@@ -9,7 +9,6 @@ from bs4 import BeautifulSoup
 from fastapi_utilities import repeat_at  # type: ignore
 
 from ....util.across_server import client, sdk
-from ....util.footprint_util import project_footprint
 
 pd.options.mode.chained_assignment = None  # Disable pandas chained assignment warning
 
@@ -270,7 +269,6 @@ def transform_to_across_observation(
     instrument_id: str,
     observation_type: sdk.ObservationType,
     bandpass: sdk.Bandpass,
-    instrument_footprint: dict,
 ) -> sdk.ObservationCreate:
     """Construct ACROSS observation for the given exposure"""
     pointing_coord = SkyCoord(
@@ -290,16 +288,6 @@ def transform_to_across_observation(
             "end": end_time.strftime("%Y-%m-%d %H:%M:%S"),
         }
     )
-
-    footprint = None
-    if instrument_id in instrument_footprint.keys():
-        footprint = project_footprint(
-            footprint_points=instrument_footprint[instrument_id],
-            ra=pointing_coord.ra.deg,
-            dec=pointing_coord.dec.deg,
-            roll_angle=row["PA ddd.dd"],
-        )
-
     return sdk.ObservationCreate(
         instrument_id=instrument_id,
         object_name=row["Target Name"],
@@ -312,12 +300,11 @@ def transform_to_across_observation(
         status=sdk.ObservationStatus.PLANNED,
         type=observation_type,
         bandpass=bandpass,
-        footprint=footprint,
     )
 
 
 def create_mos_observations(
-    observations_df: pd.DataFrame, instrument_id_dict: dict, instrument_footprint: dict
+    observations_df: pd.DataFrame, instrument_id_dict: dict
 ) -> list[sdk.ObservationCreate]:
     observations_df["max_mos_exposure"] = observations_df.apply(
         lambda row: (
@@ -339,14 +326,13 @@ def create_mos_observations(
             instrument_id_dict["EPIC-MOS"],
             sdk.ObservationType.IMAGING,
             sdk.Bandpass(XMM_BANDPASSES["EPIC"]),
-            instrument_footprint,
         )
         for _, row in observations_df.iterrows()
     ]
 
 
 def create_rgs_observations(
-    observations_df: pd.DataFrame, instrument_id_dict: dict, instrument_footprint: dict
+    observations_df: pd.DataFrame, instrument_id_dict: dict
 ) -> list[sdk.ObservationCreate]:
     observations_df["max_rgs_exposure"] = observations_df.apply(
         lambda row: (
@@ -367,14 +353,13 @@ def create_rgs_observations(
             instrument_id_dict["RGS"],
             sdk.ObservationType.SPECTROSCOPY,
             sdk.Bandpass(XMM_BANDPASSES["RGS"]),
-            instrument_footprint,
         )
         for _, row in observations_df.iterrows()
     ]
 
 
 def create_pn_observations(
-    observations_df: pd.DataFrame, instrument_id_dict: dict, instrument_footprint: dict
+    observations_df: pd.DataFrame, instrument_id_dict: dict
 ) -> list[sdk.ObservationCreate]:
     return [
         transform_to_across_observation(
@@ -384,14 +369,13 @@ def create_pn_observations(
             instrument_id_dict["EPIC-PN"],
             sdk.ObservationType.IMAGING,
             sdk.Bandpass(XMM_BANDPASSES["EPIC"]),
-            instrument_footprint,
         )
         for _, row in observations_df.iterrows()
     ]
 
 
 def aggregate_observations(
-    schedule_data: pd.DataFrame, instrument_id_dict: dict, instrument_footprint: dict
+    schedule_data: pd.DataFrame, instrument_id_dict: dict
 ) -> list[sdk.ObservationCreate]:
     """
     Iterate over the planned schedule data by unique revolution ID,
@@ -408,17 +392,17 @@ def aggregate_observations(
 
         # Create observations for each instrument
         across_mos_observations = create_mos_observations(
-            current_revolution_observations_df, instrument_id_dict, instrument_footprint
+            current_revolution_observations_df, instrument_id_dict
         )
         across_observations.extend(across_mos_observations)
 
         across_rgs_observations = create_rgs_observations(
-            current_revolution_observations_df, instrument_id_dict, instrument_footprint
+            current_revolution_observations_df, instrument_id_dict
         )
         across_observations.extend(across_rgs_observations)
 
         across_pn_observations = create_pn_observations(
-            current_revolution_observations_df, instrument_id_dict, instrument_footprint
+            current_revolution_observations_df, instrument_id_dict
         )
         across_observations.extend(across_pn_observations)
 
@@ -446,7 +430,6 @@ def aggregate_observations(
                             instrument_id_dict["OM"],
                             sdk.ObservationType.IMAGING,
                             sdk.Bandpass(XMM_BANDPASSES[exposure["filter"]]),
-                            instrument_footprint,
                         )
                         for exposure in om_exposures
                     ]
@@ -467,13 +450,9 @@ def ingest() -> None:
     """
     # GET telescope and instrument info
     telescope = sdk.TelescopeApi(client).get_telescopes(name="XMM-Newton")[0]
-    instrument_footprint = {}
     if telescope.instruments:
         instrument_id_dict = {
             instrument.short_name: instrument.id for instrument in telescope.instruments
-        }
-        instrument_footprint = {
-            instrument.id: instrument.footprints for instrument in telescope.instruments
         }
 
     raw_planned_schedule_data = read_planned_schedule_table()
@@ -485,7 +464,7 @@ def ingest() -> None:
     )
 
     across_schedule.observations = aggregate_observations(
-        raw_planned_schedule_data, instrument_id_dict, instrument_footprint
+        raw_planned_schedule_data, instrument_id_dict
     )
 
     try:
