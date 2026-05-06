@@ -32,7 +32,7 @@ xmm_newton_planned_schedule: dict = {
                     },
                 )
             ),
-            "footprint": [],
+            "footprint": None,
         },
         {
             "instrument_id": "epic-pn_instrument_uuid",
@@ -59,7 +59,7 @@ xmm_newton_planned_schedule: dict = {
                     },
                 )
             ),
-            "footprint": [],
+            "footprint": None,
         },
         {
             "instrument_id": "rgs_instrument_uuid",
@@ -86,7 +86,7 @@ xmm_newton_planned_schedule: dict = {
                     },
                 )
             ),
-            "footprint": [],
+            "footprint": None,
         },
         {
             "instrument_id": "om_instrument_uuid",
@@ -113,7 +113,7 @@ xmm_newton_planned_schedule: dict = {
                     },
                 )
             ),
-            "footprint": [],
+            "footprint": None,
         },
     ],
 }

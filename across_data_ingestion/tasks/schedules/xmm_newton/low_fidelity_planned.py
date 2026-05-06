@@ -472,7 +472,9 @@ def ingest() -> None:
             instrument.short_name: instrument.id for instrument in telescope.instruments
         }
         instrument_footprint = {
-            instrument.id: instrument.footprints for instrument in telescope.instruments
+            instrument.id: instrument.footprints
+            for instrument in telescope.instruments
+            if instrument.footprints
         }
 
     raw_planned_schedule_data = read_planned_schedule_table()

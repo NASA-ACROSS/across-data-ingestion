@@ -367,7 +367,8 @@ def ingest() -> None:
     )
     for inst in jwst_instruments:
         instruments_info[inst.short_name] = inst.id
-        instrument_footprint[inst.id] = inst.footprints
+        if inst.footprints:
+            instrument_footprint[inst.id] = inst.footprints
 
     # Query the JWST planned execution schedule
     latest_jwst_plan = query_jwst_planned_execution_schedule(instruments_info)
