@@ -59,7 +59,7 @@ class TestGetObsType:
         self,
         fake_instrument_data: dict,
         obs_type: str,
-        fake_instrument: sdk.Instrument,
+        fake_instrument: sdk.TelescopeInstrument,
         fake_filters: list[sdk.Filter],
     ) -> None:
         """Should identify correct observation type from obs parameters"""

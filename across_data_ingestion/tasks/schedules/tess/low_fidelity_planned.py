@@ -11,9 +11,6 @@ from ....util.across_server import client, sdk
 from ....util.footprint_util import project_footprint
 
 # Bypass SSL certificate verification
-ssl._create_default_https_context = ssl._create_unverified_context
-
-# Bypass SSL certificate verification
 ssl._create_default_https_context = ssl._create_unverified_context  # type: ignore
 
 logger: structlog.stdlib.BoundLogger = structlog.getLogger()

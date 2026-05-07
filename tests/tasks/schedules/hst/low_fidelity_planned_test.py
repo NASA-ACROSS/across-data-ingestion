@@ -410,7 +410,7 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
             }
 
             # set both element and aperture fields so that they both produce a match.
-            fake_obs_data = fake_timeline_row | {
+            fake_obs_data: dict = fake_timeline_row | {
                 "instrument": "WFC3/IR",
                 "element": "IR",
                 "aperture": "APERTURE",
