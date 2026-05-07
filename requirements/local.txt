@@ -82,6 +82,8 @@ coverage==7.13.0
     # via pytest-cov
 croniter==1.4.1
     # via fastapi-utilities
+diskcache==5.6.3
+    # via across-tools
 distlib==0.4.0
     # via virtualenv
 dnspython==2.8.0
@@ -109,9 +111,11 @@ fastapi-utils==0.8.0
 fastar==0.9.0
     # via fastapi-cloud-cli
 filelock==3.20.3
-    # via virtualenv
+    # via
+    #   spacetrack
+    #   virtualenv
 geoalchemy2==0.18.1
-    # via -r base.in
+    # via -r requirements/base.in
 h11==0.16.0
     # via
     #   httpcore
@@ -160,7 +164,7 @@ keyring==25.7.0
     # via
     #   astroquery
     #   swifttools
-librt==0.7.4
+librt==0.10.0
     # via mypy
 logbook==1.9.2
     # via spacetrack
@@ -226,7 +230,6 @@ pathspec==1.0.4
     # via mypy
 platformdirs==4.9.4
     # via
-    #   python-discovery
     #   spacetrack
     #   virtualenv
 plotly==6.6.0
@@ -249,6 +252,7 @@ pydantic==2.12.5
     #   fastapi-utils
     #   pydantic-extra-types
     #   pydantic-settings
+    #   rust-ephem
     #   swifttools
 pydantic-core==2.41.5
     # via pydantic
@@ -266,7 +270,7 @@ pygments==2.20.0
     #   pytest
     #   rich
 pyjwt==2.10.1
-    # via -r base.in
+    # via -r requirements/base.in
 pytest==9.0.2
     # via
     #   -r requirements/test.in
@@ -287,8 +291,6 @@ python-dateutil==2.9.0.post0
     #   botocore
     #   croniter
     #   pandas
-python-discovery==1.2.1
-    # via virtualenv
 python-dotenv==1.2.2
     # via
     #   pydantic-settings
@@ -364,12 +366,12 @@ sqlalchemy==2.0.49
     #   alembic
     #   fastapi-utilities
     #   geoalchemy2
-starlette==1.0.0
+starlette==0.50.0
     # via fastapi
 structlog==25.5.0
-    # via -r base.in
+    # via -r requirements/base.in
 swifttools==4.0.2
-    # via -r base.in
+    # via -r requirements/base.in
 tabulate==0.9.0
     # via swifttools
 tqdm==4.67.3
@@ -381,7 +383,7 @@ typer==0.24.1
 types-awscrt==0.31.3
     # via botocore-stubs
 types-boto3==1.42.14
-    # via -r types.in
+    # via -r requirements/types.in
 types-boto3-ssm==1.42.3
     # via types-boto3
 types-cachetools==6.2.0.20260317
@@ -412,14 +414,12 @@ typing-extensions==4.15.0
     #   rich-toolkit
     #   sqlalchemy
     #   starlette
-    #   typer
     #   typing-inspect
     #   typing-inspection
 typing-inspect==0.9.0
     # via -r requirements/base.in
 typing-inspection==0.4.2
     # via
-    #   fastapi
     #   pydantic
     #   pydantic-settings
 urllib3==2.6.3
@@ -437,7 +437,7 @@ uvicorn==0.40.0
     #   fastapi-cloud-cli
 uvloop==0.22.1
     # via uvicorn
-virtualenv==21.2.0
+virtualenv==20.36.1
     # via pre-commit
 watchfiles==1.1.1
     # via uvicorn
