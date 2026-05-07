@@ -156,10 +156,7 @@ def transform_to_across_observation(
         return None
 
     footprint = None
-    if (
-        instrument_info.type == sdk.ObservationType.IMAGING
-        and instrument_info.id in instrument_footprint.keys()
-    ):
+    if instrument_info.id in instrument_footprint.keys():
         footprint = project_footprint(
             instrument_footprint[instrument_info.id],
             ra=observation_data.sci_ra,
