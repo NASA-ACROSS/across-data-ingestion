@@ -89,7 +89,7 @@ def fake_observatories(
 def mock_get_tle(
     monkeypatch: pytest.MonkeyPatch, fake_spacetrack_tle: TLE
 ) -> MagicMock:
-    mock = MagicMock(return_value=fake_spacetrack_tle)
+    mock = MagicMock(return_value=[fake_spacetrack_tle])
 
     monkeypatch.setattr(tle, "get_tle", mock)
 

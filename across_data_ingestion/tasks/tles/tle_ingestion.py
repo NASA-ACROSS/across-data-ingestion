@@ -1,6 +1,6 @@
 from datetime import datetime
+from typing import TypedDict
 
-import pydantic
 import structlog
 from across.tools import tle as tle_tool
 from fastapi_utilities import repeat_at  # type: ignore
@@ -11,7 +11,7 @@ from .config import spacetrack_config
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
 
-class NoradSatellite(pydantic.BaseModel):
+class NoradSatellite(TypedDict):
     id: int
     name: str
 
@@ -59,41 +59,50 @@ def ingest() -> None:
     )
     satellites = extract_norad_satellites(observatories)
 
-    for satellite in satellites:
-        tle = tle_tool.get_tle(
-            norad_id=satellite.id,
-            epoch=datetime.now(),
-            spacetrack_user=spacetrack_config.SPACETRACK_USER,
-            spacetrack_pwd=spacetrack_config.SPACETRACK_PWD,
-        )
+    # query spacetrack for all satellites and parse out the newest result for each norad_id
+    tles = tle_tool.get_tle(
+        satellites=satellites,
+        epoch=datetime.now(),
+        spacetrack_user=spacetrack_config.SPACETRACK_USER,
+        spacetrack_pwd=spacetrack_config.SPACETRACK_PWD,
+        spacetrack_base_url=spacetrack_config.SPACETRACK_BASE_URL,
+    )
 
-        if tle:
+    if tles is None or len(tles) == 0:
+        logger.warning(
+            "No TLE data returned from spacetrack for satellites: ",
+            satellites=satellites,
+        )
+        return
+
+    for satellite in satellites:
+        satellite_tle = next(
+            (tle for tle in tles if tle.norad_id == satellite["id"]), None
+        )
+        if satellite_tle is not None:
             across_tle = sdk.TLECreate(
-                norad_id=satellite.id,
-                satellite_name=satellite.name,
-                tle1=tle.tle1,
-                tle2=tle.tle2,
+                norad_id=satellite["id"],
+                satellite_name=satellite["name"],
+                tle1=satellite_tle.tle1,
+                tle2=satellite_tle.tle2,
             )
 
             try:
                 sdk.TLEApi(client).create_tle(across_tle)
-                logger.info("Created new TLE", satellite=satellite.model_dump())
+                logger.info("Created new TLE", satellite=satellite)
             except sdk.ApiException as err:
                 if err.status == 409:
                     logger.warning(
                         "TLE Already Exists",
                         name=across_tle.satellite_name,
                         norad_id=across_tle.norad_id,
-                        epoch=tle.epoch,
+                        epoch=satellite_tle.epoch,
                     )
                 else:
                     raise err
 
-        else:
-            logger.warning("Could not fetch TLE", satellite=satellite.model_dump())
 
-
-@repeat_at(cron="34 4,16 * * *", logger=logger)
+@repeat_at(cron="38 4,16 * * *", logger=logger)
 async def entrypoint() -> None:
     try:
         ingest()

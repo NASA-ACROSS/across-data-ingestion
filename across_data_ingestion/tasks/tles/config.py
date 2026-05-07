@@ -10,6 +10,7 @@ logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 class Config(BaseConfig):
     SPACETRACK_USER: str = "spacetrack-username"
     SPACETRACK_PWD: str = "spacetrack-pwd"
+    SPACETRACK_BASE_URL: str | None = None
 
     def __init__(self) -> None:
         super().__init__()
@@ -27,6 +28,11 @@ class Config(BaseConfig):
                 "spacetrack/password", core_config.APP_ENV
             )
             self.SPACETRACK_PWD = str(password_param.get("Value"))
+
+            base_url_param = SSM.get_parameter(
+                "spacetrack/base_url", core_config.APP_ENV
+            )
+            self.SPACETRACK_BASE_URL = str(base_url_param.get("Value"))
 
             logger.debug("Retrieved spacetrack credentials from SSM!")
         else:
