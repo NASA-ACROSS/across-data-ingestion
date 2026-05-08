@@ -130,7 +130,7 @@ def parse_pointing_file(filename: str) -> pd.DataFrame:
             grism = (
                 line_vals[len(POINTING_COLUMNS) - 1]
                 if n >= len(POINTING_COLUMNS)
-                else None
+                else ""
             )
             row.append(grism)  # type: ignore[arg-type]
 
@@ -195,7 +195,7 @@ def create_nisp_observations(
     # Group by observation ID
     grouped_observations = observation_df.groupby("obs_id")
     for obs_id, group in grouped_observations:
-        grisms = [val for val in group["grism"].values if val is not None]
+        grisms = [val for val in group["grism"].values if val]
         if len(grisms):
             grism = grisms[0]
         else:
@@ -361,4 +361,12 @@ class EuclidScheduleHandler:
         )
 
         # Post the schedule to the ACROSS API
-        sdk.ScheduleApi(client).create_schedule(euclid_schedule)
+        try:
+            sdk.ScheduleApi(client).create_schedule(euclid_schedule)
+        except sdk.ApiException as err:
+            if err.status == 409:
+                logger.info(
+                    "Schedule already exists.", schedule_name=euclid_schedule.name
+                )
+            else:
+                raise err
