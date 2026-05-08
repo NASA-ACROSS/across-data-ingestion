@@ -71,7 +71,6 @@
     "yday",
     "YYYYDDD"
   ],
-  "python.defaultInterpreterPath": "./.venv/bin/python",
   "python-envs.pythonProjects": [],
   "makefile.configureOnOpen": false,
   "python.testing.pytestArgs": [
