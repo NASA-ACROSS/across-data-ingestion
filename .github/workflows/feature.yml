@@ -1,8 +1,8 @@
 name: Feature Branch
 on:
   pull_request:
-    branches: ["main"]
-    types: [opened, synchronize, reopened, closed, labeled, unlabeled]
+    branches: [ "main" ]
+    types: [ opened, synchronize, reopened, closed, labeled, unlabeled ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   do:
-    uses: NASA-ACROSS/github-action-workflows/.github/workflows/ecspresso-feature-branch.yml@ecspress-feature-branch-only-builds
+    uses: NASA-ACROSS/github-action-workflows/.github/workflows/ecspresso-feature-branch.yml@main
     with:
       organization: "${{ github.event.repository.owner.login }}"
       repository: "${{ github.event.repository.name }}"
