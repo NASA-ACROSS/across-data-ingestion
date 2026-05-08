@@ -146,7 +146,9 @@ class RubinSchedulerHandler:
     def run(self, df: pd.DataFrame) -> None:
         """Create a schedule from a DataFrame of Rubin LSST observations."""
 
-        telescope = sdk.TelescopeApi(client).get_telescopes(name="lsst")[0]
+        telescope = sdk.TelescopeApi(client).get_telescopes(
+            name="lsst", include_footprints=True
+        )[0]
         telescope_id = telescope.id
 
         instrument_footprint = {}
