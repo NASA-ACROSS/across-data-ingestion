@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.4.0](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.3.0...v1.4.0) (2026-05-11)
+
+
+### Features
+
+* **config:** remove api root path prefix to support new domain ([#246](https://github.com/NASA-ACROSS/across-data-ingestion/issues/246)) ([208499c](https://github.com/NASA-ACROSS/across-data-ingestion/commit/208499c8d5f1e3d01f773db6c6ebfe6b1b8b0363))
+* **tle:** bulk request all satellites at once from space-track using QP ([#249](https://github.com/NASA-ACROSS/across-data-ingestion/issues/249)) ([d5ec645](https://github.com/NASA-ACROSS/across-data-ingestion/commit/d5ec64589bd6202e714f7cfec6aa8fa1c7df3bbe))
+
+
+### Bug Fixes
+
+* change name of Main Branch to Main, formatting ([7739fc5](https://github.com/NASA-ACROSS/across-data-ingestion/commit/7739fc5cf6543ad2e152b3ce34f6c8fb5ee0c227))
+* **ci:** change name of Main Branch to Main, formatting ([#251](https://github.com/NASA-ACROSS/across-data-ingestion/issues/251)) ([7739fc5](https://github.com/NASA-ACROSS/across-data-ingestion/commit/7739fc5cf6543ad2e152b3ce34f6c8fb5ee0c227))
+* **dep:** fix crash caused by swiftools-4.0 api changes ([#209](https://github.com/NASA-ACROSS/across-data-ingestion/issues/209)) ([cc52d14](https://github.com/NASA-ACROSS/across-data-ingestion/commit/cc52d14221954697e50281ad87fcde4e7b76aa27))
+* fix broken IXPE low fidelity planned schedule ingestion ([#221](https://github.com/NASA-ACROSS/across-data-ingestion/issues/221)) ([0fff376](https://github.com/NASA-ACROSS/across-data-ingestion/commit/0fff3760e5d202f4e73a21f609752a5c81b969ad))
+* rewrite xmm-newton planned schedule ingestion using scheduled observation search page ([#210](https://github.com/NASA-ACROSS/across-data-ingestion/issues/210)) ([74851ac](https://github.com/NASA-ACROSS/across-data-ingestion/commit/74851acb28b9b82d8f5e5e16175f5dc72d2c8255))
+* **TESS:** bypass ssl to read orbit files ([#224](https://github.com/NASA-ACROSS/across-data-ingestion/issues/224)) ([4235f0f](https://github.com/NASA-ACROSS/across-data-ingestion/commit/4235f0f3fe08786362b465c160cf997cf78922e3))
+* update workflows to use main branch ([#250](https://github.com/NASA-ACROSS/across-data-ingestion/issues/250)) ([f6674ec](https://github.com/NASA-ACROSS/across-data-ingestion/commit/f6674eca08d7c33f37fa1e5ca885fabe45518903))
+* use simplified workflows ([#205](https://github.com/NASA-ACROSS/across-data-ingestion/issues/205)) ([b486bcc](https://github.com/NASA-ACROSS/across-data-ingestion/commit/b486bcca639d5dc8169adc16a62ad517ee2e898c))
+
 ## [1.3.0](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.2.2...v1.3.0) (2026-02-20)
 
 
