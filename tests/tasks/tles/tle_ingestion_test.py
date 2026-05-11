@@ -23,14 +23,14 @@ class TestExtractNoradEntries:
         entries = task.extract_norad_satellites([fake_observatory])
         assert len(entries)
 
-    def test_should_return_instance_of_satellite_data(
+    def test_should_return_satellite_dict_with_name_and_id(
         self,
         fake_observatory: sdk.Observatory,
     ) -> None:
-        """Should return instance of norad satellite data object"""
+        """Should return instance of norad satellite dict with name and id"""
         [satellite] = task.extract_norad_satellites([fake_observatory])
 
-        assert isinstance(satellite, task.NoradSatellite)
+        assert "id" in satellite and "name" in satellite
 
     def test_should_extract_norad_id(
         self,
@@ -40,7 +40,7 @@ class TestExtractNoradEntries:
         """Should extract NORAD ID from ACROSS observatory data"""
         [satellite] = task.extract_norad_satellites([fake_observatory])
 
-        assert satellite.id == expected_tle_parameters.norad_id
+        assert satellite["id"] == expected_tle_parameters.norad_id
 
     def test_should_extract_norad_satellite_name(
         self,
@@ -50,7 +50,7 @@ class TestExtractNoradEntries:
         """Should extract NORAD satellite name from ACROSS observatory data"""
         [satellite] = task.extract_norad_satellites([fake_observatory])
 
-        assert satellite.name == expected_tle_parameters.norad_satellite_name
+        assert satellite["name"] == expected_tle_parameters.norad_satellite_name
 
     def test_should_extract_all_tle_ephem_type_satellites(
         self,
