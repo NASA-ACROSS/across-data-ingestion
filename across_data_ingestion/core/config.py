@@ -12,11 +12,11 @@ class Config(BaseConfig):
     RUNTIME_ENV: Environments = Environments.LOCAL
     HOST: str = "localhost"
     PORT: int = 8001
-    ROOT_PATH: str = "/api"
+    ROOT_PATH: str = ""
 
     ACROSS_SERVER_HOST: str = "http://localhost"
     ACROSS_SERVER_PORT: int = 8000
-    ACROSS_SERVER_ROOT_PATH: str = "/api"
+    ACROSS_SERVER_ROOT_PATH: str = ""
     ACROSS_SERVER_VERSION: str = "/v1"
 
     ACROSS_SERVER_ID: str = "9798d4e2-fe46-4da9-8708-dd098c27ea8c"

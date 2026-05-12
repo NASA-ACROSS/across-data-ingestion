@@ -2,9 +2,9 @@
 #    uv pip compile requirements/deploy.in -o requirements/deploy.txt
 across-server-openapi-python==1.2.0
     # via -r requirements/base.in
-across-tools==1.3.2
+across-tools==1.5.0
     # via -r requirements/base.in
-alembic==1.18.4
+alembic==1.18.1
     # via -r requirements/base.in
 annotated-doc==0.0.4
     # via fastapi
@@ -27,20 +27,19 @@ astropy==7.2.0
     #   swifttools
 astropy-healpix==1.1.3
     # via -r requirements/base.in
-astropy-iers-data==0.2026.4.1.15.5.49
+astropy-iers-data==0.2025.12.15.0.40.51
     # via astropy
 astroquery==0.4.11
     # via
     #   -r requirements/base.in
     #   across-tools
+    #   rust-ephem
 asyncer==0.0.12
     # via -r requirements/base.in
 asyncpg==0.31.0
     # via -r requirements/base.in
-attrs==26.1.0
-    # via
-    #   outcome
-    #   rush
+attrs==25.4.0
+    # via rush
 beautifulsoup4==4.14.3
     # via
     #   -r requirements/base.in
@@ -55,7 +54,7 @@ botocore==1.42.82
     #   s3transfer
 cachetools==5.5.2
     # via -r requirements/base.in
-certifi==2026.2.25
+certifi==2025.11.12
     # via
     #   httpcore
     #   httpx
@@ -75,7 +74,7 @@ dnspython==2.8.0
     # via email-validator
 email-validator==2.3.0
     # via -r requirements/base.in
-fastapi==0.135.3
+fastapi==0.128.0
     # via
     #   -r requirements/base.in
     #   fastapi-utilities
@@ -84,8 +83,6 @@ fastapi-utilities==0.3.1
     # via -r requirements/base.in
 fastapi-utils==0.8.0
     # via -r requirements/base.in
-filelock==3.29.0
-    # via spacetrack
 geoalchemy2==0.18.1
     # via -r requirements/base.in
 h11==0.16.0
@@ -136,15 +133,15 @@ markupsafe==3.0.3
     # via mako
 mocpy==0.20.0
     # via across-tools
-more-itertools==11.0.1
+more-itertools==10.8.0
     # via
     #   jaraco-classes
     #   jaraco-functools
 mypy-extensions==1.1.0
     # via typing-inspect
-narwhals==2.18.1
+narwhals==2.21.0
     # via plotly
-numpy==2.4.4
+numpy==2.3.5
     # via
     #   across-tools
     #   astropy
@@ -173,11 +170,9 @@ pandas==3.0.2
     # via
     #   -r requirements/base.in
     #   swifttools
-pandas-stubs==3.0.0.260204
+pandas-stubs==2.3.3.260113
     # via -r requirements/base.in
-platformdirs==4.9.4
-    # via spacetrack
-plotly==6.6.0
+plotly==6.7.0
     # via across-tools
 pluggy==1.6.0
     # via pytest
@@ -230,7 +225,7 @@ requests==2.33.1
     #   swifttools
 rush==2021.4.0
     # via spacetrack
-rust-ephem==0.7.0
+rust-ephem==0.10.1
     # via across-tools
 s3transfer==0.16.0
     # via boto3
