@@ -219,7 +219,7 @@ def create_swift_across_schedule(
     schedule_name: str,
     create_observations: Callable = create_observations,
     bandpass: sdk.Bandpass | None = None,
-) -> sdk.ScheduleCreate | None:
+) -> sdk.ScheduleCreate:
     telescope = sdk.TelescopeApi(client).get_telescopes(
         name=telescope_name, include_footprints=True
     )[0]
@@ -227,9 +227,6 @@ def create_swift_across_schedule(
     if telescope.instruments:
         instrument_id = telescope.instruments[0].id
         instrument_footprint = telescope.instruments[0].footprints
-    else:
-        logger.warning("Telescope has no instruments.")
-        return None
 
     schedule = swift_to_across_schedule(
         telescope_id=telescope_id,

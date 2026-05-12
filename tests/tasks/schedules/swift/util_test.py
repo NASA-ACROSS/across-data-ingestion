@@ -39,7 +39,7 @@ class TestCreateUVOTObservations:
             instrument_id="instrument-id",
             observation_data=fake_swift_obs_entries,
             observation_status=sdk.ObservationStatus.PLANNED,
-            instrument_footprint={},
+            instrument_footprint=[],
         )
 
         assert isinstance(observations[0], sdk.ObservationCreate)
@@ -59,7 +59,7 @@ class TestCreateUVOTObservations:
             instrument_id="instrument-id",
             observation_data=fake_swift_obs_entries,
             observation_status=sdk.ObservationStatus.PLANNED,
-            instrument_footprint={},
+            instrument_footprint=[],
         )
 
         mock_logger.warning.assert_called_once_with(
