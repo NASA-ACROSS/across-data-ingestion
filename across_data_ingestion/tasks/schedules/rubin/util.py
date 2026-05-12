@@ -81,7 +81,7 @@ def rubin_observation_to_across_observation(
     row: pd.Series,
     observation_type: sdk.ObservationType,
     observation_status: sdk.ObservationStatus,
-    instrument_footprint: dict,
+    instrument_footprint: list[list[sdk.Point]] | None,
 ) -> sdk.ObservationCreate:
     """
     Creates a Rubin observation from the provided row of data.
@@ -90,10 +90,10 @@ def rubin_observation_to_across_observation(
     begin = Time(row["date_range_begin"])
     end = Time(row["date_range_end"])
 
-    footprint = None
-    if instrument_id in instrument_footprint.keys():
-        footprint = project_footprint(
-            footprint_points=instrument_footprint[instrument_id],
+    observation_footprint = None
+    if instrument_footprint:
+        observation_footprint = project_footprint(
+            footprint_points=instrument_footprint,
             ra=float(row["s_ra"]),
             dec=float(row["s_dec"]),
             roll_angle=float(row["rubin_rot_sky_pos"]),
@@ -124,7 +124,7 @@ def rubin_observation_to_across_observation(
         category=sdk.IVOAObsCategory(str.lower(row["category"])),
         priority=row["priority"],
         tracking_type=sdk.IVOAObsTrackingType(str.lower(row["tracking_type"])),
-        footprint=footprint,
+        footprint=observation_footprint,
     )
 
 
@@ -151,11 +151,9 @@ class RubinSchedulerHandler:
         )[0]
         telescope_id = telescope.id
 
-        instrument_footprint = {}
-
         if telescope.instruments:
             instrument_id = telescope.instruments[0].id
-            instrument_footprint[instrument_id] = telescope.instruments[0].footprints
+            instrument_footprint = telescope.instruments[0].footprints
 
         observations = [
             rubin_observation_to_across_observation(

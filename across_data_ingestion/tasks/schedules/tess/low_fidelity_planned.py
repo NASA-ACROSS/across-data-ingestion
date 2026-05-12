@@ -35,7 +35,7 @@ def transform_to_across_orbit_observation(
     obs: Any,  # Pandas namedtuple; no good typing for it
     pointing: Any,
     instrument_id: str,
-    instrument_footprint: dict,
+    instrument_footprint: list[list[sdk.Point]] | None,
 ) -> sdk.ObservationCreate:
     # orbit start/end times are strings (non isot)
     obs_start_str = str.replace(obs.start_of_orbit, " ", "T")
@@ -47,12 +47,14 @@ def transform_to_across_orbit_observation(
 
     object_name = f"TESS_sector_{int(obs.sector)}_obs_{idx}_orbit_{int(obs.orbit)}"
 
-    footprint = project_footprint(
-        instrument_footprint[instrument_id],
-        ra=pointing.ra,
-        dec=pointing.dec,
-        roll_angle=pointing.roll,
-    )
+    observation_footprint = None
+    if instrument_footprint:
+        observation_footprint = project_footprint(
+            instrument_footprint,
+            ra=pointing.ra,
+            dec=pointing.dec,
+            roll_angle=pointing.roll,
+        )
 
     return sdk.ObservationCreate(
         instrument_id=instrument_id,
@@ -65,7 +67,7 @@ def transform_to_across_orbit_observation(
         status=sdk.ObservationStatus.PLANNED,
         type=sdk.ObservationType.IMAGING,
         bandpass=sdk.Bandpass(TESS_BANDPASS),
-        footprint=footprint,
+        footprint=observation_footprint,
     )
 
 
@@ -73,17 +75,19 @@ def transform_to_across_placeholder_observation(
     pointing: Any,
     date_range: sdk.DateRange,
     instrument_id: str,
-    instrument_footprint: dict,
+    instrument_footprint: list[list[sdk.Point]] | None,
 ):
     exposure_time = date_range.end - date_range.begin
     object_name = f"TESS_sector_{pointing.sector}_placeholder"
 
-    footprint = project_footprint(
-        instrument_footprint[instrument_id],
-        ra=pointing.ra,
-        dec=pointing.dec,
-        roll_angle=pointing.roll,
-    )
+    observation_footprint = None
+    if instrument_footprint:
+        observation_footprint = project_footprint(
+            instrument_footprint,
+            ra=pointing.ra,
+            dec=pointing.dec,
+            roll_angle=pointing.roll,
+        )
 
     return sdk.ObservationCreate(
         instrument_id=instrument_id,
@@ -96,7 +100,7 @@ def transform_to_across_placeholder_observation(
         status=sdk.ObservationStatus.PLANNED,
         type=sdk.ObservationType.IMAGING,
         bandpass=sdk.Bandpass(TESS_BANDPASS),
-        footprint=footprint,
+        footprint=observation_footprint,
     )
 
 
@@ -139,10 +143,9 @@ def ingest():
     (tess_telescope,) = sdk.TelescopeApi(client).get_telescopes(
         name="tess", include_footprints=True
     )
-    instrument_footprint = {}
+    instrument_footprint = tess_telescope.instruments[0].footprints
     telescope_id = tess_telescope.id
     instrument_id = tess_telescope.instruments[0].id
-    instrument_footprint[instrument_id] = tess_telescope.instruments[0].footprints
 
     # Initialize List of Schedules to append
     schedules = []

@@ -140,13 +140,13 @@ def extract_instrument_info(
         id=across_instrument.id,
         bandpass=sdk.Bandpass(bandpass_parameters),
         type=obs_type,
+        footprint=across_instrument.footprints,
     )
 
 
 def transform_to_across_observation(
     observation_data: pd.Series,
     instruments: list[sdk.TelescopeInstrument],
-    instrument_footprint: dict,
 ) -> sdk.ObservationCreate | None:
     """
     Format the observation data in the ACROSS format
@@ -156,9 +156,9 @@ def transform_to_across_observation(
         return None
 
     footprint = None
-    if instrument_info.id in instrument_footprint.keys():
+    if instrument_info.footprint:
         footprint = project_footprint(
-            instrument_footprint[instrument_info.id],
+            instrument_info.footprint,
             ra=observation_data.sci_ra,
             dec=observation_data.sci_dec,
             roll_angle=observation_data.sci_pa_aper,
@@ -192,15 +192,9 @@ def transform_to_across_observation(
 async def ingest():
     # GET telescope and instrument info from the server
     [telescope] = sdk.TelescopeApi(client).get_telescopes(
-        name="HST", include_footprints=True
+        name="HST", include_footprints=True, include_filters=True
     )
     instruments = telescope.instruments
-
-    instrument_footprint = {}
-
-    for instrument in instruments:
-        if instrument.footprints:
-            instrument_footprint[instrument.id] = instrument.footprints
 
     observations_tab = await get_observation_data_from_tap()
     if not observations_tab:
@@ -222,9 +216,7 @@ async def ingest():
         return None
 
     for row in filtered_observation_data:
-        across_obs = transform_to_across_observation(
-            row, instruments, instrument_footprint=instrument_footprint
-        )
+        across_obs = transform_to_across_observation(row, instruments)
         if across_obs:
             across_schedule.observations.append(across_obs)
 

@@ -81,14 +81,14 @@ def swift_to_across_observation(
     observation_type: sdk.ObservationType,
     exposure_time: float,
     observation_status: sdk.ObservationStatus,
-    instrument_footprint: dict,
+    instrument_footprint: list[list[sdk.Point]] | None,
 ) -> sdk.ObservationCreate:
     """Converts a SwiftObservationEntry to an ACROSS ObservationCreate object."""
 
-    footprint = None
-    if instrument_id in instrument_footprint.keys():
-        footprint = project_footprint(
-            instrument_footprint[instrument_id],
+    observation_footprint = None
+    if instrument_footprint:
+        observation_footprint = project_footprint(
+            instrument_footprint,
             ra=float(swift_obs.ra),
             dec=float(swift_obs.dec),
             roll_angle=swift_obs.roll,
@@ -115,7 +115,7 @@ def swift_to_across_observation(
         pointing_angle=swift_obs.roll,
         exposure_time=exposure_time,
         bandpass=bandpass,
-        footprint=footprint,
+        footprint=observation_footprint,
     )
 
 
@@ -123,7 +123,7 @@ def create_observations(
     instrument_id: str,
     observation_data: list[SwiftObservationEntry],
     observation_status: sdk.ObservationStatus,
-    instrument_footprint: dict,
+    instrument_footprint: list[list[sdk.Point]] | None,
     bandpass: sdk.Bandpass,
     observation_type: sdk.ObservationType,
 ) -> list[sdk.ObservationCreate]:
@@ -146,7 +146,7 @@ def create_uvot_observations(
     instrument_id: str,
     observation_data: list[SwiftObservationEntry],
     observation_status: sdk.ObservationStatus,
-    instrument_footprint: dict,
+    instrument_footprint: list[list[sdk.Point]] | None,
     *args: list[Any],
 ) -> list[sdk.ObservationCreate]:
     """Creates a list of ACROSS ObservationCreate objects specifically for UVOT observations."""
@@ -219,15 +219,17 @@ def create_swift_across_schedule(
     schedule_name: str,
     create_observations: Callable = create_observations,
     bandpass: sdk.Bandpass | None = None,
-) -> sdk.ScheduleCreate:
+) -> sdk.ScheduleCreate | None:
     telescope = sdk.TelescopeApi(client).get_telescopes(
         name=telescope_name, include_footprints=True
     )[0]
-    instrument_footprint = {}
     telescope_id = telescope.id
     if telescope.instruments:
         instrument_id = telescope.instruments[0].id
-        instrument_footprint[instrument_id] = telescope.instruments[0].footprints
+        instrument_footprint = telescope.instruments[0].footprints
+    else:
+        logger.warning("Telescope has no instruments.")
+        return None
 
     schedule = swift_to_across_schedule(
         telescope_id=telescope_id,

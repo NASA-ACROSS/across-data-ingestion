@@ -22,6 +22,7 @@ class InstrumentInfo(pydantic.BaseModel):
     id: str
     bandpass: sdk.Bandpass
     type: sdk.ObservationType
+    footprint: list[list[sdk.Point]] | None
 
 
 def get_obs_type(

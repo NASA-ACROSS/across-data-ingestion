@@ -109,7 +109,7 @@ def ixpe_to_across_schedule(
 
 
 def ixpe_to_across_observation(
-    instrument_id: str, row: dict, footprint: dict
+    instrument_id: str, row: dict, instrument_footprint: list[list[sdk.Point]] | None
 ) -> sdk.ObservationCreate:
     """
     Creates a IXPE observation from the provided row of data.
@@ -123,12 +123,14 @@ def ixpe_to_across_observation(
 
     external_id = f"{str.replace(row['P S'], ' ', '_')}_obs_{row['Pnum']}"
 
-    observation_footprint = project_footprint(
-        footprint[instrument_id],
-        ra=float(row["RA"]),
-        dec=float(row["Dec"]),
-        roll_angle=0.0,
-    )
+    observation_footprint = None
+    if instrument_footprint:
+        observation_footprint = project_footprint(
+            instrument_footprint,
+            ra=float(row["RA"]),
+            dec=float(row["Dec"]),
+            roll_angle=0.0,
+        )
 
     return sdk.ObservationCreate(
         instrument_id=instrument_id,
@@ -174,8 +176,7 @@ def ingest() -> None:
         return
 
     instrument_id = telescope.instruments[0].id
-    instrument_footprint = {}
-    instrument_footprint[instrument_id] = telescope.instruments[0].footprints
+    instrument_footprint = telescope.instruments[0].footprints
 
     # Initialize schedule
     schedule = ixpe_to_across_schedule(

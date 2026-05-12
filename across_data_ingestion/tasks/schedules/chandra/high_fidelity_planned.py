@@ -79,7 +79,7 @@ async def get_observation_data_from_tap() -> Table:
 
 
 def transform_to_observation(
-    tap_obs: Row, instrument: sdk.TelescopeInstrument, instrument_footprint: dict
+    tap_obs: Row, instrument: sdk.TelescopeInstrument
 ) -> sdk.ObservationCreate:
     begin = tap_obs["start_date"]
     end = (
@@ -92,9 +92,9 @@ def transform_to_observation(
         instrument.short_name or ""
     ]
 
-    if instrument.id in instrument_footprint.keys():
+    if instrument.footprints:
         footprint = project_footprint(
-            instrument_footprint[instrument.id],
+            instrument.footprints,
             ra=float(tap_obs["ra"]),
             dec=float(tap_obs["dec"]),
             roll_angle=0.0,
@@ -136,17 +136,13 @@ async def ingest() -> None:
     and pushes the schedule to the across-server create schedule endpoint.
     """
     # GET Telescope by name
-    telescope = sdk.TelescopeApi(client).get_telescopes(name="chandra")[0]
+    telescope = sdk.TelescopeApi(client).get_telescopes(
+        name="chandra", include_footprints=True
+    )[0]
 
     if not telescope.instruments:
         logger.warning("No instruments found.")
         return
-
-    instrument_footprint = {}
-
-    for instrument in telescope.instruments:
-        if instrument.footprints:
-            instrument_footprint[instrument.id] = instrument.footprints
 
     tap_observation_table = await get_observation_data_from_tap()
     if not len(tap_observation_table):
@@ -170,9 +166,7 @@ async def ingest() -> None:
         instrument = chandra_util.match_instrument_from_tap_observation(
             instruments_by_short_name, observation_data
         )
-        observation = transform_to_observation(
-            observation_data, instrument, instrument_footprint
-        )
+        observation = transform_to_observation(observation_data, instrument)
         schedule.observations.append(observation)
 
     try:

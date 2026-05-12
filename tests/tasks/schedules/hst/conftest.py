@@ -481,4 +481,5 @@ def fake_instrument_info(fake_instrument: sdk.TelescopeInstrument) -> Instrument
             )
         ),
         type=sdk.ObservationType.IMAGING,
+        footprint=fake_instrument.footprints,
     )

@@ -35,7 +35,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         }
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -61,7 +61,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -87,7 +87,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -113,7 +113,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -139,7 +139,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -165,7 +165,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -191,7 +191,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -217,7 +217,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -243,7 +243,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -269,7 +269,7 @@ expected_xrt = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
         ],
     }
@@ -310,7 +310,7 @@ expected_bat = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -336,7 +336,7 @@ expected_bat = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -362,7 +362,7 @@ expected_bat = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -388,7 +388,7 @@ expected_bat = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -414,7 +414,7 @@ expected_bat = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -440,7 +440,7 @@ expected_bat = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -466,7 +466,7 @@ expected_bat = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -492,7 +492,7 @@ expected_bat = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -518,7 +518,7 @@ expected_bat = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -544,7 +544,7 @@ expected_bat = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
         ],
     }
@@ -585,7 +585,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -611,7 +611,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -637,7 +637,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -663,7 +663,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -689,7 +689,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -715,7 +715,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -741,7 +741,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -767,7 +767,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -793,7 +793,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -819,7 +819,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -845,7 +845,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -871,7 +871,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -897,7 +897,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -923,7 +923,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -949,7 +949,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -975,7 +975,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1001,7 +1001,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1027,7 +1027,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1053,7 +1053,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1079,7 +1079,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1105,7 +1105,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1131,7 +1131,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1157,7 +1157,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1183,7 +1183,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1209,7 +1209,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1235,7 +1235,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1261,7 +1261,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1287,7 +1287,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1313,7 +1313,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1339,7 +1339,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1365,7 +1365,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1391,7 +1391,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1417,7 +1417,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1443,7 +1443,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1469,7 +1469,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1495,7 +1495,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -1521,7 +1521,7 @@ expected_uvot = sdk.ScheduleCreate.model_validate(
                         },
                     )
                 ),
-                "footprint": [],
+                "footprint": None,
             },
         ],
     }

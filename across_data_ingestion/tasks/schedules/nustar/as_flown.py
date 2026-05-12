@@ -59,15 +59,19 @@ def create_schedule(telescope_id: str, data: Table) -> sdk.ScheduleCreate:
 
 
 def transform_to_observation(
-    instrument_id: str, row: Table.Row, instrument_footprint: dict
+    instrument_id: str,
+    row: Table.Row,
+    instrument_footprint: list[list[sdk.Point]] | None,
 ) -> sdk.ObservationCreate:
 
-    footprint = project_footprint(
-        instrument_footprint[instrument_id],
-        ra=float(row["ra"]),
-        dec=float(row["dec"]),
-        roll_angle=float(f"{row['roll_angle']}"),
-    )
+    observation_footprint = None
+    if instrument_footprint:
+        observation_footprint = project_footprint(
+            instrument_footprint,
+            ra=float(row["ra"]),
+            dec=float(row["dec"]),
+            roll_angle=float(f"{row['roll_angle']}"),
+        )
 
     return sdk.ObservationCreate(
         instrument_id=instrument_id,
@@ -90,7 +94,7 @@ def transform_to_observation(
         pointing_angle=float(f"{row['roll_angle']}"),
         exposure_time=float(row["end_time"] - row["time"]) * SECONDS_IN_A_DAY,
         bandpass=sdk.Bandpass(NUSTAR_BANDPASS),
-        footprint=footprint,
+        footprint=observation_footprint,
     )
 
 
@@ -118,10 +122,9 @@ def ingest() -> None:
         name="NuSTAR", include_footprints=True
     )
 
-    instrument_footprint = {}
     if telescope.instruments:
         instrument_id = telescope.instruments[0].id
-        instrument_footprint[instrument_id] = telescope.instruments[0].footprints
+        instrument_footprint = telescope.instruments[0].footprints
     else:
         return
 

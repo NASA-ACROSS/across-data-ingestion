@@ -53,7 +53,7 @@ mock_low_fidelity_planned_schedule = sdk.ScheduleCreate.model_validate(
                 "tracking_type": None,
                 "created_on": None,
                 "created_by_id": None,
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "instrument_id",
@@ -94,7 +94,7 @@ mock_low_fidelity_planned_schedule = sdk.ScheduleCreate.model_validate(
                 "tracking_type": None,
                 "created_on": None,
                 "created_by_id": None,
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "instrument_id",
@@ -135,7 +135,7 @@ mock_low_fidelity_planned_schedule = sdk.ScheduleCreate.model_validate(
                 "tracking_type": None,
                 "created_on": None,
                 "created_by_id": None,
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "instrument_id",
@@ -176,7 +176,7 @@ mock_low_fidelity_planned_schedule = sdk.ScheduleCreate.model_validate(
                 "tracking_type": None,
                 "created_on": None,
                 "created_by_id": None,
-                "footprint": [],
+                "footprint": None,
             },
         ],
     }

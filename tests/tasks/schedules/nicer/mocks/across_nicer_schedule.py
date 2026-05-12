@@ -29,7 +29,7 @@ expected = sdk.ScheduleCreate.model_validate(
                 "exposure_time": 899.0,
                 "bandpass": NICER_BANDPASS,
                 "pointing_angle": 0.0,
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -46,7 +46,7 @@ expected = sdk.ScheduleCreate.model_validate(
                 "exposure_time": 1076.0,
                 "bandpass": NICER_BANDPASS,
                 "pointing_angle": 0.0,
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -63,7 +63,7 @@ expected = sdk.ScheduleCreate.model_validate(
                 "exposure_time": 1184.0,
                 "bandpass": NICER_BANDPASS,
                 "pointing_angle": 0.0,
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -80,7 +80,7 @@ expected = sdk.ScheduleCreate.model_validate(
                 "exposure_time": 1011.0,
                 "bandpass": NICER_BANDPASS,
                 "pointing_angle": 0.0,
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -97,7 +97,7 @@ expected = sdk.ScheduleCreate.model_validate(
                 "exposure_time": 1410.0,
                 "bandpass": NICER_BANDPASS,
                 "pointing_angle": 0.0,
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -114,7 +114,7 @@ expected = sdk.ScheduleCreate.model_validate(
                 "exposure_time": 899.0,
                 "bandpass": NICER_BANDPASS,
                 "pointing_angle": 0.0,
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -131,7 +131,7 @@ expected = sdk.ScheduleCreate.model_validate(
                 "exposure_time": 1056.0,
                 "bandpass": NICER_BANDPASS,
                 "pointing_angle": 0.0,
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -148,7 +148,7 @@ expected = sdk.ScheduleCreate.model_validate(
                 "exposure_time": 1204.0,
                 "bandpass": NICER_BANDPASS,
                 "pointing_angle": 0.0,
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -165,7 +165,7 @@ expected = sdk.ScheduleCreate.model_validate(
                 "exposure_time": 1011.0,
                 "bandpass": NICER_BANDPASS,
                 "pointing_angle": 0.0,
-                "footprint": [],
+                "footprint": None,
             },
             {
                 "instrument_id": "test-instrument-id",
@@ -182,7 +182,7 @@ expected = sdk.ScheduleCreate.model_validate(
                 "exposure_time": 1350.0,
                 "bandpass": NICER_BANDPASS,
                 "pointing_angle": 0.0,
-                "footprint": [],
+                "footprint": None,
             },
         ],
     }

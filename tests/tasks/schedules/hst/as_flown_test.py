@@ -214,7 +214,7 @@ class TestHSTAsFlownScheduleIngestionTask:
             )
 
             across_observation = transform_to_across_observation(
-                fake_observed_observation_row, [], {}
+                fake_observed_observation_row, []
             )
 
             assert across_observation is None

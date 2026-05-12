@@ -58,15 +58,19 @@ def create_schedule(telescope_id: str, data: pd.DataFrame) -> sdk.ScheduleCreate
 
 
 def transform_to_observation(
-    instrument_id: str, row: pd.Series, instrument_footprint: dict
+    instrument_id: str,
+    row: pd.Series,
+    instrument_footprint: list[list[sdk.Point]] | None,
 ) -> sdk.ObservationCreate:
     """Create ACROSS observation for given instrument ID and observation row"""
-    footprint = project_footprint(
-        instrument_footprint[instrument_id],
-        ra=float(row["J2000 RA"]),
-        dec=float(row["J2000 Dec"]),
-        roll_angle=0.0,
-    )
+    observation_footprint = None
+    if instrument_footprint:
+        observation_footprint = project_footprint(
+            instrument_footprint,
+            ra=float(row["J2000 RA"]),
+            dec=float(row["J2000 Dec"]),
+            roll_angle=0.0,
+        )
 
     return sdk.ObservationCreate(
         instrument_id=instrument_id,
@@ -89,7 +93,7 @@ def transform_to_observation(
         pointing_angle=0.0,  # Assume no roll angle
         exposure_time=float(row["Exp"]) * 1000,  # Given in ks
         bandpass=sdk.Bandpass(NUSTAR_BANDPASS),
-        footprint=footprint,
+        footprint=observation_footprint,
     )
 
 
@@ -107,10 +111,9 @@ def ingest() -> None:
         name="NuSTAR", include_footprints=True
     )
 
-    instrument_footprint = {}
     if telescope.instruments:
         instrument_id = telescope.instruments[0].id
-        instrument_footprint[instrument_id] = telescope.instruments[0].footprints
+        instrument_footprint = telescope.instruments[0].footprints
 
     schedule = create_schedule(telescope.id, nustar_observation_data)
 

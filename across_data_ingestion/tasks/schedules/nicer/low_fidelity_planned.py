@@ -63,18 +63,22 @@ def transform_to_across_schedule(
 
 
 def transform_to_across_observation(
-    instrument_id: str, row: ObservationRow, instrument_footprint: dict
+    instrument_id: str,
+    row: ObservationRow,
+    instrument_footprint: list[list[sdk.Point]] | None,
 ) -> sdk.ObservationCreate:
     """
     Creates a NICER observation from the provided row of data.
     """
 
-    footprint = project_footprint(
-        instrument_footprint[instrument_id],
-        ra=row.RightAscension,
-        dec=row.Declination,
-        roll_angle=0.0,
-    )
+    observation_footprint = None
+    if instrument_footprint:
+        observation_footprint = project_footprint(
+            instrument_footprint,
+            ra=float(row.RightAscension),
+            dec=float(row.Declination),
+            roll_angle=0.0,
+        )
 
     return sdk.ObservationCreate(
         instrument_id=instrument_id,
@@ -97,7 +101,7 @@ def transform_to_across_observation(
         exposure_time=float(row.Duration),
         bandpass=NICER_BANDPASS,
         pointing_angle=0.0,
-        footprint=footprint,
+        footprint=observation_footprint,
     )
 
 
@@ -122,12 +126,13 @@ def ingest(schedule_modes: list[str] = ["Scheduled"]) -> None:
         return
 
     # GET Telescope by name
-    telescope = sdk.TelescopeApi(client).get_telescopes(name="nicer")[0]
+    telescope = sdk.TelescopeApi(client).get_telescopes(
+        name="nicer", include_footprints=True
+    )[0]
     telescope_id = telescope.id
-    instrument_footprint = {}
     if telescope.instruments:
         instrument_id = telescope.instruments[0].id
-        instrument_footprint[instrument_id] = telescope.instruments[0].footprints
+        instrument_footprint = telescope.instruments[0].footprints
 
     # Initialize schedule
     schedule = transform_to_across_schedule(

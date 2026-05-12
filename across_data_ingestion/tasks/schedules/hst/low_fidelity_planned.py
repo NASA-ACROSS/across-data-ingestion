@@ -197,7 +197,7 @@ def extract_observation_pointing_coordinates(
     target_name = observation_data.target_name
 
     planned_observation_data = planned_exposures_df[
-        (object_name.str.contains(target_name[:16])) | (object_name == target_name)
+        (object_name.str.contains(str(target_name)[:16])) | (object_name == target_name)
     ]
     if len(planned_observation_data) == 0:
         # Could not find coordinates for this target in the planned exposure catalog, so skip
@@ -295,6 +295,7 @@ def extract_instrument_info(
         id=across_instrument.id,
         bandpass=sdk.Bandpass(bandpass_parameters),
         type=obs_type,
+        footprint=across_instrument.footprints,
     )
 
 
@@ -302,7 +303,6 @@ def transform_to_across_observation(
     planned_exposures_df: pd.DataFrame,
     observation_data: TimelineRow,
     instruments: list[sdk.TelescopeInstrument],
-    instrument_footprint: dict,
 ) -> sdk.ObservationCreate | None:
     """
     Format the observation data in the ACROSS format
@@ -326,9 +326,9 @@ def transform_to_across_observation(
     )
 
     footprint = None
-    if instrument_info.id in instrument_footprint.keys():
+    if instrument_info.footprint:
         footprint = project_footprint(
-            instrument_footprint[instrument_info.id],
+            instrument_info.footprint,
             ra=pointing_coord.ra.deg,
             dec=pointing_coord.dec.deg,
             roll_angle=0.0,
@@ -386,15 +386,9 @@ def ingest() -> None:
 
     # GET telescope and instrument info from the server
     [telescope] = sdk.TelescopeApi(client).get_telescopes(
-        name="HST", include_footprints=True
+        name="HST", include_footprints=True, include_filters=True
     )
     instruments = telescope.instruments if telescope.instruments else []
-
-    instrument_footprint = {}
-
-    for instrument in instruments:
-        if instrument.footprints:
-            instrument_footprint[instrument.id] = instrument.footprints
 
     # Format schedule metadata
     across_schedule = transform_to_across_schedule(timeline_file, telescope.id)
@@ -415,7 +409,6 @@ def ingest() -> None:
             planned_exposures_df,
             cast(TimelineRow, observation_data),
             instruments,
-            instrument_footprint,
         )
         if across_observation:
             across_schedule.observations.append(across_observation)

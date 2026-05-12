@@ -465,7 +465,9 @@ def ingest() -> None:
     for each OM exposure, and adds them as ACROSS observations.
     """
     # GET telescope and instrument info
-    telescope = sdk.TelescopeApi(client).get_telescopes(name="XMM-Newton")[0]
+    telescope = sdk.TelescopeApi(client).get_telescopes(
+        name="XMM-Newton", include_footprints=True
+    )[0]
     instrument_footprint = {}
     if telescope.instruments:
         instrument_id_dict = {

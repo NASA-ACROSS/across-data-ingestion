@@ -191,7 +191,6 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
                 fake_planned_exposure_catalog_df,
                 task.TimelineRow(**fake_timeline_row),
                 [],
-                {},
             )
 
             assert across_observation is None
@@ -215,7 +214,6 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
                 fake_planned_exposure_catalog_df,
                 task.TimelineRow(**fake_timeline_row),
                 [],
-                {},
             )
 
             assert across_observation is None
