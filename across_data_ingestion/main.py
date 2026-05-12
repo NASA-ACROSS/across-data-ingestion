@@ -9,13 +9,6 @@ from fastapi import FastAPI, status
 from .core import config, logging
 from .tasks.task_loader import init_tasks
 
-# Suppress the specific datetime deprecation warning
-warnings.filterwarnings(
-    "ignore",
-    category=DeprecationWarning,
-    message=r".*utcfromtimestamp\(\) is deprecated.*",
-)
-
 # Configure UTC system time
 os.environ["TZ"] = "UTC"
 time.tzset()
@@ -24,6 +17,9 @@ logging.setup(json_logs=config.LOG_JSON_FORMAT, log_level=config.LOG_LEVEL)
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
 # Suppress the specific datetime deprecation warning
+# across-data-ingestion/.venv/lib/python3.12/site-packages/croniter/croniter.py:230:
+# DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version.
+# Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
 warnings.filterwarnings(
     "ignore",
     category=DeprecationWarning,
