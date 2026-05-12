@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
-from across_data_ingestion.tasks.schedules.euclid.util import EuclidScheduleHandler
+from across_data_ingestion.tasks.schedules.euclid.handler import EuclidScheduleHandler
 from across_data_ingestion.util.across_server import sdk
 
 from .mocks.mock_nisp_observations import mock_nisp_observations

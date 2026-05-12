@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from fastapi_utilities import repeat_at  # type: ignore
 
 from ....util.across_server import sdk
-from .util import POINTING_COLUMNS, SCIENCE_OBS_TAGS_PREFIXES, EuclidScheduleHandler
+from .handler import POINTING_COLUMNS, SCIENCE_OBS_TAGS_PREFIXES, EuclidScheduleHandler
 
 logger: structlog.stdlib.BoundLogger = structlog.getLogger()
 
