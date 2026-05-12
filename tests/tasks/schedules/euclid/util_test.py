@@ -63,7 +63,7 @@ class TestCreateNispObservations:
             assert getattr(obs, field) == getattr(expected_obs, field)
 
     def test_should_log_warning_if_no_grism_found_for_obs_id(
-        self, fake_pointing_file_data: list[dict], mock_util_logger: MagicMock
+        self, fake_pointing_file_data: list[dict], mock_handler_logger: MagicMock
     ) -> None:
         """Should log a warning if no grism info found for an obs ID"""
         fake_pointing_file_data[0]["grism"] = None
@@ -82,7 +82,7 @@ class TestCreateNispObservations:
 
         assert (
             "Could not find grism information for observation ID"
-            in mock_util_logger.warning.call_args[0][0]
+            in mock_handler_logger.warning.call_args[0][0]
         )
 
 

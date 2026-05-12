@@ -17,10 +17,10 @@ def mock_logger(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
 
 
 @pytest.fixture(autouse=True)
-def mock_util_logger(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
+def mock_handler_logger(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
     mock = MagicMock(spec=structlog.stdlib.BoundLogger)
     monkeypatch.setattr(
-        "across_data_ingestion.tasks.schedules.euclid.util.logger",
+        "across_data_ingestion.tasks.schedules.euclid.handler.logger",
         mock,
     )
 
