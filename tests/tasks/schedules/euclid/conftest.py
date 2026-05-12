@@ -43,10 +43,10 @@ def mock_schedule_handler(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
 
 
 @pytest.fixture()
-def mock_retrieve_schedule_file(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
+def mock_retrieve_schedule_file_path(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
     mock = MagicMock(return_value="/fake_schedule_file_url")
     monkeypatch.setattr(
-        "across_data_ingestion.tasks.schedules.euclid.low_fidelity_planned.retrieve_schedule_file",
+        "across_data_ingestion.tasks.schedules.euclid.low_fidelity_planned.retrieve_schedule_file_path",
         mock,
     )
 
