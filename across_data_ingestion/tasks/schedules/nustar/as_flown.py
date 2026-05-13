@@ -8,6 +8,7 @@ from fastapi_utilities import repeat_at  # type: ignore
 
 from ....core.constants import SECONDS_IN_A_DAY
 from ....util.across_server import client, sdk
+from ....util.footprint_util import project_footprint
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
@@ -58,8 +59,20 @@ def create_schedule(telescope_id: str, data: Table) -> sdk.ScheduleCreate:
 
 
 def transform_to_observation(
-    instrument_id: str, row: Table.Row
+    instrument_id: str,
+    row: Table.Row,
+    instrument_footprint: list[list[sdk.Point]] | None,
 ) -> sdk.ObservationCreate:
+
+    observation_footprint = None
+    if instrument_footprint:
+        observation_footprint = project_footprint(
+            instrument_footprint,
+            ra=float(row["ra"]),
+            dec=float(row["dec"]),
+            roll_angle=float(f"{row['roll_angle']}"),
+        )
+
     return sdk.ObservationCreate(
         instrument_id=instrument_id,
         object_name=f"{row['name']}",
@@ -81,6 +94,7 @@ def transform_to_observation(
         pointing_angle=float(f"{row['roll_angle']}"),
         exposure_time=float(row["end_time"] - row["time"]) * SECONDS_IN_A_DAY,
         bandpass=sdk.Bandpass(NUSTAR_BANDPASS),
+        footprint=observation_footprint,
     )
 
 
@@ -104,14 +118,23 @@ def ingest() -> None:
     logger.debug("Found observations...", observations=len(nustar_observation_data))
 
     # Get telescope and instrument IDs
-    (telescope,) = sdk.TelescopeApi(client).get_telescopes(name="NuSTAR")
-    (instrument,) = sdk.InstrumentApi(client).get_instruments(name="FPM A/B")
+    (telescope,) = sdk.TelescopeApi(client).get_telescopes(
+        name="NuSTAR", include_footprints=True
+    )
+
+    if telescope.instruments:
+        instrument_id = telescope.instruments[0].id
+        instrument_footprint = telescope.instruments[0].footprints
+    else:
+        return
 
     schedule = create_schedule(telescope.id, nustar_observation_data)
 
     for row in nustar_observation_data:
         if row["observation_mode"] == "SCIENCE":
-            across_observation = transform_to_observation(instrument.id, row)
+            across_observation = transform_to_observation(
+                instrument_id, row, instrument_footprint
+            )
             schedule.observations.append(across_observation)
 
     try:

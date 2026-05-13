@@ -221,7 +221,7 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
     class TestExtractInstrumentInfo:
         def test_should_log_warning_when_no_instrument_short_name_match(
             self,
-            fake_instrument: sdk.Instrument,
+            fake_instrument: sdk.TelescopeInstrument,
             mock_logger: MagicMock,
             fake_timeline_row: dict,
         ) -> None:
@@ -241,7 +241,7 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
 
         def test_should_log_warning_when_no_filter_found(
             self,
-            fake_instrument: sdk.Instrument,
+            fake_instrument: sdk.TelescopeInstrument,
             mock_logger: MagicMock,
             fake_timeline_row: dict,
         ) -> None:
@@ -266,7 +266,7 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
         def test_should_return_none_if_no_filter_found(
             self,
             fake_planned_exposure_catalog_df: pd.DataFrame,
-            fake_instrument: sdk.Instrument,
+            fake_instrument: sdk.TelescopeInstrument,
             fake_timeline_row: dict,
         ) -> None:
             """Should return an empty dict if no filter found from obs parameters"""
@@ -343,7 +343,7 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
             self,
             fake_observation_data: dict,
             fake_timeline_row: dict,
-            fake_instrument: sdk.Instrument,
+            fake_instrument: sdk.TelescopeInstrument,
             expected_name: str,
         ):
             """Should get the correct bandpass filter name given obs parameters"""
@@ -370,7 +370,7 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
                 },
             ]
 
-            def to_new_fake_instrument(data: dict) -> sdk.Instrument:
+            def to_new_fake_instrument(data: dict) -> sdk.TelescopeInstrument:
                 copy = fake_instrument.model_copy(deep=True)
 
                 copy.short_name = data["short_name"]
@@ -397,7 +397,7 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
 
         def test_should_log_warning_when_multiple_filters_are_matched(
             self,
-            fake_instrument: sdk.Instrument,
+            fake_instrument: sdk.TelescopeInstrument,
             fake_timeline_row: dict,
             mock_logger: MagicMock,
         ):
@@ -408,7 +408,7 @@ class TestHSTLowFidelityPlannedScheduleIngestionTask:
             }
 
             # set both element and aperture fields so that they both produce a match.
-            fake_obs_data = fake_timeline_row | {
+            fake_obs_data: dict = fake_timeline_row | {
                 "instrument": "WFC3/IR",
                 "element": "IR",
                 "aperture": "APERTURE",

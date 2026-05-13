@@ -11,6 +11,7 @@ from astropy.coordinates import SkyCoord  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore
 
 from ....util.across_server import client, sdk
+from ....util.footprint_util import project_footprint
 from ..types import Position
 from . import util as hst_util
 
@@ -196,7 +197,7 @@ def extract_observation_pointing_coordinates(
     target_name = observation_data.target_name
 
     planned_observation_data = planned_exposures_df[
-        (object_name.str.contains(target_name[:16])) | (object_name == target_name)
+        (object_name.str.contains(str(target_name)[:16])) | (object_name == target_name)
     ]
     if len(planned_observation_data) == 0:
         # Could not find coordinates for this target in the planned exposure catalog, so skip
@@ -219,7 +220,7 @@ def extract_observation_pointing_coordinates(
 
 def extract_instrument_info(
     observation_data: TimelineRow,  # pd namedtuple
-    instruments: list[sdk.Instrument],
+    instruments: list[sdk.TelescopeInstrument],
 ) -> hst_util.InstrumentInfo | None:
     """
     Extract the ACROSS instrument model, correct bandpass,
@@ -294,13 +295,14 @@ def extract_instrument_info(
         id=across_instrument.id,
         bandpass=sdk.Bandpass(bandpass_parameters),
         type=obs_type,
+        footprint=across_instrument.footprints,
     )
 
 
 def transform_to_across_observation(
     planned_exposures_df: pd.DataFrame,
     observation_data: TimelineRow,
-    instruments: list[sdk.Instrument],
+    instruments: list[sdk.TelescopeInstrument],
 ) -> sdk.ObservationCreate | None:
     """
     Format the observation data in the ACROSS format
@@ -322,6 +324,15 @@ def transform_to_across_observation(
     pointing_coord = SkyCoord(
         pointing_coord_dict["ra"], pointing_coord_dict["dec"], unit=(u.hourangle, u.deg)
     )
+
+    footprint = None
+    if instrument_info.footprint:
+        footprint = project_footprint(
+            instrument_info.footprint,
+            ra=pointing_coord.ra.deg,
+            dec=pointing_coord.dec.deg,
+            roll_angle=0.0,
+        )
 
     begin_at = datetime.strptime(
         f"{observation_data.date} {observation_data.begin_time}",
@@ -350,6 +361,7 @@ def transform_to_across_observation(
         status=sdk.ObservationStatus.PLANNED,
         type=instrument_info.type,
         bandpass=instrument_info.bandpass,
+        footprint=footprint,
     )
 
 
@@ -373,8 +385,10 @@ def ingest() -> None:
         return
 
     # GET telescope and instrument info from the server
-    [telescope] = sdk.TelescopeApi(client).get_telescopes(name="HST")
-    instruments = sdk.InstrumentApi(client).get_instruments(telescope_id=telescope.id)
+    [telescope] = sdk.TelescopeApi(client).get_telescopes(
+        name="HST", include_footprints=True, include_filters=True
+    )
+    instruments = telescope.instruments if telescope.instruments else []
 
     # Format schedule metadata
     across_schedule = transform_to_across_schedule(timeline_file, telescope.id)
@@ -392,7 +406,9 @@ def ingest() -> None:
     for observation_data in filtered_observation_data:
         # Format observation data in ACROSS format
         across_observation = transform_to_across_observation(
-            planned_exposures_df, cast(TimelineRow, observation_data), instruments
+            planned_exposures_df,
+            cast(TimelineRow, observation_data),
+            instruments,
         )
         if across_observation:
             across_schedule.observations.append(across_observation)

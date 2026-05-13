@@ -8,6 +8,7 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore
 
 from ....util.across_server import client, sdk
+from ....util.footprint_util import project_footprint
 
 # Bypass SSL certificate verification
 ssl._create_default_https_context = ssl._create_unverified_context  # type: ignore
@@ -33,7 +34,8 @@ def transform_to_across_orbit_observation(
     idx: int,
     obs: Any,  # Pandas namedtuple; no good typing for it
     pointing: Any,
-    instrument_id,
+    instrument_id: str,
+    instrument_footprint: list[list[sdk.Point]] | None,
 ) -> sdk.ObservationCreate:
     # orbit start/end times are strings (non isot)
     obs_start_str = str.replace(obs.start_of_orbit, " ", "T")
@@ -44,6 +46,15 @@ def transform_to_across_orbit_observation(
     exposure_time = end - begin
 
     object_name = f"TESS_sector_{int(obs.sector)}_obs_{idx}_orbit_{int(obs.orbit)}"
+
+    observation_footprint = None
+    if instrument_footprint:
+        observation_footprint = project_footprint(
+            instrument_footprint,
+            ra=pointing.ra,
+            dec=pointing.dec,
+            roll_angle=pointing.roll,
+        )
 
     return sdk.ObservationCreate(
         instrument_id=instrument_id,
@@ -56,6 +67,7 @@ def transform_to_across_orbit_observation(
         status=sdk.ObservationStatus.PLANNED,
         type=sdk.ObservationType.IMAGING,
         bandpass=sdk.Bandpass(TESS_BANDPASS),
+        footprint=observation_footprint,
     )
 
 
@@ -63,9 +75,19 @@ def transform_to_across_placeholder_observation(
     pointing: Any,
     date_range: sdk.DateRange,
     instrument_id: str,
+    instrument_footprint: list[list[sdk.Point]] | None,
 ):
     exposure_time = date_range.end - date_range.begin
     object_name = f"TESS_sector_{pointing.sector}_placeholder"
+
+    observation_footprint = None
+    if instrument_footprint:
+        observation_footprint = project_footprint(
+            instrument_footprint,
+            ra=pointing.ra,
+            dec=pointing.dec,
+            roll_angle=pointing.roll,
+        )
 
     return sdk.ObservationCreate(
         instrument_id=instrument_id,
@@ -78,6 +100,7 @@ def transform_to_across_placeholder_observation(
         status=sdk.ObservationStatus.PLANNED,
         type=sdk.ObservationType.IMAGING,
         bandpass=sdk.Bandpass(TESS_BANDPASS),
+        footprint=observation_footprint,
     )
 
 
@@ -117,7 +140,10 @@ def ingest():
     ]
 
     # GET Telescope by name
-    (tess_telescope,) = sdk.TelescopeApi(client).get_telescopes(name="tess")
+    (tess_telescope,) = sdk.TelescopeApi(client).get_telescopes(
+        name="tess", include_footprints=True
+    )
+    instrument_footprint = tess_telescope.instruments[0].footprints
     telescope_id = tess_telescope.id
     instrument_id = tess_telescope.instruments[0].id
 
@@ -162,7 +188,7 @@ def ingest():
             # Iterate and add orbits as observations
             for idx, orbit_data in enumerate(orbit_observations):
                 observation = transform_to_across_orbit_observation(
-                    idx, orbit_data, pointing, instrument_id
+                    idx, orbit_data, pointing, instrument_id, instrument_footprint
                 )
                 schedule.observations.append(observation)
         else:
@@ -170,9 +196,7 @@ def ingest():
             # The pointings file contains a location and can be treated as one observation within the schedule
             # when no orbits are yet planned
             placeholder_observation = transform_to_across_placeholder_observation(
-                pointing,
-                schedule.date_range,
-                instrument_id,
+                pointing, schedule.date_range, instrument_id, instrument_footprint
             )
 
             schedule.observations.append(placeholder_observation)
@@ -180,7 +204,7 @@ def ingest():
         schedules.append(schedule)
 
     try:
-        logger.debug("Posting Schedules")
+        logger.info("Posting Schedules")
         create_many = sdk.ScheduleCreateMany(
             schedules=schedules,
             telescope_id=telescope_id,

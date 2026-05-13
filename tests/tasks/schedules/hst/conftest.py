@@ -37,7 +37,7 @@ def set_sdk_data(
     mock_telescope_api: MagicMock,
     mock_instrument_api: MagicMock,
     fake_telescope: sdk.Telescope,
-    fake_instrument: sdk.Instrument,
+    fake_instrument: sdk.TelescopeInstrument,
 ) -> None:
     mock_telescope_api.get_telescopes.return_value = [fake_telescope]
     mock_instrument_api.get_instruments.return_value = [fake_instrument]
@@ -301,8 +301,8 @@ def fake_instrument(
     fake_instrument_id: str,
     fake_telescope: sdk.Telescope,
     fake_filters: list[sdk.Filter],
-) -> sdk.Instrument:
-    return sdk.Instrument(
+) -> sdk.TelescopeInstrument:
+    return sdk.TelescopeInstrument(
         id=fake_instrument_id,
         name="FAKE HST INSTRUMENT",
         short_name="HST_FAKE",
@@ -313,6 +313,7 @@ def fake_instrument(
             name=fake_telescope.name,
             short_name=fake_telescope.short_name,
         ),
+        footprints=[],
     )
 
 
@@ -468,7 +469,7 @@ def fake_timeline_row() -> dict:
 
 
 @pytest.fixture
-def fake_instrument_info(fake_instrument: sdk.Instrument) -> InstrumentInfo:
+def fake_instrument_info(fake_instrument: sdk.TelescopeInstrument) -> InstrumentInfo:
     return InstrumentInfo(
         id=fake_instrument.id,
         bandpass=sdk.Bandpass(
@@ -480,4 +481,5 @@ def fake_instrument_info(fake_instrument: sdk.Instrument) -> InstrumentInfo:
             )
         ),
         type=sdk.ObservationType.IMAGING,
+        footprint=fake_instrument.footprints,
     )

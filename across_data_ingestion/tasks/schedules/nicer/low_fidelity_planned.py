@@ -6,6 +6,7 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore
 
 from ....util.across_server import client, sdk
+from ....util.footprint_util import project_footprint
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
@@ -62,11 +63,23 @@ def transform_to_across_schedule(
 
 
 def transform_to_across_observation(
-    instrument_id: str, row: ObservationRow
+    instrument_id: str,
+    row: ObservationRow,
+    instrument_footprint: list[list[sdk.Point]] | None,
 ) -> sdk.ObservationCreate:
     """
     Creates a NICER observation from the provided row of data.
     """
+
+    observation_footprint = None
+    if instrument_footprint:
+        observation_footprint = project_footprint(
+            instrument_footprint,
+            ra=float(row.RightAscension),
+            dec=float(row.Declination),
+            roll_angle=0.0,
+        )
+
     return sdk.ObservationCreate(
         instrument_id=instrument_id,
         object_name=row.Target,
@@ -88,6 +101,7 @@ def transform_to_across_observation(
         exposure_time=float(row.Duration),
         bandpass=NICER_BANDPASS,
         pointing_angle=0.0,
+        footprint=observation_footprint,
     )
 
 
@@ -112,10 +126,13 @@ def ingest(schedule_modes: list[str] = ["Scheduled"]) -> None:
         return
 
     # GET Telescope by name
-    telescope = sdk.TelescopeApi(client).get_telescopes(name="nicer")[0]
+    telescope = sdk.TelescopeApi(client).get_telescopes(
+        name="nicer", include_footprints=True
+    )[0]
     telescope_id = telescope.id
     if telescope.instruments:
         instrument_id = telescope.instruments[0].id
+        instrument_footprint = telescope.instruments[0].footprints
 
     # Initialize schedule
     schedule = transform_to_across_schedule(
@@ -130,8 +147,7 @@ def ingest(schedule_modes: list[str] = ["Scheduled"]) -> None:
     # Transform observations
     schedule.observations = [
         transform_to_across_observation(
-            instrument_id,
-            cast(ObservationRow, obs),
+            instrument_id, cast(ObservationRow, obs), instrument_footprint
         )
         for obs in nicer_obs
     ]

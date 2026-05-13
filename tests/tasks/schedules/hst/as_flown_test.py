@@ -214,8 +214,7 @@ class TestHSTAsFlownScheduleIngestionTask:
             )
 
             across_observation = transform_to_across_observation(
-                fake_observed_observation_row,
-                [],
+                fake_observed_observation_row, []
             )
 
             assert across_observation is None
@@ -223,7 +222,7 @@ class TestHSTAsFlownScheduleIngestionTask:
     class TestExtractInstrumentInfo:
         def test_should_log_warning_when_no_instrument_short_name_match(
             self,
-            fake_instrument: sdk.Instrument,
+            fake_instrument: sdk.TelescopeInstrument,
             mock_as_flown_logger: MagicMock,
             fake_observed_observation_row: pd.Series,
         ) -> None:
@@ -239,7 +238,7 @@ class TestHSTAsFlownScheduleIngestionTask:
 
         def test_should_log_warning_when_no_across_instrument_found(
             self,
-            fake_instrument: sdk.Instrument,
+            fake_instrument: sdk.TelescopeInstrument,
             mock_as_flown_logger: MagicMock,
             fake_observed_observation_row: pd.Series,
             monkeypatch: pytest.MonkeyPatch,
@@ -261,7 +260,7 @@ class TestHSTAsFlownScheduleIngestionTask:
 
         def test_should_log_warning_when_no_filter_found(
             self,
-            fake_instrument: sdk.Instrument,
+            fake_instrument: sdk.TelescopeInstrument,
             mock_as_flown_logger: MagicMock,
             fake_observed_observation_row: pd.Series,
         ) -> None:
@@ -280,7 +279,7 @@ class TestHSTAsFlownScheduleIngestionTask:
 
         def test_should_return_none_when_no_filter_found(
             self,
-            fake_instrument: sdk.Instrument,
+            fake_instrument: sdk.TelescopeInstrument,
             fake_observed_observation_row: pd.Series,
         ) -> None:
             """Should return None when no filter found from obs parameters"""
@@ -297,7 +296,7 @@ class TestHSTAsFlownScheduleIngestionTask:
 
         def test_should_log_warning_when_multiple_filters_are_matched(
             self,
-            fake_instrument: sdk.Instrument,
+            fake_instrument: sdk.TelescopeInstrument,
             fake_observed_observation_row: pd.Series,
             mock_as_flown_logger: MagicMock,
         ):

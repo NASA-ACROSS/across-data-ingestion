@@ -1,10 +1,14 @@
 from datetime import datetime
 
 import pandas as pd
+import structlog
 from astropy.time import Time  # type: ignore[import-untyped]
 
 from ....util.across_server import client, sdk
+from ....util.footprint_util import project_footprint
 from .constants import RUBIN_BANDPASSES
+
+logger: structlog.stdlib.BoundLogger = structlog.getLogger()
 
 
 def designate_filter_name_key(row: pd.Series) -> str:
@@ -77,6 +81,7 @@ def rubin_observation_to_across_observation(
     row: pd.Series,
     observation_type: sdk.ObservationType,
     observation_status: sdk.ObservationStatus,
+    instrument_footprint: list[list[sdk.Point]] | None,
 ) -> sdk.ObservationCreate:
     """
     Creates a Rubin observation from the provided row of data.
@@ -84,6 +89,15 @@ def rubin_observation_to_across_observation(
 
     begin = Time(row["date_range_begin"])
     end = Time(row["date_range_end"])
+
+    observation_footprint = None
+    if instrument_footprint:
+        observation_footprint = project_footprint(
+            footprint_points=instrument_footprint,
+            ra=float(row["s_ra"]),
+            dec=float(row["s_dec"]),
+            roll_angle=float(row["rubin_rot_sky_pos"]),
+        )
 
     return sdk.ObservationCreate(
         instrument_id=instrument_id,
@@ -110,6 +124,7 @@ def rubin_observation_to_across_observation(
         category=sdk.IVOAObsCategory(str.lower(row["category"])),
         priority=row["priority"],
         tracking_type=sdk.IVOAObsTrackingType(str.lower(row["tracking_type"])),
+        footprint=observation_footprint,
     )
 
 
@@ -131,10 +146,14 @@ class RubinSchedulerHandler:
     def run(self, df: pd.DataFrame) -> None:
         """Create a schedule from a DataFrame of Rubin LSST observations."""
 
-        telescope = sdk.TelescopeApi(client).get_telescopes(name="lsst")[0]
+        telescope = sdk.TelescopeApi(client).get_telescopes(
+            name="lsst", include_footprints=True
+        )[0]
         telescope_id = telescope.id
+
         if telescope.instruments:
             instrument_id = telescope.instruments[0].id
+            instrument_footprint = telescope.instruments[0].footprints
 
         observations = [
             rubin_observation_to_across_observation(
@@ -142,6 +161,7 @@ class RubinSchedulerHandler:
                 row=row,
                 observation_type=sdk.ObservationType.IMAGING,  # this should always be imaging for rubin
                 observation_status=self.observation_status,
+                instrument_footprint=instrument_footprint,
             )
             for _, row in df.iterrows()
         ]
@@ -155,4 +175,10 @@ class RubinSchedulerHandler:
             observations=observations,
         )
 
-        sdk.ScheduleApi(client).create_schedule(schedule)
+        try:
+            sdk.ScheduleApi(client).create_schedule(schedule)
+        except sdk.ApiException as err:
+            if err.status == 409:
+                logger.warning("Schedule already exists.", err=err.__dict__)
+            else:
+                raise err

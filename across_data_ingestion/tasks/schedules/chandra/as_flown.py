@@ -6,6 +6,7 @@ from astropy.time import Time  # type: ignore[import-untyped]
 from fastapi_utilities import repeat_at  # type: ignore[import-untyped]
 
 from ....util.across_server import client, sdk
+from ....util.footprint_util import project_footprint
 from ....util.vo_service import VOService
 from . import util as chandra_util
 
@@ -55,6 +56,20 @@ def transform_to_observation(
         + timedelta(seconds=tap_obs["exposure_time"] * 1000.0)
     ).isot
 
+    observation_type = chandra_util.CHANDRA_OBSERVATION_TYPES[
+        instrument.short_name or ""
+    ]
+
+    footprint = None
+
+    if instrument.footprints:
+        footprint = project_footprint(
+            instrument.footprints,
+            ra=float(tap_obs["ra"]),
+            dec=float(tap_obs["dec"]),
+            roll_angle=0.0,
+        )
+
     return sdk.ObservationCreate(
         instrument_id=instrument.id,
         object_name=tap_obs["target_name"],
@@ -71,12 +86,13 @@ def transform_to_observation(
             end=end,
         ),
         external_observation_id=str(tap_obs["obsid"]),
-        type=chandra_util.CHANDRA_OBSERVATION_TYPES[instrument.short_name or ""],
+        type=observation_type,
         status=sdk.ObservationStatus.PERFORMED,
         pointing_angle=0.0,
         exposure_time=float(tap_obs["exposure_time"]) * 1000.0,
         bandpass=chandra_util.CHANDRA_BANDPASSES[instrument.short_name or ""],
         proposal_reference=str(tap_obs["proposal_number"]),
+        footprint=footprint,
     )
 
 
@@ -90,7 +106,9 @@ async def ingest() -> None:
     and pushes the schedule to the across-server create schedule endpoint.
     """
     # GET Telescope by name
-    telescope = sdk.TelescopeApi(client).get_telescopes(name="chandra")[0]
+    telescope = sdk.TelescopeApi(client).get_telescopes(
+        name="chandra", include_footprints=True
+    )[0]
 
     if not telescope.instruments:
         logger.warning("No instruments found.")

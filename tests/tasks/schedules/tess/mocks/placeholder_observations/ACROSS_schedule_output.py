@@ -37,6 +37,7 @@ schedules = [
                 "status": sdk.ObservationStatus.PLANNED,
                 "type": sdk.ObservationType.IMAGING,
                 "bandpass": bandpass,
+                "footprint": None,
             }
         ],
     },
@@ -64,6 +65,7 @@ schedules = [
                 "status": sdk.ObservationStatus.PLANNED,
                 "type": sdk.ObservationType.IMAGING,
                 "bandpass": bandpass,
+                "footprint": None,
             }
         ],
     },

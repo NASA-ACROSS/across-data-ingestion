@@ -37,6 +37,7 @@ def fake_telescope() -> sdk.Telescope:
                 name="CHANDRA ACIS",
                 short_name="ACIS",
                 created_on=datetime.now(),
+                footprints=[],
             )
         ],
     )
