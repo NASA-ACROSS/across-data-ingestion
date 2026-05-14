@@ -5,6 +5,7 @@ import structlog
 from astropy.time import Time  # type: ignore[import-untyped]
 
 from ....util.across_server import client, sdk
+from ....util.footprint_util import project_footprint
 from .constants import (
     BANDPASS_EXPOSURE_TIMES,
     EUCLID_NISP_BANDPASS_DICT,
@@ -76,27 +77,29 @@ class EuclidScheduleHandler:
         self.schedule_status = schedule_status
         self.schedule_fidelity = schedule_fidelity
         self.schedule_name = schedule_name
-        self._extract_telescope_instrument_ids()
+        self._extract_telescope_instrument_info()
 
-    def _extract_telescope_instrument_ids(self) -> None:
+    def _extract_telescope_instrument_info(self) -> None:
         """
-        Extract telescope ID and build map of instrument name : instrument ID
+        Extract telescope ID and build map of instrument name : sdk.Instrument
         from the ACROSS API to be used for creating observations and schedules.
         Sets these as attributes on this class.
         """
-        instrument_name_id_map = {}
-        telescope = sdk.TelescopeApi(client).get_telescopes(name="Euclid")[0]
+        instrument_name_object_map = {}
+        telescope = sdk.TelescopeApi(client).get_telescopes(
+            name="Euclid", include_footprints=True
+        )[0]
         self.telescope_id = telescope.id
         if telescope.instruments:
             for instrument in telescope.instruments:
-                instrument_name_id_map[instrument.short_name] = instrument.id
-        self.instrument_ids = instrument_name_id_map
+                instrument_name_object_map[instrument.short_name] = instrument
+        self.instruments = instrument_name_object_map
 
     def _create_vis_observations(
         self,
         observation_df: pd.DataFrame,
         observation_status: sdk.ObservationStatus,
-        instrument_id: str,
+        instrument: sdk.TelescopeInstrument,
     ) -> list[sdk.ObservationCreate]:
         """
         Creates ACROSS ObservationCreate objects for VIS observations from
@@ -106,34 +109,47 @@ class EuclidScheduleHandler:
         an exposure time of 566 seconds in VIS.
         """
         vis_exposure_time = BANDPASS_EXPOSURE_TIMES[EUCLID_VIS_BANDPASS.filter_name]  # type: ignore
-        return [
-            sdk.ObservationCreate(
-                instrument_id=instrument_id,
-                object_name=pointing.obs_tag,
-                pointing_position=sdk.Coordinate(
+        across_observations = []
+
+        for _, pointing in observation_df.iterrows():
+            footprint = None
+            if instrument.footprints:
+                footprint = project_footprint(
+                    instrument.footprints,
                     ra=float(pointing.center_lon),
                     dec=float(pointing.center_lat),
-                ),
-                date_range=sdk.DateRange(
-                    begin=datetime.strptime(pointing.utc, "%Y-%m-%dT%H:%M:%S%z"),
-                    end=datetime.strptime(pointing.utc, "%Y-%m-%dT%H:%M:%S%z")
-                    + timedelta(seconds=vis_exposure_time),
-                ),
-                external_observation_id=pointing.obs_id,
-                type=sdk.ObservationType.IMAGING,
-                status=observation_status,
-                pointing_angle=float(pointing.pos_angle),
-                exposure_time=vis_exposure_time,
-                bandpass=sdk.Bandpass(EUCLID_VIS_BANDPASS),
+                    roll_angle=float(pointing.pos_angle),
+                )
+            across_observations.append(
+                sdk.ObservationCreate(
+                    instrument_id=instrument.id,
+                    object_name=pointing.obs_tag,
+                    pointing_position=sdk.Coordinate(
+                        ra=float(pointing.center_lon),
+                        dec=float(pointing.center_lat),
+                    ),
+                    date_range=sdk.DateRange(
+                        begin=datetime.strptime(pointing.utc, "%Y-%m-%dT%H:%M:%S%z"),
+                        end=datetime.strptime(pointing.utc, "%Y-%m-%dT%H:%M:%S%z")
+                        + timedelta(seconds=vis_exposure_time),
+                    ),
+                    external_observation_id=pointing.obs_id,
+                    type=sdk.ObservationType.IMAGING,
+                    status=observation_status,
+                    pointing_angle=float(pointing.pos_angle),
+                    exposure_time=vis_exposure_time,
+                    bandpass=sdk.Bandpass(EUCLID_VIS_BANDPASS),
+                    footprint=footprint,
+                )
             )
-            for _, pointing in observation_df.iterrows()
-        ]
+
+        return across_observations
 
     def _create_nisp_observations(
         self,
         observation_df: pd.DataFrame,
         observation_status: sdk.ObservationStatus,
-        instrument_id: str,
+        instrument: sdk.TelescopeInstrument,
     ) -> list[sdk.ObservationCreate]:
         """
         Creates ACROSS ObservationCreate objects for NISP observations from
@@ -171,9 +187,17 @@ class EuclidScheduleHandler:
                 grism_exposure_time = BANDPASS_EXPOSURE_TIMES[
                     grism_bandpass.filter_name  # type: ignore
                 ]
+                footprint = None
+                if instrument.footprints:
+                    footprint = project_footprint(
+                        instrument.footprints,
+                        ra=float(pointing.center_lon),
+                        dec=float(pointing.center_lat),
+                        roll_angle=float(pointing.pos_angle),
+                    )
                 across_observations.append(
                     sdk.ObservationCreate(
-                        instrument_id=instrument_id,
+                        instrument_id=instrument.id,
                         object_name=pointing.obs_tag,
                         pointing_position=sdk.Coordinate(
                             ra=float(pointing.center_lon),
@@ -192,6 +216,7 @@ class EuclidScheduleHandler:
                         pointing_angle=float(pointing.pos_angle),
                         exposure_time=grism_exposure_time,
                         bandpass=sdk.Bandpass(grism_bandpass),
+                        footprint=footprint,
                     )
                 )
 
@@ -202,7 +227,7 @@ class EuclidScheduleHandler:
                     ]
                     across_observations.append(
                         sdk.ObservationCreate(
-                            instrument_id=instrument_id,
+                            instrument_id=instrument.id,
                             object_name=pointing.obs_tag,
                             pointing_position=sdk.Coordinate(
                                 ra=float(pointing.center_lon),
@@ -223,6 +248,7 @@ class EuclidScheduleHandler:
                             pointing_angle=float(pointing.pos_angle),
                             exposure_time=imaging_exposure_time,
                             bandpass=sdk.Bandpass(EUCLID_NISP_BANDPASS_DICT[filt]),
+                            footprint=footprint,
                         )
                     )
 
@@ -269,13 +295,13 @@ class EuclidScheduleHandler:
         vis_obs = self._create_vis_observations(
             observation_df=observation_df,
             observation_status=self.observation_status,
-            instrument_id=self.instrument_ids["Euclid VIS"],
+            instrument=self.instruments["Euclid VIS"],
         )
 
         nisp_obs = self._create_nisp_observations(
             observation_df=observation_df,
             observation_status=self.observation_status,
-            instrument_id=self.instrument_ids["Euclid NISP"],
+            instrument=self.instruments["Euclid NISP"],
         )
 
         # Create schedule containing all observations

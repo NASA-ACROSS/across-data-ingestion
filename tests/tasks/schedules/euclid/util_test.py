@@ -15,7 +15,7 @@ class TestCreateVisObservations:
     def test_should_create_observations_with_expected_parameters(
         self,
         fake_pointing_file_data: list[dict],
-        fake_vis_instrument_id: str,
+        fake_vis_instrument: sdk.TelescopeInstrument,
         field: str,
     ) -> None:
         """Should extract correct parameters from input DataFrame"""
@@ -29,7 +29,7 @@ class TestCreateVisObservations:
         created_observations = handler._create_vis_observations(
             observation_df=obs_df,
             observation_status=sdk.ObservationStatus.PLANNED,
-            instrument_id=fake_vis_instrument_id,
+            instrument=fake_vis_instrument,
         )
         expected_obs = sdk.ObservationCreate.model_validate(mock_vis_observations[0])
         assert getattr(created_observations[0], field) == getattr(expected_obs, field)
@@ -40,7 +40,7 @@ class TestCreateNispObservations:
     def test_should_create_observations_with_expected_parameters(
         self,
         fake_pointing_file_data: list[dict],
-        fake_nisp_instrument_id: str,
+        fake_nisp_instrument: sdk.TelescopeInstrument,
         field: str,
     ) -> None:
         """Should extract correct parameters from input DataFrame"""
@@ -54,7 +54,7 @@ class TestCreateNispObservations:
         created_observations = handler._create_nisp_observations(
             observation_df=obs_df,
             observation_status=sdk.ObservationStatus.PLANNED,
-            instrument_id=fake_nisp_instrument_id,
+            instrument=fake_nisp_instrument,
         )
         for i, obs in enumerate(created_observations):
             expected_obs = sdk.ObservationCreate.model_validate(
@@ -63,7 +63,10 @@ class TestCreateNispObservations:
             assert getattr(obs, field) == getattr(expected_obs, field)
 
     def test_should_log_warning_if_no_grism_found_for_obs_id(
-        self, fake_pointing_file_data: list[dict], mock_handler_logger: MagicMock
+        self,
+        fake_pointing_file_data: list[dict],
+        mock_handler_logger: MagicMock,
+        fake_nisp_instrument: sdk.TelescopeInstrument,
     ) -> None:
         """Should log a warning if no grism info found for an obs ID"""
         fake_pointing_file_data[0]["grism"] = None
@@ -77,7 +80,7 @@ class TestCreateNispObservations:
         handler._create_nisp_observations(
             observation_df=obs_df,
             observation_status=sdk.ObservationStatus.PLANNED,
-            instrument_id="fake_instrument_id",
+            instrument=fake_nisp_instrument,
         )
 
         assert (
@@ -118,7 +121,7 @@ class TestEuclidScheduleHandler:
             ("schedule_name",),
             ("schedule_fidelity",),
             ("telescope_id",),
-            ("instrument_ids",),
+            ("instruments",),
         ],
     )
     def test_should_set_values_on_init(
@@ -135,7 +138,11 @@ class TestEuclidScheduleHandler:
         assert hasattr(handler, field)
 
     def test_should_call_create_schedule(
-        self, mock_schedule_api: MagicMock, fake_pointing_file_data: list[dict]
+        self,
+        mock_schedule_api: MagicMock,
+        fake_pointing_file_data: list[dict],
+        fake_vis_instrument: sdk.TelescopeInstrument,
+        fake_nisp_instrument: sdk.TelescopeInstrument,
     ) -> None:
         """Should call create schedule on run"""
         obs_df = pd.DataFrame(fake_pointing_file_data)
@@ -145,9 +152,9 @@ class TestEuclidScheduleHandler:
             schedule_name="low_fidelity_planned",
             schedule_fidelity=sdk.ScheduleFidelity.LOW,
         )
-        handler.instrument_ids = {
-            "Euclid VIS": "fake_vis_instrument_id",
-            "Euclid NISP": "fake_nisp_instrument_id",
+        handler.instruments = {
+            "Euclid VIS": fake_vis_instrument,
+            "Euclid NISP": fake_nisp_instrument,
         }
         handler.run(obs_df)
         mock_schedule_api.create_schedule.assert_called_once()

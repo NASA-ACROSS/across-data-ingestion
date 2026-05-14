@@ -1,8 +1,11 @@
+from datetime import datetime
 from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
 import structlog
+
+from across_data_ingestion.util.across_server import sdk
 
 
 @pytest.fixture(autouse=True)
@@ -87,13 +90,25 @@ def fake_euclid_telescope_id() -> str:
 
 
 @pytest.fixture()
-def fake_vis_instrument_id() -> str:
-    return "vis_instrument_uuid"
+def fake_vis_instrument() -> sdk.TelescopeInstrument:
+    return sdk.TelescopeInstrument(
+        id="vis_instrument_uuid",
+        name="Euclid VIS",
+        short_name="Euclid VIS",
+        created_on=datetime.now(),
+        footprints=[],
+    )
 
 
 @pytest.fixture()
-def fake_nisp_instrument_id() -> str:
-    return "nisp_instrument_uuid"
+def fake_nisp_instrument() -> sdk.TelescopeInstrument:
+    return sdk.TelescopeInstrument(
+        id="nisp_instrument_uuid",
+        name="Euclid NISP",
+        short_name="Euclid NISP",
+        created_on=datetime.now(),
+        footprints=[],
+    )
 
 
 @pytest.fixture()
