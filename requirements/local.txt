@@ -2,7 +2,7 @@
 #    uv pip compile requirements/local.in -o requirements/local.txt
 across-server-openapi-python==1.2.0
     # via -r requirements/base.in
-across-tools==1.5.0
+across-tools==1.6.1
     # via -r requirements/base.in
 alembic==1.18.1
     # via -r requirements/base.in
@@ -42,7 +42,9 @@ asyncer==0.0.12
 asyncpg==0.31.0
     # via -r requirements/base.in
 attrs==25.4.0
-    # via rush
+    # via
+    #   outcome
+    #   rush
 beautifulsoup4==4.14.3
     # via
     #   -r requirements/base.in
@@ -228,7 +230,9 @@ pandas-stubs==2.3.3.260113
 pathspec==0.12.1
     # via mypy
 platformdirs==4.5.1
-    # via virtualenv
+    # via
+    #   spacetrack
+    #   virtualenv
 plotly==6.7.0
     # via across-tools
 pluggy==1.6.0

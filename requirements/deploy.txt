@@ -2,7 +2,7 @@
 #    uv pip compile requirements/deploy.in -o requirements/deploy.txt
 across-server-openapi-python==1.2.0
     # via -r requirements/base.in
-across-tools==1.5.0
+across-tools==1.6.1
     # via -r requirements/base.in
 alembic==1.18.1
     # via -r requirements/base.in
@@ -39,7 +39,9 @@ asyncer==0.0.12
 asyncpg==0.31.0
     # via -r requirements/base.in
 attrs==25.4.0
-    # via rush
+    # via
+    #   outcome
+    #   rush
 beautifulsoup4==4.14.3
     # via
     #   -r requirements/base.in
@@ -83,6 +85,8 @@ fastapi-utilities==0.3.1
     # via -r requirements/base.in
 fastapi-utils==0.8.0
     # via -r requirements/base.in
+filelock==3.29.0
+    # via spacetrack
 geoalchemy2==0.18.1
     # via -r requirements/base.in
 h11==0.16.0
@@ -172,6 +176,8 @@ pandas==3.0.2
     #   swifttools
 pandas-stubs==2.3.3.260113
     # via -r requirements/base.in
+platformdirs==4.9.6
+    # via spacetrack
 plotly==6.7.0
     # via across-tools
 pluggy==1.6.0
@@ -262,7 +268,7 @@ sqlalchemy==2.0.49
     #   alembic
     #   fastapi-utilities
     #   geoalchemy2
-starlette==1.0.0
+starlette==0.50.0
     # via fastapi
 structlog==25.5.0
     # via -r requirements/base.in
@@ -272,6 +278,8 @@ tabulate==0.9.0
     # via swifttools
 tqdm==4.67.3
     # via swifttools
+types-pytz==2026.2.0.20260506
+    # via pandas-stubs
 typing-extensions==4.15.0
     # via
     #   across-server-openapi-python
@@ -291,7 +299,6 @@ typing-inspect==0.9.0
     # via -r requirements/base.in
 typing-inspection==0.4.2
     # via
-    #   fastapi
     #   pydantic
     #   pydantic-settings
 urllib3==2.6.3
