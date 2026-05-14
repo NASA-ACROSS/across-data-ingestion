@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import TypedDict
 
 import structlog
@@ -62,7 +61,6 @@ def ingest() -> None:
     # query spacetrack for all satellites and parse out the newest result for each norad_id
     tles = tle_tool.get_tle(
         satellites=satellites,
-        epoch=datetime.now(),
         spacetrack_user=spacetrack_config.SPACETRACK_USER,
         spacetrack_pwd=spacetrack_config.SPACETRACK_PWD,
         spacetrack_base_url=spacetrack_config.SPACETRACK_BASE_URL,
@@ -96,7 +94,6 @@ def ingest() -> None:
                         "TLE Already Exists",
                         name=across_tle.satellite_name,
                         norad_id=across_tle.norad_id,
-                        epoch=satellite_tle.epoch,
                     )
                 else:
                     raise err
