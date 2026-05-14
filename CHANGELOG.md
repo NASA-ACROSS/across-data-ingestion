@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.4.0...v1.5.0) (2026-05-14)
+
+
+### Features
+
+* **all:** calculate projected footprint for imaging type observations ([#232](https://github.com/NASA-ACROSS/across-data-ingestion/issues/232)) ([5051292](https://github.com/NASA-ACROSS/across-data-ingestion/commit/5051292ff5ad0bb53ec778f152f108e750e353fd))
+
+
+### Bug Fixes
+
+* use spacetrack recommended method for ingesting latest tles ([#254](https://github.com/NASA-ACROSS/across-data-ingestion/issues/254)) ([34f8a38](https://github.com/NASA-ACROSS/across-data-ingestion/commit/34f8a38ecc06d1f07ccabe36eeddc0453c433ecc))
+
 ## [1.4.0](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.3.0...v1.4.0) (2026-05-11)
 
 
