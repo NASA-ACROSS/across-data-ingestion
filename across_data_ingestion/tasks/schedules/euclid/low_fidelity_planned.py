@@ -97,10 +97,10 @@ def parse_pointing_file(filename: str) -> pd.DataFrame:
 def ingest() -> None:
     schedule_file_url = retrieve_schedule_file_path(SCHEDULE_PAGE_URL)
     if not len(schedule_file_url):
-        logger.error("Failed to retrieve schedule file URL from schedule page.")
         return
     df = parse_pointing_file(SCHEDULE_FILE_BASE_URL + schedule_file_url)
     if not len(df):
+        logger.warning("No pointing observations found, nothing to ingest.")
         return
     filtered_df = df[
         (df["utc"] > datetime.now().strftime("%Y-%m-%dT%H:%M:%S"))

@@ -117,20 +117,6 @@ class TestIngest:
 
         mock_schedule_handler.run.assert_called_once()
 
-    def test_should_log_error_when_file_url_not_found(
-        self,
-        mock_retrieve_schedule_file_path: MagicMock,
-        mock_logger: MagicMock,
-    ) -> None:
-        """Should log an error when retrieve_schedule_file cannot find the URL of the file"""
-        mock_retrieve_schedule_file_path.return_value = ""
-        ingest()
-
-        assert (
-            "Failed to retrieve schedule file URL from schedule page"
-            in mock_logger.error.call_args[0][0]
-        )
-
     def test_should_not_call_handler_when_file_url_not_found(
         self,
         mock_schedule_handler: MagicMock,
@@ -153,3 +139,18 @@ class TestIngest:
         ingest()
 
         mock_schedule_handler.run.assert_not_called()
+
+    def test_should_log_warning_when_no_observations_read(
+        self,
+        mock_retrieve_schedule_file_path: MagicMock,
+        mock_parse_pointing_file: MagicMock,
+        mock_logger: MagicMock,
+    ) -> None:
+        """Should log a warning when no observations are read from the pointing file"""
+        mock_parse_pointing_file.return_value = pd.DataFrame([])
+        ingest()
+
+        assert (
+            "No pointing observations found, nothing to ingest."
+            in mock_logger.warning.call_args[0][0]
+        )
