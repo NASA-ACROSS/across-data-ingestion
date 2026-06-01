@@ -13,7 +13,7 @@ logger: structlog.stdlib.BoundLogger = structlog.getLogger()
 
 
 class XRISMScheduleHandler:
-    """Handles the creation and posting of Euclid schedules to the ACROSS API."""
+    """Handles the creation and posting of XRISM schedules to the ACROSS API."""
 
     def __init__(
         self,
