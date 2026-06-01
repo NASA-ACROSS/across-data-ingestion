@@ -49,6 +49,9 @@ from .schedules.tess.low_fidelity_planned import (
 from .schedules.xmm_newton.low_fidelity_planned import (
     entrypoint as XMM_Newton_low_fidelity_schedule_ingestion_task,
 )
+from .schedules.xrism.low_fidelity_planned import (
+    entrypoint as XRISM_low_fidelity_schedule_ingestion_task,
+)
 from .tles.tle_ingestion import (
     entrypoint as tle_ingestion_task,
 )
@@ -78,3 +81,4 @@ async def init_tasks():
     create_task(rubin_low_fidelity_planned_schedule_ingestion_task())
     create_task(HST_as_flown_schedule_ingestion_task())
     create_task(euclid_low_fidelity_planned_schedule_ingestion_task())
+    create_task(XRISM_low_fidelity_schedule_ingestion_task())
