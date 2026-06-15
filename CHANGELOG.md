@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.0](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.5.0...v1.6.0) (2026-06-15)
+
+
+### Features
+
+* add euclid low fidelity planned schedule ingestion task ([#244](https://github.com/NASA-ACROSS/across-data-ingestion/issues/244)) ([54a08dc](https://github.com/NASA-ACROSS/across-data-ingestion/commit/54a08dcdc9fdf204f4795656ab130160dd2a6da8))
+* install across-server-openapi-python v1.4.0 ([#257](https://github.com/NASA-ACROSS/across-data-ingestion/issues/257)) ([47f4d2a](https://github.com/NASA-ACROSS/across-data-ingestion/commit/47f4d2a68361c0f0f77408719834d67770b03375))
+
 ## [1.5.0](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.4.0...v1.5.0) (2026-05-14)
 
 
