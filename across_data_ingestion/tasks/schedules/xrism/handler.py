@@ -135,7 +135,7 @@ class XRISMScheduleHandler:
             )
 
         # Create schedule containing all observations
-        euclid_schedule = self._create_xrism_across_schedule(
+        xrism_schedule = self._create_xrism_across_schedule(
             schedule_status=self.schedule_status,
             schedule_fidelity=self.schedule_fidelity,
             schedule_name=self.schedule_name,
@@ -144,11 +144,11 @@ class XRISMScheduleHandler:
 
         # Post the schedule to the ACROSS API
         try:
-            sdk.ScheduleApi(client).create_schedule(euclid_schedule)
+            sdk.ScheduleApi(client).create_schedule(xrism_schedule)
         except sdk.ApiException as err:
             if err.status == 409:
                 logger.info(
-                    "Schedule already exists.", schedule_name=euclid_schedule.name
+                    "Schedule already exists.", schedule_name=xrism_schedule.name
                 )
             else:
                 raise err
