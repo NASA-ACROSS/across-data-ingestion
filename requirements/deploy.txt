@@ -4,8 +4,6 @@ across-server-openapi-python==1.4.0
     # via -r requirements/base.in
 across-tools==1.6.1
     # via -r requirements/base.in
-alembic==1.18.1
-    # via -r requirements/base.in
 annotated-doc==0.0.4
     # via fastapi
 annotated-types==0.7.0
@@ -131,10 +129,6 @@ keyring==25.7.0
     #   swifttools
 logbook==1.9.2
     # via spacetrack
-mako==1.3.10
-    # via alembic
-markupsafe==3.0.3
-    # via mako
 mocpy==0.20.0
     # via across-tools
 more-itertools==10.8.0
@@ -143,7 +137,7 @@ more-itertools==10.8.0
     #   jaraco-functools
 mypy-extensions==1.1.0
     # via typing-inspect
-narwhals==2.21.0
+narwhals==2.22.1
     # via plotly
 numpy==2.3.5
     # via
@@ -176,9 +170,9 @@ pandas==3.0.2
     #   swifttools
 pandas-stubs==3.0.0.260204
     # via -r requirements/base.in
-platformdirs==4.9.6
+platformdirs==4.10.0
     # via spacetrack
-plotly==6.7.0
+plotly==6.8.0
     # via across-tools
 pluggy==1.6.0
     # via pytest
@@ -205,9 +199,7 @@ pyerfa==2.0.1.5
 pygments==2.20.0
     # via pytest
 pyjwt==2.11.0
-    # via
-    #   -r requirements/base.in
-    #   swifttools
+    # via -r requirements/base.in
 pytest==9.0.2
     # via pytest-asyncio
 pytest-asyncio==1.3.0
@@ -233,7 +225,7 @@ requests==2.33.1
     #   swifttools
 rush==2021.4.0
     # via spacetrack
-rust-ephem==0.10.1
+rust-ephem==0.11.1
     # via across-tools
 s3transfer==0.16.0
     # via boto3
@@ -266,8 +258,6 @@ spiceypy==8.0.2
     # via across-tools
 sqlalchemy==2.0.49
     # via
-    #   -r requirements/base.in
-    #   alembic
     #   fastapi-utilities
     #   geoalchemy2
 starlette==0.50.0
@@ -280,12 +270,9 @@ tabulate==0.9.0
     # via swifttools
 tqdm==4.67.3
     # via swifttools
-types-pytz==2026.2.0.20260506
-    # via pandas-stubs
 typing-extensions==4.15.0
     # via
     #   across-server-openapi-python
-    #   alembic
     #   anyio
     #   beautifulsoup4
     #   fastapi
