@@ -322,7 +322,7 @@ rich-toolkit==0.19.7
     #   fastapi-cloud-cli
 rignore==0.7.6
     # via fastapi-cloud-cli
-ruff==0.14.13
+ruff==0.15.0
     # via -r requirements/lint.in
 rush==2021.4.0
     # via spacetrack
