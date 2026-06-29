@@ -82,9 +82,7 @@ fastapi-utilities==0.3.1
     # via -r requirements/base.in
 fastapi-utils==0.8.0
     # via -r requirements/base.in
-filelock==3.29.0
-    # via spacetrack
-geoalchemy2==0.18.1
+geoalchemy2==0.18.4
     # via -r requirements/base.in
 h11==0.16.0
     # via
