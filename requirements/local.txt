@@ -16,6 +16,8 @@ anyio==4.13.0
     #   httpx
     #   starlette
     #   watchfiles
+ast-serialize==0.6.0
+    # via mypy
 astropy==7.2.0
     # via
     #   -r requirements/base.in
@@ -173,7 +175,7 @@ keyring==25.7.0
     # via
     #   astroquery
     #   swifttools
-librt==0.10.0
+librt==0.12.0
     # via mypy
 logbook==1.9.2
     # via spacetrack
@@ -189,7 +191,7 @@ more-itertools==10.8.0
     # via
     #   jaraco-classes
     #   jaraco-functools
-mypy==1.19.1
+mypy==2.1.0
     # via -r requirements/types.in
 mypy-extensions==1.1.0
     # via
@@ -231,7 +233,7 @@ pandas==3.0.2
     #   swifttools
 pandas-stubs==3.0.0.260204
     # via -r requirements/base.in
-pathspec==0.12.1
+pathspec==1.1.1
     # via mypy
 platformdirs==4.5.1
     # via
