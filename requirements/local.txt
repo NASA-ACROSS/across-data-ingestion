@@ -18,7 +18,7 @@ anyio==4.13.0
     #   watchfiles
 ast-serialize==0.6.0
     # via mypy
-astropy==7.2.0
+astropy==8.0.1
     # via
     #   -r requirements/base.in
     #   across-tools
@@ -30,7 +30,7 @@ astropy==7.2.0
     #   swifttools
 astropy-healpix==2.0.0
     # via -r requirements/base.in
-astropy-iers-data==0.2025.12.15.0.40.51
+astropy-iers-data==0.2026.7.6.1.1.20
     # via astropy
 astroquery==0.4.11
     # via
