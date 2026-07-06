@@ -389,9 +389,9 @@ typer==0.24.1
     #   fastapi-cloud-cli
 types-awscrt==0.31.3
     # via botocore-stubs
-types-boto3[ssm]==1.42.14
+types-boto3[ssm]==1.43.39
     # via -r requirements/types.in
-types-boto3-ssm==1.42.3
+types-boto3-ssm==1.43.0
     # via types-boto3
 types-cachetools==6.2.0.20260317
     # via -r requirements/types.in
