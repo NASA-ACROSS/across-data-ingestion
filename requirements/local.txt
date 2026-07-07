@@ -98,7 +98,7 @@ email-validator==2.3.0
     #   -r requirements/base.in
     #   fastapi
     #   pydantic
-fastapi[standard]==0.128.7
+fastapi[standard]==0.139.0
     # via
     #   -r requirements/base.in
     #   -r requirements/local.in
@@ -113,8 +113,10 @@ fastapi-utilities==0.3.1
     # via -r requirements/base.in
 fastapi-utils==0.8.0
     # via -r requirements/base.in
-fastar==0.8.0
-    # via fastapi-cloud-cli
+fastar==0.11.0
+    # via
+    #   fastapi
+    #   fastapi-cloud-cli
 filelock==3.20.3
     # via
     #   spacetrack
