@@ -280,7 +280,7 @@ pygments==2.20.0
     # via
     #   pytest
     #   rich
-pyjwt==2.11.0
+pyjwt==2.13.0
     # via -r requirements/base.in
 pytest==9.0.2
     # via
