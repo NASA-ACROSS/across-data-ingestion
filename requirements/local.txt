@@ -135,7 +135,7 @@ html5lib==1.1
     # via astroquery
 httpcore==1.0.9
     # via httpx
-httptools==0.7.1
+httptools==0.8.0
     # via uvicorn
 httpx==0.28.1
     # via
@@ -441,7 +441,7 @@ urllib3==2.6.3
     #   requests
     #   sentry-sdk
     #   types-requests
-uvicorn[standard]==0.40.0
+uvicorn[standard]==0.50.2
     # via
     #   -r requirements/base.in
     #   fastapi
