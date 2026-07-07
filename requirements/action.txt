@@ -102,7 +102,7 @@ filelock==3.20.3
     # via
     #   spacetrack
     #   virtualenv
-geoalchemy2==0.18.4
+geoalchemy2==0.20.0
     # via -r requirements/base.in
 greenlet==3.5.3
     # via sqlalchemy
