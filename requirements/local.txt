@@ -344,7 +344,7 @@ secretstorage==3.5.0
     # via keyring
 sentry-sdk==2.48.0
     # via fastapi-cloud-cli
-sgp4==2.25
+sgp4==2.27
     # via
     #   -r requirements/base.in
     #   across-tools
