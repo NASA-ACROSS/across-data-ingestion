@@ -2,7 +2,7 @@
 
 across-tools >= 1.6.1
 across-server-openapi-python >= 1.4.0
-asyncer >=0.0.8,<0.0.18
+asyncer >=0.0.18,<0.0.19
 astropy >=8.0.1
 astroquery >=0.4.10
 boto3 >=1.43.40,<2
