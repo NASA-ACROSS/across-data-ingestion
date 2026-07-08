@@ -379,7 +379,7 @@ sqlalchemy==2.0.49
     #   geoalchemy2
 starlette==0.50.0
     # via fastapi
-structlog==25.5.0
+structlog==26.1.0
     # via -r requirements/base.in
 swifttools==4.0.2
     # via -r requirements/base.in
