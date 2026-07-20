@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.6.0...v1.7.0) (2026-07-20)
+
+
+### Features
+
+* add xrism planned schedule ingestion task ([#256](https://github.com/NASA-ACROSS/across-data-ingestion/issues/256)) ([133035d](https://github.com/NASA-ACROSS/across-data-ingestion/commit/133035dc411770e193a7e3209212b25b2fbeaea9))
+
 ## [1.6.0](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.5.0...v1.6.0) (2026-06-15)
 
 
