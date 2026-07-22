@@ -216,7 +216,7 @@ pluggy==1.6.0
     # via
     #   pytest
     #   pytest-cov
-pre-commit==4.6.0
+pre-commit==4.6.1
     # via -r requirements/lint.in
 psutil==5.9.8
     # via fastapi-utils
