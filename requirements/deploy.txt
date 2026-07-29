@@ -97,7 +97,7 @@ h11==0.16.0
     # via
     #   httpcore
     #   uvicorn
-healpy==1.19.0
+healpy==1.20.0
     # via -r requirements/base.in
 html5lib==1.1
     # via astroquery
