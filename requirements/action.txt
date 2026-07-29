@@ -332,7 +332,7 @@ tqdm==4.67.3
     # via swifttools
 types-awscrt==0.31.3
     # via botocore-stubs
-types-boto3[ssm]==1.43.39
+types-boto3[ssm]==1.43.58
     # via -r requirements/types.in
 types-boto3-ssm==1.43.0
     # via types-boto3
