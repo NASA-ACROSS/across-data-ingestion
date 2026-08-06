@@ -336,7 +336,7 @@ types-boto3[ssm]==1.43.39
     # via -r requirements/types.in
 types-boto3-ssm==1.43.0
     # via types-boto3
-types-cachetools==7.0.0.20260518
+types-cachetools==7.0.0.20260713
     # via -r requirements/types.in
 types-pyasn1==0.6.0.20250914
     # via types-python-jose
