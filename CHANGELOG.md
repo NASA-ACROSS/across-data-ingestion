@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.1](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.7.0...v1.7.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* **ssm:** add path using APP_ENV for put_param ([#328](https://github.com/NASA-ACROSS/across-data-ingestion/issues/328)) ([7fcaadc](https://github.com/NASA-ACROSS/across-data-ingestion/commit/7fcaadce0510d4f43bd3a6090dd39599f4674ca6))
+
 ## [1.7.0](https://github.com/NASA-ACROSS/across-data-ingestion/compare/v1.6.0...v1.7.0) (2026-07-20)
 
 
