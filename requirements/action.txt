@@ -69,6 +69,7 @@ cachetools==5.5.2
     # via -r requirements/base.in
 certifi==2025.11.12
     # via
+    #   gcn-kafka
     #   httpcore
     #   httpx
     #   requests
@@ -87,6 +88,8 @@ click-spinner==0.1.10
     # via fastapi-utilities
 cloudpickle==3.1.2
     # via dask
+confluent-kafka==2.16.0
+    # via gcn-kafka
 contourpy==1.4.0
     # via matplotlib
 coverage==7.13.0
@@ -136,6 +139,8 @@ fsspec==2026.9.0
     # via
     #   dask
     #   reproject
+gcn-kafka==0.3.4
+    # via -r requirements/base.in
 geoalchemy2==0.18.1
     # via -r requirements/base.in
 google-crc32c==1.9.0
