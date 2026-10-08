@@ -15,18 +15,27 @@ anyio==4.13.0
     #   asyncer
     #   httpx
     #   starlette
+astroplan==0.10.1
+    # via ligo-skymap
 astropy==7.2.0
     # via
     #   -r requirements/base.in
     #   across-tools
+    #   astroplan
     #   astropy-healpix
     #   astroquery
     #   healpy
+    #   lalsuite
+    #   ligo-skymap
     #   mocpy
     #   pyvo
+    #   reproject
     #   swifttools
 astropy-healpix==1.1.3
-    # via -r requirements/base.in
+    # via
+    #   -r requirements/base.in
+    #   ligo-skymap
+    #   reproject
 astropy-iers-data==0.2025.12.15.0.40.51
     # via astropy
 astroquery==0.4.11
@@ -62,18 +71,41 @@ certifi==2025.11.12
     #   httpx
     #   requests
     #   skyfield
+cffi==2.1.1
+    # via cryptography
 charset-normalizer==3.4.4
     # via requests
 click==8.3.1
-    # via uvicorn
+    # via
+    #   dask
+    #   uvicorn
 click-spinner==0.1.10
     # via fastapi-utilities
+cloudpickle==3.1.2
+    # via dask
+contourpy==1.4.0
+    # via matplotlib
 croniter==1.4.1
     # via fastapi-utilities
+cryptography==50.0.2
+    # via
+    #   igwn-auth-utils
+    #   ligo-gracedb
+    #   scitokens
+cycler==0.12.1
+    # via matplotlib
+dask==2026.8.0
+    # via
+    #   dask-image
+    #   reproject
+dask-image==2026.5.0
+    # via reproject
 diskcache==5.6.3
     # via across-tools
 dnspython==2.8.0
     # via email-validator
+donfig==0.8.1.post1
+    # via zarr
 email-validator==2.3.0
     # via -r requirements/base.in
 fastapi==0.128.0
@@ -87,14 +119,26 @@ fastapi-utils==0.8.0
     # via -r requirements/base.in
 filelock==3.29.0
     # via spacetrack
+fonttools==4.66.1
+    # via matplotlib
+fsspec==2026.9.0
+    # via
+    #   dask
+    #   reproject
 geoalchemy2==0.18.1
     # via -r requirements/base.in
+google-crc32c==1.9.0
+    # via zarr
 h11==0.16.0
     # via
     #   httpcore
     #   uvicorn
+h5py==3.16.0
+    # via ligo-skymap
 healpy==1.19.0
-    # via -r requirements/base.in
+    # via
+    #   -r requirements/base.in
+    #   ligo-skymap
 html5lib==1.1
     # via astroquery
 httpcore==1.0.9
@@ -111,6 +155,20 @@ idna==3.11
     #   email-validator
     #   httpx
     #   requests
+igwn-auth-utils==1.4.0
+    # via ligo-gracedb
+igwn-ligolw==2.1.1
+    # via
+    #   lalsuite
+    #   ligo-skymap
+igwn-segments==2.1.1
+    # via
+    #   igwn-ligolw
+    #   lalsuite
+    #   ligo-skymap
+    #   lscsoft-glue
+imageio==2.38.1
+    # via pims
 iniconfig==2.3.0
     # via pytest
 jaraco-classes==3.4.0
@@ -129,53 +187,105 @@ keyring==25.7.0
     # via
     #   astroquery
     #   swifttools
+kiwisolver==1.5.1
+    # via matplotlib
+lalsuite==7.26.16
+    # via ligo-skymap
+ligo-gracedb==2.16.1
+    # via ligo-skymap
+ligo-skymap==2.5.4
+    # via -r requirements/base.in
+locket==1.0.0
+    # via partd
 logbook==1.9.2
     # via spacetrack
+lscsoft-glue==4.1.1
+    # via lalsuite
 mako==1.3.10
     # via alembic
 markupsafe==3.0.3
     # via mako
+matplotlib==3.11.2
+    # via
+    #   lalsuite
+    #   ligo-skymap
 mocpy==0.20.0
     # via across-tools
 more-itertools==10.8.0
     # via
     #   jaraco-classes
     #   jaraco-functools
+msgspec==0.22.0
+    # via zarr
 mypy-extensions==1.1.0
     # via typing-inspect
 narwhals==2.21.0
     # via plotly
+networkx==3.7
+    # via ligo-skymap
+numcodecs==0.17.0
+    # via zarr
 numpy==2.3.5
     # via
     #   across-tools
+    #   astroplan
     #   astropy
     #   astropy-healpix
     #   astroquery
+    #   contourpy
+    #   dask
+    #   dask-image
+    #   h5py
     #   healpy
+    #   igwn-ligolw
+    #   imageio
     #   jplephem
+    #   lalsuite
+    #   ligo-skymap
+    #   matplotlib
     #   mocpy
+    #   numcodecs
     #   pandas
     #   pandas-stubs
+    #   pims
     #   pyerfa
+    #   reproject
     #   rust-ephem
+    #   scipy
     #   shapely
     #   skyfield
     #   spiceypy
     #   swifttools
+    #   tifffile
+    #   zarr
 outcome==1.3.0.post0
     # via spacetrack
 packaging==26.0
     # via
     #   astropy
+    #   dask
     #   geoalchemy2
+    #   matplotlib
+    #   pims
     #   plotly
     #   pytest
+    #   zarr
 pandas==3.0.2
     # via
     #   -r requirements/base.in
     #   swifttools
 pandas-stubs==2.3.3.260113
     # via -r requirements/base.in
+partd==1.4.2
+    # via dask
+pillow==12.3.0
+    # via
+    #   imageio
+    #   ligo-skymap
+    #   matplotlib
+    #   reproject
+pims==0.7
+    # via dask-image
 platformdirs==4.9.6
     # via spacetrack
 plotly==6.7.0
@@ -184,6 +294,10 @@ pluggy==1.6.0
     # via pytest
 psutil==5.9.8
     # via fastapi-utils
+pyavm==0.9.9
+    # via reproject
+pycparser==3.1
+    # via cffi
 pydantic==2.12.5
     # via
     #   across-server-openapi-python
@@ -205,7 +319,11 @@ pyerfa==2.0.1.5
 pygments==2.20.0
     # via pytest
 pyjwt==2.10.1
-    # via -r requirements/base.in
+    # via
+    #   -r requirements/base.in
+    #   scitokens
+pyparsing==3.3.3
+    # via matplotlib
 pytest==9.0.2
     # via pytest-asyncio
 pytest-asyncio==1.3.0
@@ -215,19 +333,35 @@ python-dateutil==2.9.0.post0
     #   across-server-openapi-python
     #   botocore
     #   croniter
+    #   igwn-ligolw
+    #   lalsuite
+    #   matplotlib
     #   pandas
 python-dotenv==1.2.2
     # via pydantic-settings
+pytz==2026.5
+    # via
+    #   astroplan
+    #   ligo-skymap
 pyvo==1.8.1
     # via astroquery
 pyyaml==6.0.3
-    # via astropy
+    # via
+    #   astropy
+    #   dask
+    #   donfig
+    #   igwn-ligolw
 represent==2.1
     # via spacetrack
+reproject==0.21.0
+    # via ligo-skymap
 requests==2.33.1
     # via
     #   astroquery
+    #   igwn-auth-utils
+    #   ligo-gracedb
     #   pyvo
+    #   scitokens
     #   swifttools
 rush==2021.4.0
     # via spacetrack
@@ -235,6 +369,16 @@ rust-ephem==0.10.1
     # via across-tools
 s3transfer==0.16.0
     # via boto3
+safe-netrc==1.0.1
+    # via igwn-auth-utils
+scipy==1.18.1
+    # via
+    #   dask-image
+    #   lalsuite
+    #   ligo-skymap
+    #   reproject
+scitokens==1.9.7
+    # via igwn-auth-utils
 sgp4==2.25
     # via
     #   -r requirements/base.in
@@ -244,12 +388,16 @@ shapely==2.1.2
     # via
     #   -r requirements/base.in
     #   across-tools
+    #   ligo-skymap
 six==1.17.0
     # via
+    #   astroplan
     #   html5lib
     #   python-dateutil
 skyfield==1.54
     # via -r requirements/base.in
+slicerator==1.1.0
+    # via pims
 sniffio==1.3.1
     # via
     #   asyncer
@@ -276,8 +424,19 @@ swifttools==4.0.2
     # via -r requirements/base.in
 tabulate==0.9.0
     # via swifttools
+tifffile==2026.9.20
+    # via
+    #   dask-image
+    #   pims
+toolz==1.2.0
+    # via
+    #   dask
+    #   partd
 tqdm==4.67.3
-    # via swifttools
+    # via
+    #   igwn-ligolw
+    #   ligo-skymap
+    #   swifttools
 types-pytz==2026.2.0.20260506
     # via pandas-stubs
 typing-extensions==4.15.0
@@ -288,6 +447,7 @@ typing-extensions==4.15.0
     #   beautifulsoup4
     #   fastapi
     #   logbook
+    #   numcodecs
     #   pydantic
     #   pydantic-core
     #   pytest-asyncio
@@ -295,6 +455,7 @@ typing-extensions==4.15.0
     #   starlette
     #   typing-inspect
     #   typing-inspection
+    #   zarr
 typing-inspect==0.9.0
     # via -r requirements/base.in
 typing-inspection==0.4.2
@@ -310,3 +471,5 @@ uvicorn==0.40.0
     # via -r requirements/base.in
 webencodings==0.5.1
     # via html5lib
+zarr==3.4.1
+    # via reproject
