@@ -30,3 +30,5 @@ structlog >= 25.1.0
 beautifulsoup4 >=4.15.0
 fastapi-utilities >= 0.3.1
 swifttools >= 4.0.2
+ligo.skymap >=2.5.4
+gcn-kafka >=0.3.4
