@@ -210,6 +210,24 @@ def mock_tle_api_cls(mock_tle_api: MagicMock) -> MagicMock:
 ### END TLE ###
 
 
+### BROKER ALERT ###
+@pytest.fixture
+def mock_broker_alert_api() -> MagicMock:
+    mock = MagicMock()
+    mock.create_broker_alert = MagicMock()
+
+    return mock
+
+
+@pytest.fixture
+def mock_broker_alert_api_cls(mock_broker_alert_api: MagicMock) -> MagicMock:
+    mock_cls = MagicMock(return_value=mock_broker_alert_api)
+    return mock_cls
+
+
+### END BROKER ALERT ###
+
+
 ### PATCH SDK ###
 @pytest.fixture(autouse=True)
 def patch_sdk(
@@ -219,12 +237,14 @@ def patch_sdk(
     mock_instrument_api_cls: MagicMock,
     mock_observatory_api_cls: MagicMock,
     mock_tle_api_cls: MagicMock,
+    mock_broker_alert_api_cls: MagicMock,
 ) -> None:
     monkeypatch.setattr(sdk, "TelescopeApi", mock_telescope_api_cls)
     monkeypatch.setattr(sdk, "ScheduleApi", mock_schedule_api_cls)
     monkeypatch.setattr(sdk, "InstrumentApi", mock_instrument_api_cls)
     monkeypatch.setattr(sdk, "ObservatoryApi", mock_observatory_api_cls)
     monkeypatch.setattr(sdk, "TLEApi", mock_tle_api_cls)
+    monkeypatch.setattr(sdk, "BrokerAlertApi", mock_broker_alert_api_cls)
 
 
 ### END PATCH SDK ###
