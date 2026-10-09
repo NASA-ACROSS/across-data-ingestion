@@ -16,10 +16,10 @@ anyio==4.13.0
     #   httpx
     #   starlette
     #   watchfiles
-astroplan==0.10.1
-    # via ligo-skymap
 ast-serialize==0.6.0
     # via mypy
+astroplan==0.10.1
+    # via ligo-skymap
 astropy==8.0.1
     # via
     #   -r requirements/base.in
@@ -80,8 +80,6 @@ certifi==2025.11.12
     #   skyfield
 cffi==2.1.1
     # via cryptography
-cffi==2.0.0
-    # via cryptography
 cfgv==3.5.0
     # via pre-commit
 charset-normalizer==3.4.7
@@ -100,7 +98,7 @@ confluent-kafka==2.16.0
     # via gcn-kafka
 contourpy==1.4.0
     # via matplotlib
-coverage[toml]==7.13.0
+coverage==7.13.0
     # via pytest-cov
 croniter==1.4.1
     # via fastapi-utilities
@@ -117,8 +115,6 @@ dask==2026.8.0
     #   reproject
 dask-image==2026.5.0
     # via reproject
-cryptography==49.0.0
-    # via secretstorage
 diskcache==5.6.3
     # via across-tools
 distlib==0.4.0
@@ -132,14 +128,14 @@ email-validator==2.3.0
     #   -r requirements/base.in
     #   fastapi
     #   pydantic
-fastapi[standard]==0.139.0
+fastapi==0.139.0
     # via
     #   -r requirements/base.in
     #   -r requirements/local.in
     #   fastapi-utilities
     #   fastapi-utils
     #   pytest-fastapi-deps
-fastapi-cli[standard]==0.0.16
+fastapi-cli==0.0.16
     # via fastapi
 fastapi-cloud-cli==0.15.1
     # via fastapi-cli
@@ -167,8 +163,6 @@ geoalchemy2==0.20.0
     # via -r requirements/base.in
 google-crc32c==1.9.0
     # via zarr
-greenlet==3.5.3
-    # via sqlalchemy
 h11==0.16.0
     # via
     #   httpcore
@@ -223,10 +217,6 @@ jaraco-context==6.1.2
     # via keyring
 jaraco-functools==4.4.0
     # via keyring
-jeepney==0.9.0
-    # via
-    #   keyring
-    #   secretstorage
 jinja2==3.1.6
     # via fastapi
 jmespath==1.1.0
@@ -369,9 +359,7 @@ pyavm==0.9.9
     # via reproject
 pycparser==3.1
     # via cffi
-pycparser==3.0
-    # via cffi
-pydantic[email]==2.12.5
+pydantic==2.12.5
     # via
     #   across-server-openapi-python
     #   across-tools
@@ -487,8 +475,6 @@ scipy==1.18.1
     #   reproject
 scitokens==1.9.7
     # via igwn-auth-utils
-secretstorage==3.5.0
-    # via keyring
 sentry-sdk==2.48.0
     # via fastapi-cloud-cli
 sgp4==2.27
@@ -555,7 +541,7 @@ typer==0.24.1
     #   fastapi-cloud-cli
 types-awscrt==0.31.3
     # via botocore-stubs
-types-boto3[ssm]==1.43.39
+types-boto3==1.43.39
     # via -r requirements/types.in
 types-boto3-ssm==1.43.0
     # via types-boto3
@@ -605,7 +591,7 @@ urllib3==2.6.3
     #   requests
     #   sentry-sdk
     #   types-requests
-uvicorn[standard]==0.50.2
+uvicorn==0.50.2
     # via
     #   -r requirements/base.in
     #   fastapi

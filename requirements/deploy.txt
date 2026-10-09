@@ -72,8 +72,6 @@ certifi==2025.11.12
     #   skyfield
 cffi==2.1.1
     # via cryptography
-cffi==2.0.0
-    # via cryptography
 charset-normalizer==3.4.4
     # via requests
 click==8.3.1
@@ -103,8 +101,6 @@ dask==2026.8.0
     #   reproject
 dask-image==2026.5.0
     # via reproject
-cryptography==49.0.0
-    # via secretstorage
 diskcache==5.6.3
     # via across-tools
 dnspython==2.8.0
@@ -136,8 +132,6 @@ geoalchemy2==0.20.0
     # via -r requirements/base.in
 google-crc32c==1.9.0
     # via zarr
-greenlet==3.5.3
-    # via sqlalchemy
 h11==0.16.0
     # via
     #   httpcore
@@ -186,10 +180,6 @@ jaraco-context==6.1.2
     # via keyring
 jaraco-functools==4.4.0
     # via keyring
-jeepney==0.9.0
-    # via
-    #   keyring
-    #   secretstorage
 jmespath==1.0.1
     # via
     #   boto3
@@ -307,8 +297,6 @@ pyavm==0.9.9
     # via reproject
 pycparser==3.1
     # via cffi
-pycparser==3.0
-    # via cffi
 pydantic==2.12.5
     # via
     #   across-server-openapi-python
@@ -390,8 +378,6 @@ scipy==1.18.1
     #   reproject
 scitokens==1.9.7
     # via igwn-auth-utils
-secretstorage==3.5.0
-    # via keyring
 sgp4==2.27
     # via
     #   -r requirements/base.in
