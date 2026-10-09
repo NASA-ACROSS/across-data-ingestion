@@ -122,13 +122,15 @@ def process_contours(skymap_str) -> list[sdk.LocalizationCreate]:
 
 def ingest_lvk_alert(alert: dict, ingest_test_events: bool = False):
     """
-    Parse an LVK alert and extract relevant information.
+    Parse an LVK alert and extract relevant information, and posts into the ACROSS server.
+
+    Raises:
+        ValueError: If the alert is a test event and ingest_test_events is False, or if the alert_type is unknown.
+        RuntimeError: If reading the skymap fails.
 
     Args:
         alert (dict): The LVK alert payload.
-
-    Returns:
-        dict: Parsed alert information including localizations.
+        ingest_test_events (bool): Whether to ingest test events starting with "M". Defaults to False.
     """
     name = alert.get("superevent_id", "")
     if str.startswith(name, "M") and not ingest_test_events:
@@ -159,5 +161,3 @@ def ingest_lvk_alert(alert: dict, ingest_test_events: bool = False):
 
     sdk.BrokerAlertApi(client).create_broker_alert(broker_alert_create)
     logger.info("Created new Broker Alert", broker_event_name=alert["superevent_id"])
-
-    return broker_alert_create
