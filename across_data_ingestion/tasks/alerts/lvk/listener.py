@@ -46,6 +46,8 @@ def _read_json_file(path: str) -> dict:
 
 async def test_entrypoint() -> None:
     logger.info("Running test entrypoint for LVK alert listener")
-    alert = await asyncio.to_thread(_read_json_file, "MS181101ab-preliminary.json")
+    alert = await asyncio.to_thread(
+        _read_json_file, "sample_data/MS181101ab-preliminary.json"
+    )
     logger.info("Ingesting LVK alert from test file")
     ingest_lvk_alert(alert)

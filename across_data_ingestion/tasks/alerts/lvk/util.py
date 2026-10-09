@@ -138,7 +138,7 @@ def ingest_lvk_alert(alert: dict):
 
     skymap_str = alert.get("event", {}).pop("skymap")
 
-    logger.info("Processing LVK alert skymap", skymap_str=skymap_str)
+    logger.info("Processing LVK alert skymap")
     localizations = process_contours(skymap_str)
 
     broker_alert_create = sdk.BrokerAlertCreate(
