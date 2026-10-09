@@ -11,31 +11,29 @@ logger: structlog.stdlib.BoundLogger = structlog.get_logger()
 
 
 async def entrypoint() -> None:
-    try:
-        consumer = Consumer(
-            client_id=gcn_lvk_config.GCN_LVK_CLIENT_ID,
-            client_secret=gcn_lvk_config.GCN_LVK_CLIENT_SECRET,
-        )
+    consumer = Consumer(
+        client_id=gcn_lvk_config.GCN_LVK_CLIENT_ID,
+        client_secret=gcn_lvk_config.GCN_LVK_CLIENT_SECRET,
+    )
 
-        consumer.subscribe(["igwn.gwalert"])
+    consumer.subscribe(["igwn.gwalert"])
 
-        for message in consumer.consume():
-            value = message.value()
-            if value is None:
-                continue
-            alert = json.loads(value)
-            if not isinstance(alert, dict):
-                logger.warning("Skipping LVK alert with non-object payload")
-                continue
+    for message in consumer.consume():
+        value = message.value()
+        if value is None:
+            continue
+        alert = json.loads(value)
+        if not isinstance(alert, dict):
+            logger.warning("Skipping LVK alert with non-object payload")
+            continue
+        try:
             ingest_lvk_alert(alert)
-
-    except Exception as e:
-        logger.error(
-            "LVK alert listener encountered an unknown error: ",
-            err=e,
-            exc_info=True,
-        )
-        return
+        except Exception as e:
+            logger.error(
+                "Failed to ingest LVK alert",
+                err=e,
+                exc_info=True,
+            )
 
 
 ### Local testing with sample file
