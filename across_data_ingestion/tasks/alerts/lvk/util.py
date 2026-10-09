@@ -120,7 +120,7 @@ def process_contours(skymap_str) -> list[sdk.LocalizationCreate]:
     return localizations
 
 
-def ingest_lvk_alert(alert: dict):
+def ingest_lvk_alert(alert: dict, ingest_test_events: bool = False):
     """
     Parse an LVK alert and extract relevant information.
 
@@ -130,7 +130,11 @@ def ingest_lvk_alert(alert: dict):
     Returns:
         dict: Parsed alert information including localizations.
     """
-    alert_type = str.lower(alert.get("alert_type"))  # type: ignore
+    name = alert.get("superevent_id", "")
+    if str.startswith(name, "M") and not ingest_test_events:
+        raise ValueError(f"Not Ingesting Test Events: {name!r}")
+
+    alert_type = str.lower(alert.get("alert_type", ""))  # type: ignore
     try:
         status = sdk.BrokerAlertStatus(alert_type)
     except ValueError as e:
@@ -146,7 +150,7 @@ def ingest_lvk_alert(alert: dict):
         broker_name="GCN Kafka LVK",
         data_source=sdk.BrokerAlertDataSource.IGWN,
         broker_event_type=sdk.BrokerEventType.GW,
-        broker_event_name=alert["superevent_id"],
+        broker_event_name=name,
         broker_received_on=datetime.now(tz=UTC),
         broker_event_datetime=alert["event"]["time"],
         payload=alert,

@@ -28,12 +28,20 @@ async def entrypoint() -> None:
             continue
         try:
             ingest_lvk_alert(alert)
+        except ValueError as e:
+            logger.warning(
+                "Skipping LVK alert",
+                err=e,
+                exc_info=True,
+            )
+            continue
         except Exception as e:
             logger.error(
                 "Failed to ingest LVK alert",
                 err=e,
                 exc_info=True,
             )
+            continue
 
 
 ### Local testing with sample file
@@ -48,4 +56,4 @@ async def test_entrypoint() -> None:
         _read_json_file, "sample_data/MS181101ab-preliminary.json"
     )
     logger.info("Ingesting LVK alert from test file")
-    ingest_lvk_alert(alert)
+    ingest_lvk_alert(alert, ingest_test_events=True)
