@@ -18,30 +18,31 @@ async def entrypoint() -> None:
 
     consumer.subscribe(["igwn.gwalert"])
 
-    for message in consumer.consume():
-        value = message.value()
-        if value is None:
-            continue
-        alert = json.loads(value)
-        if not isinstance(alert, dict):
-            logger.warning("Skipping LVK alert with non-object payload")
-            continue
-        try:
-            ingest_lvk_alert(alert)
-        except ValueError as e:
-            logger.warning(
-                "Skipping LVK alert",
-                err=e,
-                exc_info=True,
-            )
-            continue
-        except Exception as e:
-            logger.error(
-                "Failed to ingest LVK alert",
-                err=e,
-                exc_info=True,
-            )
-            continue
+    while True:
+        for message in consumer.consume():
+            value = message.value()
+            if value is None:
+                continue
+            alert = json.loads(value)
+            if not isinstance(alert, dict):
+                logger.warning("Skipping LVK alert with non-object payload")
+                continue
+            try:
+                ingest_lvk_alert(alert)
+            except ValueError as e:
+                logger.warning(
+                    "Skipping LVK alert",
+                    err=e,
+                    exc_info=True,
+                )
+                continue
+            except Exception as e:
+                logger.error(
+                    "Failed to ingest LVK alert",
+                    err=e,
+                    exc_info=True,
+                )
+                continue
 
 
 ### Local testing with sample file
