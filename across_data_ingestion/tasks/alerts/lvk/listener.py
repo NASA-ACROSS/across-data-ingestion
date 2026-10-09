@@ -21,12 +21,15 @@ async def entrypoint() -> None:
     while True:
         for message in consumer.consume():
             value = message.value()
+
             if value is None:
                 continue
+
             alert = json.loads(value)
             if not isinstance(alert, dict):
                 logger.warning("Skipping LVK alert with non-object payload")
                 continue
+
             try:
                 ingest_lvk_alert(alert)
             except ValueError as e:
