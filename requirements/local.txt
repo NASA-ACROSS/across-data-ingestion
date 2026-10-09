@@ -4,8 +4,6 @@ across-server-openapi-python==1.4.0
     # via -r requirements/base.in
 across-tools==1.6.1
     # via -r requirements/base.in
-alembic==1.18.1
-    # via -r requirements/base.in
 annotated-doc==0.0.4
     # via
     #   fastapi
@@ -20,7 +18,9 @@ anyio==4.13.0
     #   watchfiles
 astroplan==0.10.1
     # via ligo-skymap
-astropy==7.2.0
+ast-serialize==0.6.0
+    # via mypy
+astropy==8.0.1
     # via
     #   -r requirements/base.in
     #   across-tools
@@ -34,19 +34,19 @@ astropy==7.2.0
     #   pyvo
     #   reproject
     #   swifttools
-astropy-healpix==1.1.3
+astropy-healpix==2.0.0
     # via
     #   -r requirements/base.in
     #   ligo-skymap
     #   reproject
-astropy-iers-data==0.2025.12.15.0.40.51
+astropy-iers-data==0.2026.7.6.1.1.20
     # via astropy
 astroquery==0.4.11
     # via
     #   -r requirements/base.in
     #   across-tools
     #   rust-ephem
-asyncer==0.0.12
+asyncer==0.0.18
     # via -r requirements/base.in
 asyncpg==0.31.0
     # via -r requirements/base.in
@@ -54,21 +54,21 @@ attrs==25.4.0
     # via
     #   outcome
     #   rush
-beautifulsoup4==4.14.3
+beautifulsoup4==4.15.0
     # via
     #   -r requirements/base.in
     #   astroquery
-boto3==1.42.82
+boto3==1.43.40
     # via
     #   -r requirements/base.in
     #   swifttools
-botocore==1.42.82
+botocore==1.43.40
     # via
     #   boto3
     #   s3transfer
 botocore-stubs==1.42.41
     # via types-boto3
-cachetools==5.5.2
+cachetools==7.1.4
     # via -r requirements/base.in
 certifi==2025.11.12
     # via
@@ -79,6 +79,8 @@ certifi==2025.11.12
     #   sentry-sdk
     #   skyfield
 cffi==2.1.1
+    # via cryptography
+cffi==2.0.0
     # via cryptography
 cfgv==3.5.0
     # via pre-commit
@@ -98,7 +100,7 @@ confluent-kafka==2.16.0
     # via gcn-kafka
 contourpy==1.4.0
     # via matplotlib
-coverage==7.13.0
+coverage[toml]==7.13.0
     # via pytest-cov
 croniter==1.4.1
     # via fastapi-utilities
@@ -115,6 +117,8 @@ dask==2026.8.0
     #   reproject
 dask-image==2026.5.0
     # via reproject
+cryptography==49.0.0
+    # via secretstorage
 diskcache==5.6.3
     # via across-tools
 distlib==0.4.0
@@ -128,14 +132,14 @@ email-validator==2.3.0
     #   -r requirements/base.in
     #   fastapi
     #   pydantic
-fastapi==0.128.0
+fastapi[standard]==0.139.0
     # via
     #   -r requirements/base.in
     #   -r requirements/local.in
     #   fastapi-utilities
     #   fastapi-utils
     #   pytest-fastapi-deps
-fastapi-cli==0.0.16
+fastapi-cli[standard]==0.0.16
     # via fastapi
 fastapi-cloud-cli==0.15.1
     # via fastapi-cli
@@ -143,8 +147,10 @@ fastapi-utilities==0.3.1
     # via -r requirements/base.in
 fastapi-utils==0.8.0
     # via -r requirements/base.in
-fastar==0.8.0
-    # via fastapi-cloud-cli
+fastar==0.11.0
+    # via
+    #   fastapi
+    #   fastapi-cloud-cli
 filelock==3.20.3
     # via
     #   spacetrack
@@ -157,10 +163,12 @@ fsspec==2026.9.0
     #   reproject
 gcn-kafka==0.3.4
     # via -r requirements/base.in
-geoalchemy2==0.18.1
+geoalchemy2==0.20.0
     # via -r requirements/base.in
 google-crc32c==1.9.0
     # via zarr
+greenlet==3.5.3
+    # via sqlalchemy
 h11==0.16.0
     # via
     #   httpcore
@@ -175,7 +183,7 @@ html5lib==1.1
     # via astroquery
 httpcore==1.0.9
     # via httpx
-httptools==0.7.1
+httptools==0.8.0
     # via uvicorn
 httpx==0.28.1
     # via
@@ -215,6 +223,10 @@ jaraco-context==6.1.2
     # via keyring
 jaraco-functools==4.4.0
     # via keyring
+jeepney==0.9.0
+    # via
+    #   keyring
+    #   secretstorage
 jinja2==3.1.6
     # via fastapi
 jmespath==1.1.0
@@ -231,7 +243,7 @@ kiwisolver==1.5.1
     # via matplotlib
 lalsuite==7.26.16
     # via ligo-skymap
-librt==0.10.0
+librt==0.12.0
     # via mypy
 ligo-gracedb==2.16.1
     # via ligo-skymap
@@ -243,14 +255,10 @@ logbook==1.9.2
     # via spacetrack
 lscsoft-glue==4.1.1
     # via lalsuite
-mako==1.3.10
-    # via alembic
 markdown-it-py==4.0.0
     # via rich
 markupsafe==3.0.3
-    # via
-    #   jinja2
-    #   mako
+    # via jinja2
 matplotlib==3.11.2
     # via
     #   lalsuite
@@ -265,13 +273,13 @@ more-itertools==10.8.0
     #   jaraco-functools
 msgspec==0.22.0
     # via zarr
-mypy==1.19.1
+mypy==2.1.0
     # via -r requirements/types.in
 mypy-extensions==1.1.0
     # via
     #   mypy
     #   typing-inspect
-narwhals==2.21.0
+narwhals==2.22.1
     # via plotly
 networkx==3.7
     # via ligo-skymap
@@ -325,15 +333,15 @@ packaging==26.0
     #   plotly
     #   pytest
     #   zarr
-pandas==3.0.2
+pandas==3.0.3
     # via
     #   -r requirements/base.in
     #   swifttools
-pandas-stubs==2.3.3.260113
+pandas-stubs==3.0.3.260530
     # via -r requirements/base.in
 partd==1.4.2
     # via dask
-pathspec==0.12.1
+pathspec==1.1.1
     # via mypy
 pillow==12.3.0
     # via
@@ -347,13 +355,13 @@ platformdirs==4.5.1
     # via
     #   spacetrack
     #   virtualenv
-plotly==6.7.0
+plotly==6.8.0
     # via across-tools
 pluggy==1.6.0
     # via
     #   pytest
     #   pytest-cov
-pre-commit==4.5.1
+pre-commit==4.6.0
     # via -r requirements/lint.in
 psutil==5.9.8
     # via fastapi-utils
@@ -361,7 +369,9 @@ pyavm==0.9.9
     # via reproject
 pycparser==3.1
     # via cffi
-pydantic==2.12.5
+pycparser==3.0
+    # via cffi
+pydantic[email]==2.12.5
     # via
     #   across-server-openapi-python
     #   across-tools
@@ -377,7 +387,7 @@ pydantic-core==2.41.5
     # via pydantic
 pydantic-extra-types==2.11.1
     # via fastapi
-pydantic-settings==2.13.1
+pydantic-settings==2.14.2
     # via
     #   -r requirements/base.in
     #   across-tools
@@ -388,23 +398,23 @@ pygments==2.20.0
     # via
     #   pytest
     #   rich
-pyjwt==2.10.1
+pyjwt==2.13.0
     # via
     #   -r requirements/base.in
     #   scitokens
 pyparsing==3.3.3
     # via matplotlib
-pytest==9.0.2
+pytest==9.1.1
     # via
     #   -r requirements/test.in
     #   pytest-asyncio
     #   pytest-cov
     #   pytest-fastapi-deps
-pytest-asyncio==1.3.0
+pytest-asyncio==1.4.0
     # via
     #   -r requirements/base.in
     #   -r requirements/test.in
-pytest-cov==7.0.0
+pytest-cov==7.1.0
     # via -r requirements/test.in
 pytest-fastapi-deps==0.2.3
     # via -r requirements/test.in
@@ -459,13 +469,13 @@ rich-toolkit==0.19.7
     #   fastapi-cloud-cli
 rignore==0.7.6
     # via fastapi-cloud-cli
-ruff==0.14.13
+ruff==0.15.20
     # via -r requirements/lint.in
 rush==2021.4.0
     # via spacetrack
-rust-ephem==0.10.1
+rust-ephem==0.11.1
     # via across-tools
-s3transfer==0.16.0
+s3transfer==0.19.0
     # via boto3
 safe-netrc==1.0.1
     # via igwn-auth-utils
@@ -477,9 +487,11 @@ scipy==1.18.1
     #   reproject
 scitokens==1.9.7
     # via igwn-auth-utils
+secretstorage==3.5.0
+    # via keyring
 sentry-sdk==2.48.0
     # via fastapi-cloud-cli
-sgp4==2.25
+sgp4==2.27
     # via
     #   -r requirements/base.in
     #   across-tools
@@ -514,8 +526,6 @@ spiceypy==8.0.2
     # via across-tools
 sqlalchemy==2.0.49
     # via
-    #   -r requirements/base.in
-    #   alembic
     #   fastapi-utilities
     #   geoalchemy2
 starlette==0.50.0
@@ -545,29 +555,27 @@ typer==0.24.1
     #   fastapi-cloud-cli
 types-awscrt==0.31.3
     # via botocore-stubs
-types-boto3==1.42.14
+types-boto3[ssm]==1.43.39
     # via -r requirements/types.in
-types-boto3-ssm==1.42.3
+types-boto3-ssm==1.43.0
     # via types-boto3
-types-cachetools==6.2.0.20251022
+types-cachetools==7.0.0.20260518
     # via -r requirements/types.in
 types-pyasn1==0.6.0.20250914
     # via types-python-jose
-types-python-jose==3.5.0.20250531
+types-python-jose==3.5.0.20260408
     # via -r requirements/types.in
-types-pytz==2025.2.0.20251108
-    # via pandas-stubs
-types-requests==2.32.4.20260107
+types-requests==2.33.0.20260518
     # via -r requirements/types.in
 types-s3transfer==0.16.0
     # via types-boto3
-types-shapely==2.1.0.20250917
+types-shapely==2.1.0.20260630
     # via -r requirements/types.in
 typing-extensions==4.15.0
     # via
     #   across-server-openapi-python
-    #   alembic
     #   anyio
+    #   asyncer
     #   beautifulsoup4
     #   fastapi
     #   logbook
@@ -587,6 +595,7 @@ typing-inspect==0.9.0
     # via -r requirements/base.in
 typing-inspection==0.4.2
     # via
+    #   fastapi
     #   pydantic
     #   pydantic-settings
 urllib3==2.6.3
@@ -596,7 +605,7 @@ urllib3==2.6.3
     #   requests
     #   sentry-sdk
     #   types-requests
-uvicorn==0.40.0
+uvicorn[standard]==0.50.2
     # via
     #   -r requirements/base.in
     #   fastapi

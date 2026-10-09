@@ -47,6 +47,7 @@ class SSMCredentials(CredentialStorage):
             logger.debug("updating SSM Parameter Store value", method="update_key")
             SSM.put_parameter(
                 name=config.ACROSS_SERVER_SECRET_PATH,
+                path=config.APP_ENV,
                 value=key,
                 overwrite=True,
             )
