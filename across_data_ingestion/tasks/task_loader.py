@@ -4,6 +4,9 @@ from .example import check_server
 from .schedules.chandra.as_flown import (
     entrypoint as chandra_as_flown_schedule_ingestion_task,
 )
+from .schedules.chandra.dynamic_too import (
+    entrypoint as chandra_dynamic_too_planned_schedule_ingestion_task,
+)
 from .schedules.chandra.high_fidelity_planned import (
     entrypoint as chandra_high_fidelity_planned_schedule_ingestion_task,
 )
@@ -82,3 +85,4 @@ async def init_tasks():
     create_task(HST_as_flown_schedule_ingestion_task())
     create_task(euclid_low_fidelity_planned_schedule_ingestion_task())
     create_task(XRISM_low_fidelity_schedule_ingestion_task())
+    create_task(chandra_dynamic_too_planned_schedule_ingestion_task())

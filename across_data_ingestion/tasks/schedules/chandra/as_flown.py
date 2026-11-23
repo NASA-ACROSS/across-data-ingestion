@@ -133,8 +133,13 @@ async def ingest() -> None:
     }
 
     for observation_data in tap_observation_table:
-        instrument = chandra_util.match_instrument_from_tap_observation(
-            instruments_by_short_name, observation_data
+        observation_instrument_params = chandra_util.ChandraObservationInstrumentParams(
+            instrument=observation_data["instrument"],
+            grating=observation_data["grating"],
+            exposure_mode=observation_data["exposure_mode"],
+        )
+        instrument = chandra_util.match_instrument_from_observation(
+            instruments_by_short_name, observation_instrument_params
         )
         observation = transform_to_observation(observation_data, instrument)
         schedule.observations.append(observation)
