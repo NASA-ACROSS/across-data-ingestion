@@ -25,6 +25,14 @@ def mock_as_flown_logger() -> Generator[MagicMock]:
 
 
 @pytest.fixture
+def mock_dynamic_too_logger() -> Generator[MagicMock]:
+    with patch(
+        "across_data_ingestion.tasks.schedules.chandra.dynamic_too.logger"
+    ) as mock_logger:
+        yield mock_logger
+
+
+@pytest.fixture
 def fake_telescope() -> sdk.Telescope:
     return sdk.Telescope(
         id="telescope_uuid",
@@ -257,3 +265,95 @@ def fake_instruments_by_short_name(
     return {
         (instrument.short_name or ""): instrument for instrument in fake_instruments
     }
+
+
+@pytest.fixture
+def fake_potential_too_table() -> str:
+    with open(
+        "tests/tasks/schedules/chandra/mocks/chandra_dynamic_too_potential_too_schedule.html",
+        "r",
+    ) as f:
+        return f.read()
+
+
+@pytest.fixture
+def fake_preliminary_too_table() -> str:
+    with open(
+        "tests/tasks/schedules/chandra/mocks/chandra_dynamic_too_preliminary_schedule.html",
+        "r",
+    ) as f:
+        return f.read()
+
+
+@pytest.fixture
+def fake_final_too_table() -> str:
+    with open(
+        "tests/tasks/schedules/chandra/mocks/chandra_dynamic_too_final_schedule.html",
+        "r",
+    ) as f:
+        return f.read()
+
+
+@pytest.fixture
+def fake_bad_too_table() -> str:
+    with open(
+        "tests/tasks/schedules/chandra/mocks/chandra_dynamic_too_bad_schedule.html",
+        "r",
+    ) as f:
+        return f.read()
+
+
+@pytest.fixture
+def mock_read_chandra_too_page_potential_too(
+    fake_potential_too_table: str,
+) -> Generator[AsyncMock]:
+    with patch(
+        "across_data_ingestion.tasks.schedules.chandra.dynamic_too.read_chandra_too_schedule_page",
+        return_value=fake_potential_too_table,
+    ) as mock:
+        yield mock
+
+
+@pytest.fixture
+def mock_read_chandra_too_page_preliminary(
+    fake_preliminary_too_table: str,
+) -> Generator[AsyncMock]:
+    with patch(
+        "across_data_ingestion.tasks.schedules.chandra.dynamic_too.read_chandra_too_schedule_page",
+        return_value=fake_preliminary_too_table,
+    ) as mock:
+        yield mock
+
+
+@pytest.fixture
+def mock_read_chandra_too_page_final(
+    fake_final_too_table: str,
+) -> Generator[AsyncMock]:
+    with patch(
+        "across_data_ingestion.tasks.schedules.chandra.dynamic_too.read_chandra_too_schedule_page",
+        return_value=fake_final_too_table,
+    ) as mock:
+        yield mock
+
+
+@pytest.fixture
+def mock_read_chandra_too_page_bad(
+    fake_bad_too_table: str,
+) -> Generator[AsyncMock]:
+    with patch(
+        "across_data_ingestion.tasks.schedules.chandra.dynamic_too.read_chandra_too_schedule_page",
+        return_value=fake_bad_too_table,
+    ) as mock:
+        yield mock
+
+
+@pytest.fixture
+def mock_read_chandra_too_page_no_heading(
+    fake_bad_too_table: str,
+) -> Generator[AsyncMock]:
+    fake_bad_too_table = fake_bad_too_table.replace("h3", "h4")
+    with patch(
+        "across_data_ingestion.tasks.schedules.chandra.dynamic_too.read_chandra_too_schedule_page",
+        return_value=fake_bad_too_table,
+    ) as mock:
+        yield mock

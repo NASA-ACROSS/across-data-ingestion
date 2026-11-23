@@ -1,7 +1,8 @@
 import pytest
 
 from across_data_ingestion.tasks.schedules.chandra.util import (
-    match_instrument_from_tap_observation,
+    ChandraObservationInstrumentParams,
+    match_instrument_from_observation,
 )
 from across_data_ingestion.util.across_server import sdk
 
@@ -63,8 +64,9 @@ class TestUtil:
         fake_instruments_by_short_name: dict[str, sdk.TelescopeInstrument],
     ) -> None:
         """Should return correct instrument name and id from observation row"""
-        instrument = match_instrument_from_tap_observation(
-            fake_instruments_by_short_name, mock_tap_row
+        mock_observation_params = ChandraObservationInstrumentParams(**mock_tap_row)
+        instrument = match_instrument_from_observation(
+            fake_instruments_by_short_name, mock_observation_params
         )
 
         assert instrument.short_name == expected_instrument_short_name

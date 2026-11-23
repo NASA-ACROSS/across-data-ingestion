@@ -15,8 +15,7 @@ class Config(BaseConfig):
     ROOT_PATH: str = ""
 
     ACROSS_SERVER_HOST: str = "http://localhost"
-    ACROSS_SERVER_PORT: int = 8000
-    ACROSS_SERVER_ROOT_PATH: str = ""
+    ACROSS_SERVER_ROOT_PATH: str = "/across/api"
     ACROSS_SERVER_VERSION: str = "/v1"
 
     ACROSS_SERVER_ID: str = "9798d4e2-fe46-4da9-8708-dd098c27ea8c"
@@ -34,7 +33,7 @@ class Config(BaseConfig):
 
     @property
     def ACROSS_SERVER_URL(self):
-        url = f"{self.ACROSS_SERVER_HOST}:{self.ACROSS_SERVER_PORT}{self.ACROSS_SERVER_ROOT_PATH}{self.ACROSS_SERVER_VERSION}"
+        url = f"{self.ACROSS_SERVER_HOST}{self.ACROSS_SERVER_ROOT_PATH}{self.ACROSS_SERVER_VERSION}"
 
         # add protocol if DNE
         if not url.startswith(("http://", "https://")):
@@ -49,7 +48,7 @@ class Config(BaseConfig):
         return f"{self.HOST}:{self.PORT}{self.ROOT_PATH}"
 
     def across_server_url(self):
-        return f"{self.ACROSS_SERVER_HOST}:{self.ACROSS_SERVER_PORT}{self.ACROSS_SERVER_ROOT_PATH}{self.ACROSS_SERVER_VERSION}"
+        return f"{self.ACROSS_SERVER_HOST}{self.ACROSS_SERVER_ROOT_PATH}{self.ACROSS_SERVER_VERSION}"
 
 
 config = Config()

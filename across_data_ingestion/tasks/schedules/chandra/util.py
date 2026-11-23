@@ -1,7 +1,8 @@
 from datetime import datetime
 
 import structlog
-from astropy.table import Row, Table  # type: ignore[import-untyped]
+from astropy.table import Table  # type: ignore[import-untyped]
+from pydantic import BaseModel
 
 from ....util.across_server import sdk
 
@@ -72,8 +73,15 @@ CHANDRA_OBSERVATION_TYPES: dict[str, sdk.ObservationType] = {
 CHANDRA_TAP_URL = "https://cda.cfa.harvard.edu/cxctap/async"
 
 
-def match_instrument_from_tap_observation(
-    instruments_by_short_name: dict[str, sdk.TelescopeInstrument], tap_obs: Row
+class ChandraObservationInstrumentParams(BaseModel):
+    instrument: str
+    grating: str
+    exposure_mode: str | None = None
+
+
+def match_instrument_from_observation(
+    instruments_by_short_name: dict[str, sdk.TelescopeInstrument],
+    observation_params: ChandraObservationInstrumentParams,
 ) -> sdk.TelescopeInstrument:
     """
     Constructs the instrument name from the observation parameters and
@@ -81,26 +89,29 @@ def match_instrument_from_tap_observation(
     """
 
     short_name = None
-    if "ACIS" in tap_obs["instrument"]:
-        if tap_obs["grating"] == "NONE" and tap_obs["exposure_mode"] != "CC":
+    if "ACIS" in observation_params.instrument:
+        if (
+            observation_params.grating == "NONE"
+            and observation_params.exposure_mode != "CC"
+        ):
             short_name = "ACIS"
-        elif tap_obs["grating"] in ["HETG", "LETG"]:
-            short_name = f"ACIS-{tap_obs['grating']}"
-        elif tap_obs["exposure_mode"] == "CC":
+        elif observation_params.grating in ["HETG", "LETG"]:
+            short_name = f"ACIS-{observation_params.grating}"
+        elif observation_params.exposure_mode == "CC":
             short_name = "ACIS-CC"
 
-    elif "HRC" in tap_obs["instrument"]:
-        if tap_obs["exposure_mode"] != "":
+    elif "HRC" in observation_params.instrument:
+        if observation_params.exposure_mode != "":
             short_name = "HRC-Timing"
-        elif tap_obs["grating"] == "NONE":
+        elif observation_params.grating == "NONE":
             short_name = "HRC"
-        elif tap_obs["grating"] in ["HETG", "LETG"]:
-            short_name = f"HRC-{tap_obs['grating']}"
+        elif observation_params.grating in ["HETG", "LETG"]:
+            short_name = f"HRC-{observation_params.grating}"
 
     if not short_name:
         logger.warning(
             "Could not parse observation parameters for correct instrument",
-            tap_observation=tap_obs,
+            observation_params=observation_params,
         )
         return sdk.TelescopeInstrument(
             id="", name="", short_name="", created_on=datetime.now()
